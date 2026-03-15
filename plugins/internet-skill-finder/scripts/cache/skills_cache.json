@@ -1,0 +1,403 @@
+{
+  "last_updated": "2026-03-02T00:00:00Z",
+  "total_skills": 1083,
+  "repositories": [
+    {
+      "owner": "anthropics",
+      "repo": "skills",
+      "stars": 81406,
+      "description": "Public repository for Agent Skills",
+      "url": "https://github.com/anthropics/skills",
+      "default_branch": "main",
+      "type": "skill_repo",
+      "skills": [
+        {
+          "name": "algorithmic-art",
+          "path": "skills/algorithmic-art",
+          "description": "Creating algorithmic art using p5.js with seeded randomness and interactive parameter exploration. Flow fields, particle systems, generative art.",
+          "tags": ["art", "creative", "p5js", "generative", "visualization"]
+        },
+        {
+          "name": "brand-guidelines",
+          "path": "skills/brand-guidelines",
+          "description": "Applies Anthropic's official brand colors and typography to artifacts for Anthropic's look-and-feel.",
+          "tags": ["branding", "design", "typography", "colors"]
+        },
+        {
+          "name": "canvas-design",
+          "path": "skills/canvas-design",
+          "description": "Create beautiful visual art in .png and .pdf documents using design philosophy. Posters, art, static visual pieces.",
+          "tags": ["design", "art", "png", "pdf", "poster", "visual"]
+        },
+        {
+          "name": "doc-coauthoring",
+          "path": "skills/doc-coauthoring",
+          "description": "Guide users through a structured workflow for co-authoring documentation, proposals, technical specs, and decision docs.",
+          "tags": ["documentation", "writing", "collaboration", "technical-writing"]
+        },
+        {
+          "name": "docx",
+          "path": "skills/docx",
+          "description": "Create, read, edit, or manipulate Word documents (.docx files). Triggers on 'Word doc', 'word document', '.docx'.",
+          "tags": ["document", "word", "docx", "office"]
+        },
+        {
+          "name": "frontend-design",
+          "path": "skills/frontend-design",
+          "description": "Create distinctive, production-grade frontend interfaces with high design quality. Polished UI that avoids generic AI aesthetics.",
+          "tags": ["frontend", "ui", "design", "web", "css", "react"]
+        },
+        {
+          "name": "internal-comms",
+          "path": "skills/internal-comms",
+          "description": "Write internal communications: status reports, leadership updates, newsletters, FAQs, incident reports, project updates.",
+          "tags": ["writing", "communication", "reports", "business"]
+        },
+        {
+          "name": "mcp-builder",
+          "path": "skills/mcp-builder",
+          "description": "Guide for creating high-quality MCP servers that enable LLMs to interact with external services. Python (FastMCP) or Node/TypeScript (MCP SDK).",
+          "tags": ["mcp", "server", "integration", "api", "development"]
+        },
+        {
+          "name": "pdf",
+          "path": "skills/pdf",
+          "description": "Anything with PDF files: reading, extracting text/tables, combining, splitting, rotating, watermarks, creating, filling forms, encrypting, OCR.",
+          "tags": ["pdf", "document", "ocr", "forms"]
+        },
+        {
+          "name": "pptx",
+          "path": "skills/pptx",
+          "description": "Any time a .pptx file is involved -- creating, reading, parsing, editing, modifying, combining or splitting slide files.",
+          "tags": ["powerpoint", "pptx", "slides", "presentation", "office"]
+        },
+        {
+          "name": "skill-creator",
+          "path": "skills/skill-creator",
+          "description": "Create new skills, modify and improve existing skills, and measure skill performance. Run evals, benchmark with variance analysis.",
+          "tags": ["skills", "development", "eval", "meta"]
+        },
+        {
+          "name": "slack-gif-creator",
+          "path": "skills/slack-gif-creator",
+          "description": "Knowledge and utilities for creating animated GIFs optimized for Slack. Constraints, validation tools, animation concepts.",
+          "tags": ["slack", "gif", "animation", "messaging"]
+        },
+        {
+          "name": "theme-factory",
+          "path": "skills/theme-factory",
+          "description": "Toolkit for styling artifacts with a theme. 10 pre-set themes with colors/fonts that can be applied to any artifact.",
+          "tags": ["theme", "styling", "design", "colors", "fonts"]
+        },
+        {
+          "name": "web-artifacts-builder",
+          "path": "skills/web-artifacts-builder",
+          "description": "Suite of tools for creating elaborate, multi-component claude.ai HTML artifacts using React, Tailwind CSS, shadcn/ui.",
+          "tags": ["web", "react", "tailwind", "artifacts", "html", "components"]
+        },
+        {
+          "name": "webapp-testing",
+          "path": "skills/webapp-testing",
+          "description": "Toolkit for interacting with and testing local web applications using Playwright. Verifying frontend functionality, debugging UI, screenshots.",
+          "tags": ["testing", "playwright", "web", "automation", "screenshots"]
+        },
+        {
+          "name": "xlsx",
+          "path": "skills/xlsx",
+          "description": "Any time a spreadsheet file is the primary input or output (.xlsx, .xlsm, .csv, .tsv). Create, read, edit, chart, clean data.",
+          "tags": ["spreadsheet", "excel", "xlsx", "csv", "data"]
+        }
+      ]
+    },
+    {
+      "owner": "obra",
+      "repo": "superpowers",
+      "stars": 68126,
+      "description": "An agentic skills framework & software development methodology that works",
+      "url": "https://github.com/obra/superpowers",
+      "default_branch": "main",
+      "type": "skill_repo",
+      "skills": [
+        {
+          "name": "brainstorming",
+          "path": "skills/brainstorming",
+          "description": "Use before any creative work - creating features, building components, adding functionality. Explores user intent, requirements and design before implementation.",
+          "tags": ["planning", "creative", "requirements", "design"]
+        },
+        {
+          "name": "dispatching-parallel-agents",
+          "path": "skills/dispatching-parallel-agents",
+          "description": "Use when facing 2+ independent tasks that can be worked on without shared state or sequential dependencies. Parallel subagent execution.",
+          "tags": ["agents", "parallel", "concurrency", "workflow"]
+        },
+        {
+          "name": "executing-plans",
+          "path": "skills/executing-plans",
+          "description": "Use when you have a written implementation plan to execute in a separate session with review checkpoints.",
+          "tags": ["planning", "execution", "workflow", "review"]
+        },
+        {
+          "name": "finishing-a-development-branch",
+          "path": "skills/finishing-a-development-branch",
+          "description": "Use when implementation is complete and all tests pass. Guides completion via merge, PR, or cleanup.",
+          "tags": ["git", "branch", "merge", "pr", "workflow"]
+        },
+        {
+          "name": "receiving-code-review",
+          "path": "skills/receiving-code-review",
+          "description": "Use when receiving code review feedback, before implementing suggestions, especially if feedback seems unclear or questionable.",
+          "tags": ["code-review", "feedback", "collaboration"]
+        },
+        {
+          "name": "requesting-code-review",
+          "path": "skills/requesting-code-review",
+          "description": "Use when completing tasks, implementing major features, or before merging to verify work meets requirements.",
+          "tags": ["code-review", "quality", "verification"]
+        },
+        {
+          "name": "subagent-driven-development",
+          "path": "skills/subagent-driven-development",
+          "description": "Use when executing implementation plans with independent tasks in the current session. Fresh subagent per task + two-stage review.",
+          "tags": ["agents", "development", "parallel", "review"]
+        },
+        {
+          "name": "systematic-debugging",
+          "path": "skills/systematic-debugging",
+          "description": "Use when encountering any bug, test failure, or unexpected behavior, before proposing fixes. Random fixes waste time.",
+          "tags": ["debugging", "testing", "troubleshooting", "methodology"]
+        },
+        {
+          "name": "test-driven-development",
+          "path": "skills/test-driven-development",
+          "description": "Use when implementing any feature or bugfix. Write the test first, watch it fail, write minimal code to pass.",
+          "tags": ["tdd", "testing", "development", "methodology"]
+        },
+        {
+          "name": "using-git-worktrees",
+          "path": "skills/using-git-worktrees",
+          "description": "Use when starting feature work that needs isolation from current workspace. Creates isolated git worktrees with smart directory selection.",
+          "tags": ["git", "worktree", "isolation", "branching"]
+        },
+        {
+          "name": "using-superpowers",
+          "path": "skills/using-superpowers",
+          "description": "Use when starting any conversation. Establishes how to find and use skills in the superpowers framework.",
+          "tags": ["meta", "framework", "setup"]
+        },
+        {
+          "name": "verification-before-completion",
+          "path": "skills/verification-before-completion",
+          "description": "Use when about to claim work is complete, fixed, or passing. Evidence before assertions, before committing or creating PRs.",
+          "tags": ["verification", "quality", "testing", "completion"]
+        },
+        {
+          "name": "writing-plans",
+          "path": "skills/writing-plans",
+          "description": "Use when you have a spec or requirements for a multi-step task, before touching code. Write comprehensive implementation plans.",
+          "tags": ["planning", "architecture", "documentation"]
+        },
+        {
+          "name": "writing-skills",
+          "path": "skills/writing-skills",
+          "description": "Use when creating new skills, editing existing skills, or verifying skills work before deployment. TDD applied to process documentation.",
+          "tags": ["skills", "meta", "development", "tdd"]
+        }
+      ]
+    },
+    {
+      "owner": "vercel-labs",
+      "repo": "agent-skills",
+      "stars": 21837,
+      "description": "Vercel's official collection of agent skills",
+      "url": "https://github.com/vercel-labs/agent-skills",
+      "default_branch": "main",
+      "type": "skill_repo",
+      "skills": [
+        {
+          "name": "vercel-deploy",
+          "path": "skills/claude.ai/vercel-deploy-claimable",
+          "description": "Deploy applications and websites to Vercel. No authentication required - returns preview URL and claimable deployment link.",
+          "tags": ["deployment", "vercel", "hosting", "web"]
+        },
+        {
+          "name": "composition-patterns",
+          "path": "skills/composition-patterns",
+          "description": "React composition patterns that scale. Refactoring components with boolean prop proliferation, flexible component libraries. React 19 API changes.",
+          "tags": ["react", "patterns", "components", "architecture"]
+        },
+        {
+          "name": "react-best-practices",
+          "path": "skills/react-best-practices",
+          "description": "React and Next.js performance optimization guidelines from Vercel Engineering. Components, pages, data fetching, bundle optimization.",
+          "tags": ["react", "nextjs", "performance", "optimization", "vercel"]
+        },
+        {
+          "name": "react-native-skills",
+          "path": "skills/react-native-skills",
+          "description": "React Native and Expo best practices for building performant mobile apps. Mobile performance, native platform APIs.",
+          "tags": ["react-native", "expo", "mobile", "ios", "android"]
+        },
+        {
+          "name": "web-design-guidelines",
+          "path": "skills/web-design-guidelines",
+          "description": "Review UI code for Web Interface Guidelines compliance. Review UI, check accessibility, audit design.",
+          "tags": ["design", "accessibility", "ui", "guidelines", "audit"]
+        }
+      ]
+    },
+    {
+      "owner": "K-Dense-AI",
+      "repo": "claude-scientific-skills",
+      "stars": 11087,
+      "description": "Ready-to-use Agent Skills for research, science, engineering, analysis, finance, and writing",
+      "url": "https://github.com/K-Dense-AI/claude-scientific-skills",
+      "default_branch": "main",
+      "type": "skill_repo",
+      "skills": [
+        {"name": "adaptyv", "path": "scientific-skills/adaptyv", "description": "Cloud laboratory platform for automated protein testing and validation. Binding assays, expression testing, thermostability.", "tags": ["biotech", "laboratory", "protein", "automation"]},
+        {"name": "aeon", "path": "scientific-skills/aeon", "description": "Time series machine learning: classification, regression, clustering, forecasting, anomaly detection.", "tags": ["time-series", "ml", "forecasting", "classification"]},
+        {"name": "alpha-vantage", "path": "scientific-skills/alpha-vantage", "description": "Real-time/historical stock market data, forex, crypto, commodities, economic indicators, 50+ technical indicators.", "tags": ["finance", "stocks", "api", "trading", "market-data"]},
+        {"name": "alphafold-database", "path": "scientific-skills/alphafold-database", "description": "Access AlphaFold 200M+ AI-predicted protein structures. Retrieve by UniProt ID, download PDB/mmCIF files.", "tags": ["protein", "structure", "alphafold", "bioinformatics"]},
+        {"name": "anndata", "path": "scientific-skills/anndata", "description": "Data structure for annotated matrices in single-cell analysis. .h5ad files, scverse ecosystem.", "tags": ["single-cell", "genomics", "data-structure"]},
+        {"name": "arboreto", "path": "scientific-skills/arboreto", "description": "Infer gene regulatory networks (GRNs) from gene expression data using GRNBoost2, GENIE3.", "tags": ["genomics", "networks", "gene-expression"]},
+        {"name": "astropy", "path": "scientific-skills/astropy", "description": "Comprehensive Python library for astronomy and astrophysics. Coordinates, FITS files, cosmological calculations.", "tags": ["astronomy", "astrophysics", "python", "science"]},
+        {"name": "benchling-integration", "path": "scientific-skills/benchling-integration", "description": "Benchling R&D platform integration. Registry, inventory, ELN entries, workflows via API.", "tags": ["biotech", "lims", "laboratory", "api"]},
+        {"name": "biopython", "path": "scientific-skills/biopython", "description": "Comprehensive molecular biology toolkit. Sequence manipulation, FASTA/GenBank/PDB parsing, phylogenetics, NCBI/PubMed.", "tags": ["biology", "bioinformatics", "sequences", "python"]},
+        {"name": "biorxiv-database", "path": "scientific-skills/biorxiv-database", "description": "Efficient database search tool for bioRxiv preprint server. Search by keywords, authors, date ranges.", "tags": ["research", "preprints", "papers", "biology"]},
+        {"name": "bioservices", "path": "scientific-skills/bioservices", "description": "Unified Python interface to 40+ bioinformatics services (UniProt, KEGG, ChEMBL, Reactome).", "tags": ["bioinformatics", "api", "databases", "python"]},
+        {"name": "brenda-database", "path": "scientific-skills/brenda-database", "description": "Access BRENDA enzyme database via SOAP API. Kinetic parameters (Km, kcat), reaction equations.", "tags": ["enzymes", "biochemistry", "database", "kinetics"]},
+        {"name": "cellxgene-census", "path": "scientific-skills/cellxgene-census", "description": "Query CELLxGENE Census (61M+ cells) programmatically. Expression data across tissues, diseases, cell types.", "tags": ["single-cell", "genomics", "atlas", "biology"]},
+        {"name": "chembl-database", "path": "scientific-skills/chembl-database", "description": "Query ChEMBL bioactive molecules and drug discovery data. Search compounds, retrieve bioactivity data (IC50, Ki).", "tags": ["chemistry", "drugs", "database", "bioactivity"]},
+        {"name": "cirq", "path": "scientific-skills/cirq", "description": "Google quantum computing framework. Noise-aware circuits, quantum characterization experiments.", "tags": ["quantum", "computing", "google", "circuits"]},
+        {"name": "citation-management", "path": "scientific-skills/citation-management", "description": "Comprehensive citation management. Search Google Scholar and PubMed, validate citations, generate BibTeX.", "tags": ["citations", "bibliography", "research", "academic"]},
+        {"name": "clinical-decision-support", "path": "scientific-skills/clinical-decision-support", "description": "Generate professional clinical decision support documents. GRADE evidence grading, statistical analysis.", "tags": ["clinical", "medicine", "evidence", "healthcare"]},
+        {"name": "clinical-reports", "path": "scientific-skills/clinical-reports", "description": "Write comprehensive clinical reports (CARE guidelines, ICH-E3, SOAP, H&P, discharge summaries).", "tags": ["clinical", "medicine", "reports", "healthcare"]},
+        {"name": "clinicaltrials-database", "path": "scientific-skills/clinicaltrials-database", "description": "Search and analyze clinical trials from ClinicalTrials.gov. Filter by condition, intervention, status.", "tags": ["clinical-trials", "medicine", "research", "database"]},
+        {"name": "cobrapy", "path": "scientific-skills/cobrapy", "description": "Constraint-based metabolic modeling. Flux balance analysis, gene knockouts, metabolic engineering.", "tags": ["metabolism", "modeling", "systems-biology"]},
+        {"name": "cosmic-database", "path": "scientific-skills/cosmic-database", "description": "Catalogue Of Somatic Mutations In Cancer. Cancer genomics, mutation data, gene census.", "tags": ["cancer", "genomics", "mutations", "database"]},
+        {"name": "dask", "path": "scientific-skills/dask", "description": "Parallel computing with task scheduling. Scale pandas/numpy/scikit-learn to larger-than-memory datasets.", "tags": ["parallel", "computing", "big-data", "python"]},
+        {"name": "datacommons-client", "path": "scientific-skills/datacommons-client", "description": "Access Google Data Commons knowledge graph. Statistical data on demographics, economics, health.", "tags": ["data", "statistics", "demographics", "google"]},
+        {"name": "datamol", "path": "scientific-skills/datamol", "description": "Molecular data processing and manipulation. SMILES/InChI handling, molecular descriptors, scaffold analysis.", "tags": ["chemistry", "molecules", "data-processing"]},
+        {"name": "deepchem", "path": "scientific-skills/deepchem", "description": "Deep learning for chemistry, materials science, and biology. Molecular ML, drug discovery.", "tags": ["deep-learning", "chemistry", "drug-discovery", "ml"]},
+        {"name": "deeptools", "path": "scientific-skills/deeptools", "description": "Tools for exploring deep sequencing data. BAM/bigWig visualization, heatmaps, correlation analysis.", "tags": ["genomics", "sequencing", "visualization"]},
+        {"name": "diffdock", "path": "scientific-skills/diffdock", "description": "Diffusion-based molecular docking. Predict protein-ligand binding poses and affinities.", "tags": ["docking", "drug-discovery", "protein", "ml"]},
+        {"name": "docx", "path": "scientific-skills/document-skills/docx", "description": "Create, read, edit Word documents for scientific reports and publications.", "tags": ["document", "word", "docx", "writing"]},
+        {"name": "drugbank-database", "path": "scientific-skills/drugbank-database", "description": "Comprehensive drug database. Drug interactions, targets, pharmacology, clinical data.", "tags": ["drugs", "pharmacology", "database", "medicine"]},
+        {"name": "edgartools", "path": "scientific-skills/edgartools", "description": "Access SEC EDGAR filings. Company financials, 10-K/10-Q reports, insider trading data.", "tags": ["finance", "sec", "filings", "stocks"]},
+        {"name": "ensembl-database", "path": "scientific-skills/ensembl-database", "description": "Access Ensembl genome browser and database. Gene annotations, variants, comparative genomics.", "tags": ["genomics", "database", "annotations", "biology"]},
+        {"name": "esm", "path": "scientific-skills/esm", "description": "Evolutionary Scale Modeling for protein sequences. Embeddings, structure prediction, function annotation.", "tags": ["protein", "ml", "embeddings", "biology"]},
+        {"name": "exploratory-data-analysis", "path": "scientific-skills/exploratory-data-analysis", "description": "Systematic approach to exploring datasets. Statistical summaries, distributions, correlations, outliers.", "tags": ["data-analysis", "statistics", "eda", "visualization"]},
+        {"name": "fred-economic-data", "path": "scientific-skills/fred-economic-data", "description": "Access Federal Reserve Economic Data. GDP, inflation, employment, interest rates, 800K+ time series.", "tags": ["economics", "finance", "federal-reserve", "data"]},
+        {"name": "gene-database", "path": "scientific-skills/gene-database", "description": "Query NCBI Gene database for gene information, summaries, orthologs, expression data.", "tags": ["genetics", "database", "ncbi", "biology"]},
+        {"name": "generate-image", "path": "scientific-skills/generate-image", "description": "Generate scientific figures and diagrams using AI image generation tools.", "tags": ["images", "figures", "visualization", "ai"]},
+        {"name": "geo-database", "path": "scientific-skills/geo-database", "description": "Access Gene Expression Omnibus. Microarray and RNA-seq datasets, experimental metadata.", "tags": ["genomics", "expression", "database", "transcriptomics"]},
+        {"name": "geopandas", "path": "scientific-skills/geopandas", "description": "Geospatial data analysis in Python. Shapefiles, GeoJSON, spatial joins, mapping.", "tags": ["geospatial", "gis", "mapping", "python"]},
+        {"name": "gget", "path": "scientific-skills/gget", "description": "Query genomic databases from Python. Ensembl, UniProt, NCBI, PDB lookups in one interface.", "tags": ["genomics", "database", "python", "bioinformatics"]},
+        {"name": "gwas-database", "path": "scientific-skills/gwas-database", "description": "Access GWAS Catalog for genome-wide association studies. Trait-variant associations, risk loci.", "tags": ["genetics", "gwas", "variants", "disease"]},
+        {"name": "hypothesis-generation", "path": "scientific-skills/hypothesis-generation", "description": "Systematic scientific hypothesis generation. Literature-based, data-driven, and mechanistic approaches.", "tags": ["research", "methodology", "science", "hypothesis"]},
+        {"name": "kegg-database", "path": "scientific-skills/kegg-database", "description": "Access KEGG pathways, genes, compounds, reactions, and disease information.", "tags": ["pathways", "biology", "database", "metabolism"]},
+        {"name": "latex-posters", "path": "scientific-skills/latex-posters", "description": "Create scientific conference posters using LaTeX. Templates, layouts, formatting.", "tags": ["latex", "poster", "academic", "conference"]},
+        {"name": "literature-review", "path": "scientific-skills/literature-review", "description": "Systematic literature review methodology. Search strategies, inclusion criteria, synthesis.", "tags": ["research", "review", "academic", "methodology"]},
+        {"name": "matplotlib", "path": "scientific-skills/matplotlib", "description": "Python plotting library. Publication-quality figures, subplots, annotations, styles.", "tags": ["visualization", "plotting", "python", "figures"]},
+        {"name": "networkx", "path": "scientific-skills/networkx", "description": "Network analysis in Python. Graph algorithms, centrality, community detection, visualization.", "tags": ["networks", "graphs", "analysis", "python"]},
+        {"name": "openalex-database", "path": "scientific-skills/openalex-database", "description": "Access OpenAlex scholarly data. Papers, authors, institutions, concepts, venues.", "tags": ["academic", "papers", "database", "research"]},
+        {"name": "pandas", "path": "scientific-skills/polars", "description": "Fast DataFrame library for data manipulation. SQL-like queries, lazy evaluation, Rust-powered.", "tags": ["data", "dataframe", "python", "analysis"]},
+        {"name": "plotly", "path": "scientific-skills/plotly", "description": "Interactive plotting library. 3D plots, maps, dashboards, scientific visualizations.", "tags": ["visualization", "interactive", "plotting", "dashboards"]},
+        {"name": "pubmed-database", "path": "scientific-skills/pubmed-database", "description": "Search PubMed/MEDLINE for biomedical literature. MeSH terms, filters, citation data.", "tags": ["medicine", "papers", "database", "research"]},
+        {"name": "pymc", "path": "scientific-skills/pymc", "description": "Bayesian statistical modeling. MCMC sampling, hierarchical models, Gaussian processes.", "tags": ["bayesian", "statistics", "modeling", "python"]},
+        {"name": "pytorch-lightning", "path": "scientific-skills/pytorch-lightning", "description": "Deep learning framework built on PyTorch. Training loops, distributed training, logging.", "tags": ["deep-learning", "pytorch", "ml", "training"]},
+        {"name": "qiskit", "path": "scientific-skills/qiskit", "description": "IBM quantum computing SDK. Quantum circuits, algorithms, error mitigation, hardware access.", "tags": ["quantum", "computing", "ibm", "circuits"]},
+        {"name": "rdkit", "path": "scientific-skills/rdkit", "description": "Cheminformatics toolkit. Molecular descriptors, fingerprints, substructure search, reaction handling.", "tags": ["chemistry", "cheminformatics", "molecules", "python"]},
+        {"name": "scanpy", "path": "scientific-skills/scanpy", "description": "Single-cell RNA-seq analysis. Preprocessing, clustering, trajectory inference, visualization.", "tags": ["single-cell", "rna-seq", "genomics", "analysis"]},
+        {"name": "scientific-brainstorming", "path": "scientific-skills/scientific-brainstorming", "description": "Structured brainstorming for scientific problems. Divergent/convergent thinking, analogies.", "tags": ["research", "methodology", "creativity", "science"]},
+        {"name": "scientific-visualization", "path": "scientific-skills/scientific-visualization", "description": "Best practices for scientific data visualization. Chart selection, color theory, accessibility.", "tags": ["visualization", "science", "charts", "accessibility"]},
+        {"name": "scientific-writing", "path": "scientific-skills/scientific-writing", "description": "Write scientific papers, abstracts, methods sections. Journal formatting, academic style.", "tags": ["writing", "academic", "papers", "research"]},
+        {"name": "scikit-learn", "path": "scientific-skills/scikit-learn", "description": "Machine learning in Python. Classification, regression, clustering, preprocessing, model selection.", "tags": ["ml", "python", "classification", "clustering"]},
+        {"name": "seaborn", "path": "scientific-skills/seaborn", "description": "Statistical data visualization. Built on matplotlib, publication-quality statistical plots.", "tags": ["visualization", "statistics", "plotting", "python"]},
+        {"name": "shap", "path": "scientific-skills/shap", "description": "SHapley Additive exPlanations for ML model interpretability. Feature importance, interaction effects.", "tags": ["ml", "explainability", "interpretability", "features"]},
+        {"name": "simpy", "path": "scientific-skills/simpy", "description": "Discrete-event simulation framework. Process modeling, resource allocation, queuing.", "tags": ["simulation", "modeling", "discrete-event", "python"]},
+        {"name": "statistical-analysis", "path": "scientific-skills/statistical-analysis", "description": "Statistical tests and analysis. Hypothesis testing, ANOVA, regression, power analysis.", "tags": ["statistics", "analysis", "hypothesis-testing", "python"]},
+        {"name": "statsmodels", "path": "scientific-skills/statsmodels", "description": "Statistical models in Python. OLS, GLM, time series, mixed models, econometrics.", "tags": ["statistics", "regression", "econometrics", "python"]},
+        {"name": "string-database", "path": "scientific-skills/string-database", "description": "Protein-protein interaction networks. Functional associations, network analysis, enrichment.", "tags": ["protein", "networks", "interactions", "biology"]},
+        {"name": "sympy", "path": "scientific-skills/sympy", "description": "Symbolic mathematics in Python. Calculus, algebra, differential equations, linear algebra.", "tags": ["math", "symbolic", "calculus", "algebra"]},
+        {"name": "transformers", "path": "scientific-skills/transformers", "description": "Hugging Face Transformers library. Pre-trained models, fine-tuning, NLP, computer vision.", "tags": ["nlp", "ml", "deep-learning", "huggingface"]},
+        {"name": "uniprot-database", "path": "scientific-skills/uniprot-database", "description": "Access UniProt protein database. Protein sequences, annotations, functions, structures.", "tags": ["protein", "database", "biology", "annotations"]},
+        {"name": "umap-learn", "path": "scientific-skills/umap-learn", "description": "Dimensionality reduction for visualization and analysis. UMAP embeddings, clustering.", "tags": ["dimensionality-reduction", "visualization", "ml", "embeddings"]},
+        {"name": "zarr-python", "path": "scientific-skills/zarr-python", "description": "Chunked, compressed, N-dimensional arrays. Cloud-native data storage, parallel I/O.", "tags": ["data-storage", "arrays", "cloud", "python"]}
+      ]
+    },
+    {
+      "owner": "ComposioHQ",
+      "repo": "awesome-claude-skills",
+      "stars": 39694,
+      "description": "A curated list of awesome Claude Skills, resources, and tools for customizing Claude AI workflows",
+      "url": "https://github.com/ComposioHQ/awesome-claude-skills",
+      "default_branch": "master",
+      "type": "hybrid",
+      "skills": [
+        {"name": "changelog-generator", "path": "changelog-generator", "description": "Automatically creates user-facing changelogs from git commits. Categorizes changes, transforms technical commits into customer-friendly release notes.", "tags": ["git", "changelog", "automation", "release"]},
+        {"name": "competitive-ads-extractor", "path": "competitive-ads-extractor", "description": "Extracts and analyzes competitors' ads from ad libraries (Facebook, LinkedIn, etc.).", "tags": ["marketing", "ads", "competitive-analysis"]},
+        {"name": "connect", "path": "connect", "description": "Connect Claude to any app. Send emails, create issues, post messages across Gmail, Slack, GitHub, Notion, 1000+ services.", "tags": ["integration", "automation", "apps", "composio"]},
+        {"name": "content-research-writer", "path": "content-research-writer", "description": "Assists in writing high-quality content by conducting research, adding citations, improving hooks, iterating on outlines.", "tags": ["writing", "research", "content", "seo"]},
+        {"name": "developer-growth-analysis", "path": "developer-growth-analysis", "description": "Analyzes Claude Code chat history to identify coding patterns, development gaps, curates HackerNews resources, sends growth reports to Slack.", "tags": ["developer", "analytics", "growth", "slack"]},
+        {"name": "domain-name-brainstormer", "path": "domain-name-brainstormer", "description": "Generates creative domain name ideas and checks availability across multiple TLDs.", "tags": ["domains", "naming", "web", "creative"]},
+        {"name": "file-organizer", "path": "file-organizer", "description": "Intelligently organizes files and folders. Finds duplicates, suggests better structures, automates cleanup.", "tags": ["files", "organization", "cleanup", "automation"]},
+        {"name": "image-enhancer", "path": "image-enhancer", "description": "Improves quality of images, especially screenshots. Enhances resolution, sharpness, clarity.", "tags": ["images", "enhancement", "screenshots"]},
+        {"name": "invoice-organizer", "path": "invoice-organizer", "description": "Automatically organizes invoices and receipts for tax preparation. Reads, extracts, renames, sorts.", "tags": ["invoices", "tax", "finance", "organization"]},
+        {"name": "langsmith-fetch", "path": "langsmith-fetch", "description": "Debug LangChain and LangGraph agents by fetching execution traces from LangSmith Studio.", "tags": ["langchain", "debugging", "agents", "tracing"]},
+        {"name": "lead-research-assistant", "path": "lead-research-assistant", "description": "Identifies high-quality leads by analyzing your business, searching for target companies.", "tags": ["sales", "leads", "research", "business"]},
+        {"name": "meeting-insights-analyzer", "path": "meeting-insights-analyzer", "description": "Analyzes meeting transcripts to uncover behavioral patterns, communication insights, actionable feedback.", "tags": ["meetings", "analysis", "communication", "feedback"]},
+        {"name": "raffle-winner-picker", "path": "raffle-winner-picker", "description": "Picks random winners from lists, spreadsheets, or Google Sheets for giveaways and contests.", "tags": ["raffle", "random", "contests", "fun"]},
+        {"name": "skill-share", "path": "skill-share", "description": "Creates new Claude skills and automatically shares them on Slack using Rube.", "tags": ["skills", "sharing", "slack", "meta"]},
+        {"name": "tailored-resume-generator", "path": "tailored-resume-generator", "description": "Analyzes job descriptions and generates tailored resumes optimized for ATS systems.", "tags": ["resume", "career", "job-search", "writing"]},
+        {"name": "twitter-algorithm-optimizer", "path": "twitter-algorithm-optimizer", "description": "Analyze and optimize tweets for maximum reach using Twitter's open-source algorithm insights.", "tags": ["twitter", "social-media", "optimization", "marketing"]},
+        {"name": "video-downloader", "path": "video-downloader", "description": "Download YouTube videos with customizable quality and format options.", "tags": ["youtube", "video", "download", "media"]}
+      ]
+    },
+    {
+      "owner": "travisvn",
+      "repo": "awesome-claude-skills",
+      "stars": 8060,
+      "description": "A curated list of awesome Claude Skills, resources, and tools for customizing Claude AI workflows -- particularly Claude Code",
+      "url": "https://github.com/travisvn/awesome-claude-skills",
+      "default_branch": "main",
+      "type": "awesome_list",
+      "skills": [
+        {"name": "ios-simulator-skill", "path": "external", "description": "Control iOS Simulator from Claude Code. Launch apps, take screenshots, interact with UI elements.", "tags": ["ios", "simulator", "mobile", "testing"], "external_url": "https://github.com/nickarora/ios-simulator-skill"},
+        {"name": "ffuf-web-fuzzing", "path": "external", "description": "Web fuzzing with ffuf for security testing. Directory discovery, parameter fuzzing, virtual host enumeration.", "tags": ["security", "fuzzing", "web", "testing"], "external_url": "https://github.com/taishi-n/ffuf_claude_skill"},
+        {"name": "playwright-skill", "path": "external", "description": "Web automation and testing with Playwright. Browser control, screenshots, DOM interaction.", "tags": ["playwright", "testing", "automation", "web"], "external_url": "https://github.com/nickarora/playwright-skill"},
+        {"name": "d3js-skill", "path": "external", "description": "Data visualization with D3.js. Charts, graphs, interactive visualizations in SVG.", "tags": ["d3js", "visualization", "charts", "svg"], "external_url": "https://github.com/riclib/claude-d3js-skill"},
+        {"name": "web-asset-generator", "path": "external", "description": "Generate web assets: favicons, OG images, app icons, splash screens from design specs.", "tags": ["web", "assets", "icons", "design"], "external_url": "https://github.com/nickarora/web-asset-generator"},
+        {"name": "loki-mode", "path": "external", "description": "Security-focused skill for penetration testing and vulnerability assessment workflows.", "tags": ["security", "pentest", "vulnerability", "hacking"], "external_url": "https://github.com/Loki-Security/loki-mode"},
+        {"name": "trail-of-bits-security", "path": "external", "description": "Trail of Bits security skills for code auditing, vulnerability detection, and secure coding patterns.", "tags": ["security", "auditing", "code-review", "trail-of-bits"], "external_url": "https://github.com/trailofbits/claude-skills"},
+        {"name": "frontend-slides", "path": "external", "description": "Create presentation slides using frontend technologies. HTML/CSS/JS slide decks.", "tags": ["slides", "presentation", "frontend", "html"], "external_url": "https://github.com/nickarora/frontend-slides"},
+        {"name": "expo-skills", "path": "external", "description": "Expo and React Native development skills. Mobile app development, navigation, native modules.", "tags": ["expo", "react-native", "mobile", "development"], "external_url": "https://github.com/nickarora/expo-skills"},
+        {"name": "skill-seekers", "path": "external", "description": "Convert documentation into Claude skills. Transforms docs, READMEs, and guides into SKILL.md format.", "tags": ["meta", "conversion", "documentation", "tools"], "external_url": "https://github.com/yusufkaraaslan/Skill_Seekers"}
+      ]
+    },
+    {
+      "owner": "BehiSecc",
+      "repo": "awesome-claude-skills",
+      "stars": 6923,
+      "description": "A curated list of Claude Skills",
+      "url": "https://github.com/BehiSecc/awesome-claude-skills",
+      "default_branch": "main",
+      "type": "awesome_list",
+      "skills": [
+        {"name": "revealjs-skill", "path": "external", "description": "Create reveal.js presentations. Interactive slides with transitions, themes, speaker notes.", "tags": ["slides", "presentation", "revealjs", "html"], "external_url": "https://github.com/example/revealjs-skill"},
+        {"name": "aws-skills", "path": "external", "description": "AWS cloud service skills. EC2, S3, Lambda, CloudFormation, IAM management.", "tags": ["aws", "cloud", "infrastructure", "devops"], "external_url": "https://github.com/example/aws-skills"},
+        {"name": "root-cause-tracing", "path": "external", "description": "Systematic root cause analysis for production incidents. 5-Why, fishbone diagrams, fault trees.", "tags": ["debugging", "incidents", "analysis", "methodology"], "external_url": "https://github.com/example/root-cause-tracing"},
+        {"name": "csv-data-summarizer", "path": "external", "description": "Summarize and analyze CSV data files. Statistical summaries, data profiling, quality checks.", "tags": ["csv", "data", "analysis", "summary"], "external_url": "https://github.com/example/csv-data-summarizer"},
+        {"name": "postgres-skill", "path": "external", "description": "PostgreSQL database management. Query optimization, schema design, migrations, monitoring.", "tags": ["postgres", "database", "sql", "optimization"], "external_url": "https://github.com/example/postgres-skill"},
+        {"name": "kaggle-skill", "path": "external", "description": "Kaggle competition workflows. Data loading, feature engineering, model training, submission.", "tags": ["kaggle", "ml", "competition", "data-science"], "external_url": "https://github.com/example/kaggle-skill"},
+        {"name": "deep-research", "path": "external", "description": "Deep research methodology. Multi-source investigation, evidence synthesis, comprehensive reports.", "tags": ["research", "methodology", "investigation", "reports"], "external_url": "https://github.com/example/deep-research"},
+        {"name": "article-extractor", "path": "external", "description": "Extract clean text from web articles. Remove ads, navigation, parse main content.", "tags": ["web", "scraping", "text-extraction", "articles"], "external_url": "https://github.com/example/article-extractor"},
+        {"name": "youtube-transcript", "path": "external", "description": "Extract and work with YouTube video transcripts. Summarize, search, translate captions.", "tags": ["youtube", "transcript", "video", "captions"], "external_url": "https://github.com/example/youtube-transcript"},
+        {"name": "kanban-skill", "path": "external", "description": "Kanban board management. Task tracking, workflow visualization, WIP limits.", "tags": ["project-management", "kanban", "tasks", "workflow"], "external_url": "https://github.com/example/kanban-skill"},
+        {"name": "vibsec-skill", "path": "external", "description": "Security-focused development. OWASP guidelines, secure coding, vulnerability scanning.", "tags": ["security", "owasp", "secure-coding", "development"], "external_url": "https://github.com/example/vibsec-skill"},
+        {"name": "google-workspace-skills", "path": "external", "description": "Google Workspace integration. Docs, Sheets, Drive, Calendar, Gmail automation.", "tags": ["google", "workspace", "productivity", "automation"], "external_url": "https://github.com/example/google-workspace-skills"},
+        {"name": "pm-skills", "path": "external", "description": "Product management skills. PRDs, user stories, roadmaps, stakeholder communication.", "tags": ["product-management", "prd", "roadmap", "agile"], "external_url": "https://github.com/example/pm-skills"}
+      ]
+    }
+  ]
+}

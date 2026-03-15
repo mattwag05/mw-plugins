@@ -1,0 +1,44 @@
+#!/usr/bin/osascript -l JavaScript
+
+/**
+ * Read inbox messages from Apple Mail
+ *
+ * Usage:
+ *   osascript -l JavaScript read-inbox.jxa
+ *
+ * Output: JSON array of recent inbox messages
+ */
+
+function run() {
+  const Mail = Application('Mail')
+  Mail.includeStandardAdditions = true
+
+  const inbox = Mail.inbox()
+  const messages = inbox.messages()
+  const limit = 10
+
+  // Get recent messages
+  const recentMessages = messages.slice(0, limit).map(msg => {
+    try {
+      return {
+        id: msg.messageId() || msg.id().toString(),
+        subject: msg.subject() || '(No subject)',
+        sender: msg.sender(),
+        date: msg.dateReceived().toISOString(),
+        read: msg.readStatus(),
+        flagged: msg.flaggedStatus()
+      }
+    } catch (error) {
+      return null
+    }
+  }).filter(msg => msg !== null)
+
+  // Return as JSON
+  return JSON.stringify({
+    inbox: {
+      total: messages.length,
+      unread: inbox.unreadCount()
+    },
+    messages: recentMessages
+  }, null, 2)
+}

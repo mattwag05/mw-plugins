@@ -1,0 +1,10 @@
+{
+  "name": "swift-concurrency",
+  "version": "1.0.0",
+  "description": "Swift 6.2 concurrency patterns, proactive code review, and migration planning for modern Swift async/await, actors, and Sendable",
+  "author": {
+    "name": "Matthew Wagner",
+    "email": "wagnermatt@icloud.com"
+  },
+  "keywords": ["swift", "concurrency", "async", "actor", "sendable", "swift6", "swift6.2"]
+}

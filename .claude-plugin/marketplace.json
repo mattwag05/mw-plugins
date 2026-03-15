@@ -1,0 +1,55 @@
+{
+  "name": "mw-plugins",
+  "owner": {
+    "name": "Matthew Wagner"
+  },
+  "metadata": {
+    "description": "Personal Claude Code plugin marketplace",
+    "version": "1.0.0",
+    "pluginRoot": "./plugins"
+  },
+  "plugins": [
+    {
+      "name": "autonomous-execution",
+      "source": "./plugins/autonomous-execution",
+      "description": "Instructs Claude to complete tasks autonomously by executing, verifying, diagnosing, and fixing — rather than asking the user to check things",
+      "version": "0.1.0"
+    },
+    {
+      "name": "doc-harvest",
+      "source": "./plugins/doc-harvest",
+      "description": "Scrape documentation websites into structured Claude Context Library entries with progressive disclosure navigation",
+      "version": "1.0.0"
+    },
+    {
+      "name": "internet-skill-finder",
+      "source": "./plugins/internet-skill-finder",
+      "description": "Search and recommend Agent Skills from 7 verified GitHub repositories",
+      "version": "1.0.0"
+    },
+    {
+      "name": "macos-automation",
+      "source": "./plugins/macos-automation",
+      "description": "Teach Claude how to automate Apple's native macOS apps (Mail, Calendar, Notes, Reminders) using AppleScript, JXA, and Swift",
+      "version": "1.0.0"
+    },
+    {
+      "name": "agent-cli-cli",
+      "source": "./plugins/agent-cli-cli",
+      "description": "[agent-cli] CLI reference for managing [agent]'s gateway (deprecated — [agent-cli] disabled 2026-03-13, replaced by GrimClaw)",
+      "version": "1.0.0"
+    },
+    {
+      "name": "pippin",
+      "source": "./plugins/pippin",
+      "description": "Pippin CLI integration — teaches Claude to use pippin for Apple app automation (mail, calendar, reminders, notes, contacts, voice memos, audio, browser)",
+      "version": "1.0.0"
+    },
+    {
+      "name": "swift-concurrency",
+      "source": "./plugins/swift-concurrency",
+      "description": "Swift 6.2 concurrency patterns, proactive code review, and migration planning for modern Swift async/await, actors, and Sendable",
+      "version": "1.0.0"
+    }
+  ]
+}

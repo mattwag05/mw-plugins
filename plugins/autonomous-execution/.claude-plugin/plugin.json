@@ -1,0 +1,8 @@
+{
+  "name": "autonomous-execution",
+  "version": "0.1.0",
+  "description": "Instructs Claude to complete tasks autonomously by executing, verifying, diagnosing, and fixing — rather than asking the user to check things",
+  "author": {
+    "name": "Matthew Wagner"
+  }
+}

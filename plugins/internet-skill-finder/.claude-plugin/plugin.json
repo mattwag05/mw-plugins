@@ -1,0 +1,12 @@
+{
+  "name": "internet-skill-finder",
+  "version": "1.0.0",
+  "description": "Search and recommend Agent Skills from 7 verified GitHub repositories",
+  "author": {
+    "name": "Matthew Wagner",
+    "email": "wagnermatt@icloud.com"
+  },
+  "repository": "https://github.com/anthropics/skills",
+  "license": "MIT",
+  "keywords": ["skills", "discovery", "search", "plugins", "github"]
+}

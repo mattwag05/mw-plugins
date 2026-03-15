@@ -1,0 +1,20 @@
+{
+  "name": "macos-automation",
+  "description": "Teach Claude how to automate Apple's native macOS apps (Mail, Calendar, Notes, Reminders) using AppleScript, JXA, and Swift",
+  "version": "1.0.0",
+  "author": {
+    "name": "Matthew Wagner"
+  },
+  "keywords": [
+    "macos",
+    "automation",
+    "applescript",
+    "jxa",
+    "mail",
+    "calendar",
+    "notes",
+    "reminders",
+    "eventkit"
+  ],
+  "license": "MIT"
+}

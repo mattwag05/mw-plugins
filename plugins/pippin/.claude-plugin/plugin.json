@@ -1,0 +1,5 @@
+{
+  "name": "pippin",
+  "version": "1.0.0",
+  "description": "Pippin CLI integration — teaches Claude to use pippin for Apple app automation (mail, calendar, reminders, notes, contacts, voice memos, audio, browser)"
+}

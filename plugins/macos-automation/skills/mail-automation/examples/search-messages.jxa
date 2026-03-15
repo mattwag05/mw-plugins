@@ -1,0 +1,100 @@
+#!/usr/bin/osascript -l JavaScript
+
+/**
+ * Search messages in Apple Mail by various criteria
+ *
+ * Usage:
+ *   osascript -l JavaScript search-messages.jxa
+ *
+ * Customize search criteria below before running.
+ */
+
+function run() {
+  const Mail = Application('Mail')
+  Mail.includeStandardAdditions = true
+
+  // Search configuration (customize these)
+  const searchConfig = {
+    unreadOnly: true,
+    senderContains: '',  // e.g., 'example.com'
+    subjectContains: '',  // e.g., 'invoice'
+    hoursLookback: 72,   // Only search last 72 hours
+    limit: 20
+  }
+
+  const inbox = Mail.inbox()
+  const allMessages = inbox.messages()
+
+  // Calculate cutoff date
+  const cutoffDate = new Date(Date.now() - searchConfig.hoursLookback * 60 * 60 * 1000)
+
+  // Apply filters
+  let filteredMessages = allMessages
+
+  // Filter by date
+  filteredMessages = filteredMessages.filter(msg => {
+    try {
+      return msg.dateReceived() > cutoffDate
+    } catch {
+      return false
+    }
+  })
+
+  // Filter by read status
+  if (searchConfig.unreadOnly) {
+    filteredMessages = filteredMessages.filter(msg => {
+      try {
+        return !msg.readStatus()
+      } catch {
+        return false
+      }
+    })
+  }
+
+  // Filter by sender
+  if (searchConfig.senderContains) {
+    filteredMessages = filteredMessages.filter(msg => {
+      try {
+        return msg.sender().toLowerCase().includes(searchConfig.senderContains.toLowerCase())
+      } catch {
+        return false
+      }
+    })
+  }
+
+  // Filter by subject
+  if (searchConfig.subjectContains) {
+    filteredMessages = filteredMessages.filter(msg => {
+      try {
+        return msg.subject().toLowerCase().includes(searchConfig.subjectContains.toLowerCase())
+      } catch {
+        return false
+      }
+    })
+  }
+
+  // Limit results
+  const limitedMessages = filteredMessages.slice(0, searchConfig.limit)
+
+  // Map to output format
+  const results = limitedMessages.map(msg => {
+    try {
+      return {
+        subject: msg.subject() || '(No subject)',
+        sender: msg.sender(),
+        date: msg.dateReceived().toISOString(),
+        read: msg.readStatus(),
+        flagged: msg.flaggedStatus()
+      }
+    } catch {
+      return null
+    }
+  }).filter(msg => msg !== null)
+
+  return JSON.stringify({
+    searchCriteria: searchConfig,
+    totalMatches: filteredMessages.length,
+    returned: results.length,
+    messages: results
+  }, null, 2)
+}

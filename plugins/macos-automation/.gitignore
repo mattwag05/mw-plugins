@@ -1,0 +1,15 @@
+# Build artifacts
+.build/
+*.swiftmodule
+*.swiftdoc
+
+# macOS
+.DS_Store
+
+# Editor
+*.swp
+*.swo
+*~
+
+# Local configuration
+.claude/*.local.md

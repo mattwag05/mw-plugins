@@ -1,0 +1,42 @@
+#!/usr/bin/osascript -l JavaScript
+
+/**
+ * Create a draft email in Apple Mail
+ *
+ * Usage:
+ *   osascript -l JavaScript create-draft.jxa
+ *
+ * Customize the recipient, subject, and body below before running.
+ */
+
+function run() {
+  const Mail = Application('Mail')
+  Mail.includeStandardAdditions = true
+
+  // Configuration (customize these)
+  const recipient = 'example@example.com'
+  const subject = 'Draft from JXA Script'
+  const body = 'This is an automated draft created via JXA.\n\nYou can edit this before sending.'
+
+  // Create outgoing message
+  const newMessage = Mail.OutgoingMessage({
+    subject: subject,
+    content: body,
+    visible: true  // Show draft window
+  })
+
+  // Add to outgoing messages
+  Mail.outgoingMessages.push(newMessage)
+
+  // Add recipient
+  newMessage.toRecipients.push(
+    Mail.Recipient({ address: recipient })
+  )
+
+  return JSON.stringify({
+    success: true,
+    message: 'Draft created successfully',
+    recipient: recipient,
+    subject: subject
+  }, null, 2)
+}

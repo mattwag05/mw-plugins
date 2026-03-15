@@ -1,0 +1,11 @@
+{
+  "name": "doc-harvest",
+  "version": "1.0.0",
+  "description": "Scrape documentation websites into structured Claude Context Library entries with progressive disclosure navigation",
+  "author": {
+    "name": "Matthew Wagner",
+    "email": "wagnermatt@icloud.com"
+  },
+  "license": "MIT",
+  "keywords": ["documentation", "scraping", "ccl", "context", "knowledge-base"]
+}
