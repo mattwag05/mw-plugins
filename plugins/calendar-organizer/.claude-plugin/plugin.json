@@ -1,0 +1,9 @@
+{
+  "name": "calendar-organizer",
+  "version": "1.0.0",
+  "description": "Extract, clean, and organize calendar schedules from messy sources into structured calendar data",
+  "author": {
+    "name": "Matthew Wagner"
+  },
+  "keywords": ["calendar", "schedule", "ics", "organizer", "excel", "parsing"]
+}

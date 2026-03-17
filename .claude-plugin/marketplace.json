@@ -36,7 +36,7 @@
     {
       "name": "agent-cli-cli",
       "source": "./plugins/agent-cli-cli",
-      "description": "[agent-cli] CLI reference for managing [agent]'s gateway (deprecated — [agent-cli] disabled 2026-03-13, replaced by GrimClaw)",
+      "description": "[agent-cli] CLI reference for managing [agent]'s gateway on Raspberry Pi — config, gateway, cron, and security commands",
       "version": "1.0.0"
     },
     {
@@ -49,6 +49,24 @@
       "name": "swift-concurrency",
       "source": "./plugins/swift-concurrency",
       "description": "Swift 6.2 concurrency patterns, proactive code review, and migration planning for modern Swift async/await, actors, and Sendable",
+      "version": "1.0.0"
+    },
+    {
+      "name": "calendar-organizer",
+      "source": "./plugins/calendar-organizer",
+      "description": "Extract, clean, and organize calendar schedules from messy sources into structured calendar data",
+      "version": "1.0.0"
+    },
+    {
+      "name": "[agent]-connector",
+      "source": "./plugins/[agent]-connector",
+      "description": "MCP bridge to [agent] (personal AI assistant) via [agent-cli] on Raspberry Pi — provides ask, status, memory search, sessions, cron, and messaging tools",
+      "version": "1.0.0"
+    },
+    {
+      "name": "remote-tasks",
+      "source": "./plugins/remote-tasks",
+      "description": "Async cross-machine task delegation via SSH and Beads — delegate work to Raspberry Pi and homelab-host workers over Tailscale",
       "version": "1.0.0"
     }
   ]
