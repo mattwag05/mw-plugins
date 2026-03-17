@@ -68,6 +68,12 @@
       "source": "./plugins/remote-tasks",
       "description": "Async cross-machine task delegation via SSH and Beads — delegate work to Raspberry Pi and homelab-host workers over Tailscale",
       "version": "1.0.0"
+    },
+    {
+      "name": "obsidian-homelab",
+      "source": "./plugins/obsidian-homelab",
+      "description": "Obsidian vault intelligence, homelab operations, and daily workflows for personal knowledge management and infrastructure.",
+      "version": "1.0.0"
     }
   ]
 }
