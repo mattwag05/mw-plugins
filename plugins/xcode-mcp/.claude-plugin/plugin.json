@@ -1,0 +1,10 @@
+{
+  "name": "xcode-mcp",
+  "version": "1.0.0",
+  "description": "Teach Claude Code to effectively use the Xcode MCP bridge for building, testing, fixing, and managing Xcode projects via natural-language requests",
+  "author": {
+    "name": "Matthew Wagner",
+    "email": "wagnermatt@icloud.com"
+  },
+  "keywords": ["xcode", "mcp", "swift", "build", "test", "ios", "macos", "swiftui", "swift-package-manager"]
+}

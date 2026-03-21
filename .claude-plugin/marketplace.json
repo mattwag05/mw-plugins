@@ -74,6 +74,12 @@
       "source": "./plugins/obsidian-homelab",
       "description": "Obsidian vault intelligence, homelab operations, and daily workflows for personal knowledge management and infrastructure.",
       "version": "1.0.0"
+    },
+    {
+      "name": "xcode-mcp",
+      "source": "./plugins/xcode-mcp",
+      "description": "Teach Claude Code to effectively use the Xcode MCP bridge for building, testing, fixing, and managing Xcode projects via natural-language requests",
+      "version": "1.0.0"
     }
   ]
 }
