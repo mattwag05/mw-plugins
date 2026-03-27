@@ -29,7 +29,7 @@ Use the Xcode MCP to build projects and diagnose compiler errors. Xcode's increm
 ### Run on Device/Simulator
 
 ```
-"Build and run the [scheme] scheme on the iPhone 16 simulator"
+"Build and run the [scheme] scheme on the iPhone 17 Pro simulator"
 "Build and run on the connected device"
 ```
 
@@ -103,7 +103,7 @@ MyView(isOn: $isOn)  // not MyView(isOn: isOn)
 
 ### SourceKit False Positives in SPM Packages
 
-When a project uses local SPM packages with `@_exported import`, SourceKit/IDE analysis will report errors like "No such module 'SharedKit'" or "Cannot find type 'X' in scope" even when the code is valid. These are always false positives — SourceKit cannot resolve transitive SPM imports outside Xcode's full build graph. **Never act on SourceKit diagnostics alone; `xcodebuild build` is the only authoritative check.** This applies to any module that re-exports another via `@_exported import`.
+When a project uses local SPM packages with `@_exported import`, SourceKit/IDE analysis will report errors like "No such module 'SomeModule'" or "Cannot find type 'X' in scope" even when the code is valid. These are false positives — SourceKit cannot resolve transitive SPM imports outside Xcode's full build graph. **Never act on SourceKit diagnostics alone; `xcodebuild build` is the only authoritative check.**
 
 ### Strict Concurrency (Swift 6)
 
@@ -122,7 +122,7 @@ Prefer `xcodebuild` via Bash when:
 xcodebuild -scheme MyApp -destination 'platform=iOS Simulator,name=iPhone 17 Pro' build
 ```
 
-**Note:** `iPhone 16` no longer exists in iOS 26 simulators — use `iPhone 17 Pro` (or list available devices with `xcrun simctl list devices`).
+**Note:** iOS 26 simulators no longer include `iPhone 16` — use `xcrun simctl list devices` to find available names.
 
 
 ## Build Performance Tips
