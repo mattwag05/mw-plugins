@@ -101,6 +101,10 @@ Usually a missing import or conflicting module. Request from Xcode MCP:
 MyView(isOn: $isOn)  // not MyView(isOn: isOn)
 ```
 
+### SourceKit False Positives in SPM Packages
+
+When a project uses local SPM packages with `@_exported import`, SourceKit/IDE analysis will report errors like "No such module 'SharedKit'" or "Cannot find type 'X' in scope" even when the code is valid. These are always false positives — SourceKit cannot resolve transitive SPM imports outside Xcode's full build graph. **Never act on SourceKit diagnostics alone; `xcodebuild build` is the only authoritative check.** This applies to any module that re-exports another via `@_exported import`.
+
 ### Strict Concurrency (Swift 6)
 
 For Swift 6 concurrency errors, the swift-concurrency plugin's `swift-concurrency` skill provides detailed guidance. Use it alongside this skill when builds fail with actor isolation or Sendable errors.
@@ -115,8 +119,11 @@ Prefer `xcodebuild` via Bash when:
 - Running `xcodebuild test` with `-resultBundlePath` for CI artifacts
 
 ```bash
-xcodebuild -scheme MyApp -destination 'platform=iOS Simulator,name=iPhone 16' build
+xcodebuild -scheme MyApp -destination 'platform=iOS Simulator,name=iPhone 17 Pro' build
 ```
+
+**Note:** `iPhone 16` no longer exists in iOS 26 simulators — use `iPhone 17 Pro` (or list available devices with `xcrun simctl list devices`).
+
 
 ## Build Performance Tips
 
