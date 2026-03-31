@@ -174,6 +174,26 @@ await withTaskGroup(of: Void.self) { group in ... }
 ```
 Fix: Pick one. Prefer structured concurrency; wrap legacy GCD in `withCheckedContinuation`.
 
+**8. `DispatchSemaphore.wait()` inside `Task.detached` — thread pool starvation**
+```swift
+// WRONG — Task.detached still runs on the cooperative thread pool
+// blocking with a semaphore starves other tasks
+Task.detached {
+    semaphore.wait()  // blocks a thread in the pool
+    completion()
+}
+```
+Fix: Use `withCheckedThrowingContinuation` + `DispatchQueue.global().async` to move the blocking call off the cooperative thread pool:
+```swift
+try await withCheckedThrowingContinuation { continuation in
+    DispatchQueue.global(qos: .userInitiated).async {
+        // blocking work here — runs on GCD thread, not cooperative pool
+        continuation.resume(returning: result)
+    }
+}
+```
+`Task.detached` does NOT inherit actor isolation but still occupies a cooperative thread. A semaphore `wait()` inside it blocks that thread permanently until signaled, starving concurrent tasks that need to run.
+
 ---
 
 ## Actor Reentrancy
