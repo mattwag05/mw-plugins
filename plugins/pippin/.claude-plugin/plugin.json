@@ -1,5 +1,10 @@
 {
   "name": "pippin",
-  "version": "1.0.0",
-  "description": "Pippin CLI integration — teaches Claude to use pippin for Apple app automation (mail, calendar, reminders, notes, contacts, voice memos, audio, browser)"
+  "version": "1.1.0",
+  "description": "Pippin integration — bundles the pippin MCP server so Claude can call mail, calendar, reminders, contacts, notes, status, and doctor tools directly, plus a CLI skill for shell-level usage",
+  "author": {
+    "name": "Matthew Wagner",
+    "email": "wagnermatt@icloud.com"
+  },
+  "keywords": ["pippin", "mcp", "mail", "calendar", "reminders", "notes", "contacts", "macos", "apple", "automation"]
 }
