@@ -1,0 +1,23 @@
+{
+  "skill_name": "testflight-triage",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "/testflight-triage headwater",
+      "expected_output": "Skill loads Chrome tools, navigates all 4 TestFlight sections (crashes, feedback, builds, testers) for the Headwater app, deduplicates against existing beads issues, creates/updates issues with correct types and labels, and displays a structured summary table.",
+      "files": []
+    },
+    {
+      "id": 2,
+      "prompt": "/testflight-triage headwater --section crashes",
+      "expected_output": "Skill processes only the crashes section, skips feedback/builds/testers, creates bug-type beads issues with crash labels and correct priority scaling, and reports section skips in the summary.",
+      "files": []
+    },
+    {
+      "id": 3,
+      "prompt": "check testflight for beta tester issues",
+      "expected_output": "Skill triggers without explicit /testflight-triage invocation, recognizes no app was specified, lists known apps from APP_MAP (headwater, swiftclaw), and asks the user to pick one before proceeding.",
+      "files": []
+    }
+  ]
+}

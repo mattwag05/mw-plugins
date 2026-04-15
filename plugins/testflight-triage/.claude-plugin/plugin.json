@@ -1,0 +1,9 @@
+{
+  "name": "testflight-triage",
+  "version": "1.0.0",
+  "description": "Scrape Apple App Store Connect TestFlight (crashes, feedback, builds, testers) via Chrome automation and triage into beads issues for backlog tracking",
+  "author": {
+    "name": "Matthew Wagner"
+  },
+  "keywords": ["testflight", "app-store-connect", "beads", "triage", "chrome-automation", "ios"]
+}
