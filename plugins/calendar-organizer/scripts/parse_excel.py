@@ -24,15 +24,6 @@ import csv
 from pathlib import Path
 
 
-def _col_index_to_letter(idx: int) -> str:
-    """Convert a 1-based column index to Excel-style letter (1=A, 27=AA, etc.)."""
-    result = ""
-    while idx > 0:
-        idx, remainder = divmod(idx - 1, 26)
-        result = chr(65 + remainder) + result
-    return result
-
-
 def parse_excel(filepath: str, sheet_name: str | None = None) -> dict:
     """Parse an Excel file into structured JSON."""
     import openpyxl
@@ -70,6 +61,8 @@ def parse_excel(filepath: str, sheet_name: str | None = None) -> dict:
 
 def parse_csv(filepath: str) -> dict:
     """Parse a CSV file into structured JSON."""
+    from openpyxl.utils import get_column_letter
+
     rows = []
     with open(filepath, newline="", encoding="utf-8-sig") as f:
         reader = csv.reader(f)
@@ -77,7 +70,7 @@ def parse_csv(filepath: str) -> dict:
             cells = []
             for col_idx, value in enumerate(row, start=1):
                 if value.strip():
-                    col_letter = _col_index_to_letter(col_idx)
+                    col_letter = get_column_letter(col_idx)
                     cells.append({
                         "col": col_letter,
                         "col_idx": col_idx,
