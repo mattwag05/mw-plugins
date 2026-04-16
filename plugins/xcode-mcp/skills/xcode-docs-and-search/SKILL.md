@@ -106,7 +106,7 @@ Use Xcode's playground macro for exploring APIs interactively:
 "Create a SwiftUI preview playground for ContentView with sample data"
 ```
 
-Playgrounds generated via MCP appear in the file with `#Preview` or `#Playground` macros and render in Xcode's canvas.
+Playgrounds generated via MCP appear in the file with `#Preview` or `#Playground` macros and render in Xcode's canvas. In Xcode's coding assistant, you can also generate playgrounds via the coding tools popover (click the coding intelligence icon in the source editor gutter → "Generate a Playground").
 
 ## Tips for Effective Documentation
 

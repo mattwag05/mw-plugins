@@ -13,8 +13,23 @@ The Xcode MCP bridge (`xcrun mcpbridge`) connects Claude Code to a running Xcode
 Before using any Xcode MCP request:
 
 1. **Xcode must be open** with the target project or workspace loaded
-2. **MCP Tools must be enabled** in Xcode → Settings → Intelligence → Model Context Protocol → Xcode Tools: ON
+2. **External agent access must be enabled:** Xcode → Settings → Intelligence → Model Context Protocol → "Allow external agents to use Xcode tools": ON
 3. The Xcode MCP is configured as a project-scoped server at `/Users/matthewwagner` — it is available in any Claude Code session started in or under that directory
+4. The MCP bridge was added via: `claude mcp add --transport stdio xcode -- xcrun mcpbridge`
+
+### Intelligence Settings Overview
+
+Xcode's Intelligence settings (Xcode → Settings → Intelligence) organize coding tools into three sections:
+
+- **Agents** — Claude Agent, Codex (install via "Get" button, sign in with account or API key)
+- **Model Context Protocol** — "Allow external agents to use Xcode tools" toggle (this is what Claude Code uses)
+- **Chat** — ChatGPT in Xcode, Claude Sonnet & Opus, custom providers (Internet Hosted or Locally Hosted supporting Chat Completions API at `/v1/models` and `/v1/chat/completions`)
+
+**Agent permissions:** Click the Permissions row under Agents to manage Allowed Commands (CLI tools) and Allowed Tools (MCP tools) that all agents can use.
+
+**Claude Agent config:** `~/Library/Developer/Xcode/CodingAssistant/ClaudeAgentConfig` — set default model, add MCP servers, create skills for the in-Xcode Claude Agent.
+
+**MDM restriction:** Set `CodingAssistantAllowExternalIntegrations` to `false` in an MDM profile to disable the coding assistant on managed devices.
 
 ## Using the Xcode MCP Tool
 
@@ -119,6 +134,19 @@ The Xcode MCP is most powerful when combined with Claude's direct file tools:
 5. **Run tests** via Xcode MCP to validate
 
 This hybrid approach — Claude edits files, Xcode compiles and reports — is faster than `xcodebuild` CLI because it uses Xcode's incremental build system and gives richer diagnostics.
+
+## Xcode Coding Assistant
+
+The coding assistant is Xcode's sidebar UI for interacting with agents and chat models (open with Cmd-0). Key features relevant to external agent workflow:
+
+- **Conversation history:** Xcode maintains full transcripts of all agent interactions, including external MCP sessions
+- **Rollback:** Click History button → use slider to unwind changes prompt-by-prompt; click Restore to apply
+- **Auto-apply toggle:** "Automatically apply code changes" button (lower-right) — when off, chat changes appear as proposals to selectively apply
+- **Context references:** Type `@` in message field to reference specific symbols/files; "Upload files" for external files
+- **Playgrounds & Previews:** Coding tools popover → "Generate a Playground" for `#Playground` macros rendered in canvas
+- **Coding tools popover:** Click the coding intelligence icon in the source editor gutter, or Control-click a symbol and choose Show Coding Tools (Cmd-Opt-0) for Explain, Document, Generate a Playground
+
+When Claude Code acts as an external agent via MCP, Xcode tracks all MCP-initiated changes in the conversation history and supports rollback.
 
 ## Limitations
 

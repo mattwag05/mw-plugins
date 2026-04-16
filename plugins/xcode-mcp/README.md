@@ -25,11 +25,12 @@ The Xcode MCP bridge is a single natural-language tool: describe what you want X
 ## Prerequisites
 
 1. **Xcode must be open** with your project loaded
-2. **Enable MCP Tools:** Xcode → Settings → Intelligence → Model Context Protocol → Xcode Tools: ON
+2. **Enable external agent access:** Xcode → Settings → Intelligence → Model Context Protocol → "Allow external agents to use Xcode tools": ON
 3. **MCP configured** (already done if you're reading this):
    ```
    claude mcp add --transport stdio xcode -- xcrun mcpbridge
    ```
+4. **Claude Agent config (optional):** Customize the in-Xcode Claude Agent at `~/Library/Developer/Xcode/CodingAssistant/ClaudeAgentConfig`
 
 ## Works Best With
 

@@ -33,6 +33,10 @@ Use the Xcode MCP to build projects and diagnose compiler errors. Xcode's increm
 "Build and run on the connected device"
 ```
 
+### Agent Auto-Iteration
+
+When using an agent (Claude Agent, Codex, or external agents like Claude Code via MCP), Xcode can automatically iterate on build errors — building, detecting errors, applying fixes, and rebuilding without manual intervention. The `xcode-build-fix` agent replicates this pattern for Claude Code sessions.
+
 ## Iterative Build-Fix Workflow
 
 Follow this cycle when fixing compilation errors:
