@@ -36,6 +36,8 @@ For each phase, list:
 - **Depends on** which prior phase's branch this stacks on, if any (git base, not just conceptual dependency)
 - **Beads** to file for it (one per intended commit)
 
+**Verify each phase's premise against the actual code before you build it — not just at plan time, but as you reach the phase.** Plans (and the research behind them) are often subtly wrong: a feature the plan says to "add" may already exist (just not in the mode that matters), the named bottleneck may live somewhere the proposed fix can't reach, or the cited project may not even be the one you're working on. When exploration contradicts the plan, **re-scope the phase to the real gap and file a follow-up bead for the deferred remainder** rather than building to the stale plan or silently expanding scope. A phase that ships the genuinely-missing 20% plus a clear bead for the rest beats one that rebuilds the existing 80%. Note the re-scope in the chat and the PR body so the divergence from the plan is legible.
+
 ### Reconciling a handoff
 
 If the user handed you a handoff note ("Phase A done, phases B and C ready"):
@@ -96,6 +98,8 @@ A phase-level PR typically closes multiple beads (one per commit). That's expect
 ## 4. Pre-push review
 
 Before pushing, run `/simplify` on the branch's diff against `main`. `/simplify` spawns three parallel review agents (reuse, quality, efficiency) and returns findings in categories.
+
+**Right-size the review to the diff.** `/simplify`'s multi-agent fan-out earns its cost on diffs that span subsystems (output infra + several commands + models + MCP, say). For a *tiny, self-contained* phase — one new pure-function file plus trivial wiring and tests — the fan-out burns tokens and latency without adding signal; do a focused inline review instead and state the call ("diff is small + self-contained → inline review"). Reserve the full fan-out for genuinely multi-subsystem phases and for any change touching load-bearing code. Across a 4-phase stack you'll typically inline-review the small phases and fan out on the big ones.
 
 **Triage the findings**:
 
@@ -262,9 +266,34 @@ Using `--base` means the PR's diff on GitHub shows only phase N's files, not the
 
 **Known gotcha**: if the project's CI workflow only triggers on PRs targeting `main` (check `.github/workflows/*.yml` for `pull_request: branches: [main]`), the stacked PR will show no CI runs. Fix: retarget the base to `main` with `gh pr edit <N> --base main`, then close+reopen the PR to trigger the `pull_request` event. The diff will include the stacked commits, but they've already been reviewed in the base PR.
 
+### Merging the stack (the `--delete-branch` footgun)
+
+When you merge a stack bottom-up, **`gh pr merge <N> --delete-branch` will silently CLOSE — not retarget — the next PR up the stack**, if that PR's base is the branch you just deleted and GitHub hasn't retargeted it yet. Auto-retarget races branch deletion and loses. I closed a mid-stack PR this way; recovering it (recreate the deleted base ref → `gh pr reopen` → `gh pr edit --base main` → merge) is fiddly because **you can't reopen a PR whose base branch no longer exists, and you can't change the base of a closed PR** — chicken-and-egg.
+
+Two ways to avoid it entirely:
+
+1. **Retarget every dependent PR to `main` *before* you start merging.** `main` never gets deleted, so deleting an intermediate branch can't close anything. Walk the stack top-down with `gh pr edit <N> --base main` first, then merge bottom-up. This is the simplest and most robust — do this.
+2. Or merge bottom-up but **don't** pass `--delete-branch`; delete the branches manually only after the whole stack has landed.
+
+After each merge, verify the next PR's state before proceeding — `gh pr view <N> --json state,baseRefName`. `state: CLOSED` (not `MERGED`) on a PR you didn't merge means you hit this; recover before continuing:
+
+```bash
+# recreate the deleted base ref so the PR can reopen, then point it at main
+git push origin origin/main:refs/heads/<deleted-base-branch>
+gh pr reopen <N>
+gh pr edit <N> --base main
+# decouple any PR still based on a branch you're about to delete FIRST:
+gh pr edit <N+1> --base main
+gh pr merge <N> --merge --delete-branch   # safe now that N+1 is off this branch
+```
+
+Prefer `--merge` over `--rebase` when landing a stack: `--merge` preserves commit SHAs, so each higher branch's already-merged ancestors keep matching `main` (a `--rebase` lands rewrites SHAs and the next branch then re-applies "duplicate" ancestor commits).
+
 ---
 
 ## 6. Watch — and use subagents
+
+**First, confirm where the real gate lives.** Some repos *disable* their GitHub build/test workflow and gate locally instead (e.g. pippin runs `make ci` natively / in a VM; `ci.yml` is off). There, `gh pr checks` shows only the still-active jobs (CodeQL, secret/unicode scans) — green there does **not** mean the build passed. The build/test gate is the local command you ran before pushing, so run it every push and treat it as authoritative; don't wait on or trust remote checks that aren't actually running your tests. Check `.github/workflows/` (and whether workflows are `disabled`) once at the start so you know which signal matters. When the gate is local, §6's "watch CI" reduces to "I already gated locally" — there may be nothing to poll.
 
 After push, CI runs for ~5–10 minutes. Don't idle. **Use `ScheduleWakeup`** to poll in the background.
 
