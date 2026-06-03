@@ -1,0 +1,20 @@
+version: 2
+updates:
+  # [agent]-connector bundles a Node MCP server — the only dependency tree in this
+  # marketplace. Everything else is plain skills with no third-party packages.
+  - package-ecosystem: npm
+    directory: /plugins/[agent]-connector/mcp
+    schedule:
+      interval: weekly
+    open-pull-requests-limit: 5
+    commit-message:
+      prefix: "fix([agent]-connector)"
+      include: scope
+    # Most of these deps are transitive (qs, hono, fast-uri… pulled via the MCP
+    # SDK's HTTP transport). Group non-major bumps into a single PR so routine
+    # patch/minor security fixes don't spam the repo with one PR each.
+    groups:
+      [agent]-mcp-deps:
+        update-types:
+          - minor
+          - patch
