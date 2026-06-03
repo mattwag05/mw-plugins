@@ -32,3 +32,7 @@ Convention: **one skill per plugin** (see `autonomous-execution`, `phased-shippi
 ## Commit / push
 
 Conventional-commit subjects (`feat(<plugin>): …`). End commit messages with the Claude co-author trailer. This repo has no CI and no beads DB — don't `bd init` it.
+
+## Dependencies
+
+Only `plugins/talia-connector/mcp/` has a dependency tree (a Node MCP server); the rest are plain skills. Dependabot watches that one npm manifest weekly (`.github/dependabot.yml`), grouping minor/patch bumps. Most deps there are **transitive** via the MCP SDK's HTTP transport — fix a flagged transitive CVE with `npm update <pkg> --package-lock-only` (lockfile-only, no `package.json` change) when the patched version is in-range.
