@@ -42,7 +42,7 @@
     {
       "name": "pippin",
       "source": "./plugins/pippin",
-      "description": "Pippin integration — bundles the pippin MCP server (26 tools for mail, calendar, reminders, contacts, notes, status, doctor) plus CLI and release skills for shell-level usage",
+      "description": "Pippin integration — bundles the pippin MCP server (44 tools for mail, calendar, reminders, contacts, notes, status, doctor) plus CLI and release skills for shell-level usage",
       "version": "1.2.0"
     },
     {
