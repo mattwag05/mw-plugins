@@ -83,33 +83,37 @@ The process exit code mirrors `error.code`, so shells/agents can branch without 
 Apple privacy permissions (TCC) are the #1 cause of "it works in my terminal but not from
 the agent" failures.
 
-**The grant attaches to the *launching app* (the responsible process), not to the pippin
-binary.** macOS keys Reminders/Calendar/Contacts/Automation consent on whatever process is
-*responsible* for launching pippin:
+**The grant keys on pippin's own identity + binary PATH — not on the launcher.** As of
+**v0.31.0** pippin re-execs itself "disclaimed" so it is its own macOS TCC *responsible
+process*. macOS therefore keys Reminders/Calendar/Contacts/Automation/Full-Disk consent on
+pippin's signed identity at its binary path, **regardless of which app launched it**
+(Terminal, Codex, a background MCP gateway, launchd). Grant pippin once and it works under
+every launcher.
 
-- Run from **Terminal** → the grant is associated with Terminal.
-- Spawned by a **background LaunchAgent / MCP gateway** (e.g. [agent-runtime]) → that's a *different*
-  responsible process, so a grant you approved in Terminal does **not** apply, and the
-  call is denied.
-- A background agent **cannot show the first-use permission dialog** (no GUI session to
-  present it), so a `.notDetermined` permission silently returns denied there.
+Two consequences that bite agents:
 
-**What this means for you:**
-- **Establish the grant under the same launcher that will run pippin.** If pippin runs
-  under an agent/gateway, the permission must be granted to *that* launcher — granting it
-  to your terminal won't help the agent.
-- **Resolve prompts once, interactively:** `pippin permissions` (or `pippin init`) triggers
-  every promptable permission in one pass — but only from a real interactive TTY. It
-  deliberately **refuses to prompt** under MCP, `--format agent/json`, or a non-TTY pipe
-  (it would only produce an unanswerable dialog), printing a read-only report instead.
+- **Grants are per binary PATH (bare CLI, not a `.app`).** `/opt/homebrew/bin/pippin`
+  resolves to a *versioned* `Cellar/<ver>/…` path, so a brew grant is **lost on every
+  `brew upgrade`**. The durable, granted home is the **stable** `~/.local/bin/pippin`
+  (a copied real file at a fixed path; the grant survives rebuilds). **Agents and
+  scheduled tasks should invoke `~/.local/bin/pippin` explicitly**, never the brew symlink.
+- **The prompt only appears in an interactive session.** `pippin permissions` (or
+  `pippin init`) triggers every promptable permission in one pass — but only from a real
+  TTY. Under MCP, `--format agent/json`, or a non-TTY pipe it **refuses to prompt** (an
+  unanswerable dialog would just hang) and prints a read-only report instead, and EventKit
+  commands fast-fail with `access_denied` rather than blocking.
+
+**So the one-time setup for durable agent access:** run `pippin permissions` against
+`~/.local/bin/pippin` **once in a Terminal** and approve the prompts. After that, that path
+works from any launcher. (`make install` refreshes the binary at the same path without
+losing the grant.)
+
 - **Check state any time** without prompting: `pippin permissions --status --format agent`
-  or `pippin doctor`. Each integration reports `granted` / `not_determined` /
-  `manual_required`, plus whether it's promptable.
+  or `pippin doctor` — each integration reports `granted` / `not_determined` /
+  `manual_required` + whether it's promptable.
 - **Voice Memos and Messages need Full Disk Access**, which has *no* prompt — grant it
-  manually in System Settings ▸ Privacy & Security ▸ Full Disk Access to the launching app,
-  then relaunch that app.
-- After a pippin upgrade that changes its code signature, a one-time re-grant may be needed
-  for the new identity; once granted under a launcher it persists for that launcher.
+  manually in System Settings ▸ Privacy & Security ▸ Full Disk Access to the pippin binary,
+  then relaunch.
 
 When a structured call fails with `error.code == "access_denied"`, surface
 `error.remediation` to the user verbatim — it names the exact System Settings pane and the
