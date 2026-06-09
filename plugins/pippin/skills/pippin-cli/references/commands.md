@@ -1,6 +1,9 @@
 # Pippin CLI — Command Reference
 
-Binary: `/opt/homebrew/bin/pippin` (v0.11.0)
+Binary: `/opt/homebrew/bin/pippin` (check `pippin --version`). All structured commands
+support `--format agent` (envelope v1) and `--fields a,b,c` projection — see
+`../SKILL.md` and `output-formats.md`. TCC permissions attach to the *launching app*; see
+the Permissions section of `../SKILL.md`.
 
 ---
 

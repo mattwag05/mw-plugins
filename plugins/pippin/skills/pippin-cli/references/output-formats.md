@@ -44,21 +44,38 @@ Use when: you want all fields, human-inspectable, piped to `jq`.
 
 ---
 
-## agent
+## agent (envelope v1)
 
-Compact JSON — no whitespace, no newlines, no sorted keys. Same fields as `json`.
+Compact JSON wrapped in a **versioned envelope**. The previous raw payload now lives under
+`data` — parse `.data`, not the top level.
 
 ```bash
 pippin calendar today --format agent
-# Output:
-# [{"id":"a1b2c3d4...","calendarId":"...","calendarTitle":"Work","title":"Team Standup","startDate":"2026-03-10T10:00:00-05:00","endDate":"2026-03-10T10:30:00-05:00","isAllDay":false,"status":"none"}]
+# Success:
+# {"v":1,"status":"ok","duration_ms":138,"data":[{"id":"a1b2c3d4...","calendarTitle":"Work","title":"Team Standup","startDate":"2026-03-10T10:00:00-05:00","isAllDay":false}]}
+# Error:
+# {"v":1,"status":"error","duration_ms":44,"error":{"code":"access_denied","message":"Calendar access denied. -> Open System Settings > Privacy & Security > Calendars...","remediation":{...}}}
 ```
 
-Use when: Claude Code is the consumer. Saves tokens vs. pretty-printed JSON.
+Envelope fields:
+- `v` — schema version (currently `1`). Bumps on any breaking change.
+- `status` — `ok` or `error`. **Branch on this first.**
+- `duration_ms` — wall-clock time for the call.
+- `data` — the payload (same shape the old bare output had). Present on success.
+- `error` — `{code, message, remediation?}` on failure. `code` is stable + snake_case
+  (e.g. `access_denied`, `not_found`, `timeout`) and mirrors the process exit code.
+- `warnings` — optional array of non-fatal advisories (e.g. partial-results / soft-timeout
+  notices). Data is still valid but may be incomplete.
 
-**Exceptions:**
-- `notes show --format agent`: Returns `plainText` instead of the HTML `body` field to avoid large HTML payloads. Fields: `id, title, plainText, folder, modificationDate`.
-- Action results (create/edit/delete/complete/send/move/mark): Same as `json` — action results are already compact.
+Use when: an agent is the consumer. Saves tokens vs. pretty-printed JSON, and gives a
+machine-stable success/error contract.
+
+**Exceptions / notes:**
+- `notes show --format agent`: `data` carries `plainText` instead of the HTML `body` to
+  avoid large payloads. Fields: `id, title, plainText, folder, modificationDate`.
+- Action results (create/edit/delete/complete/send/move/mark): `data` is the compact
+  `{success, action, details}` object — still inside the envelope.
+- Project further with `--fields a,b,c` to trim `data` to just those keys.
 
 ---
 
