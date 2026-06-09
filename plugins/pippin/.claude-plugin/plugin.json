@@ -1,7 +1,7 @@
 {
   "name": "pippin",
-  "version": "1.1.0",
-  "description": "Pippin integration — bundles the pippin MCP server so Claude can call mail, calendar, reminders, contacts, notes, status, and doctor tools directly, plus a CLI skill for shell-level usage",
+  "version": "1.2.0",
+  "description": "Pippin integration — bundles the pippin MCP server so Claude can call mail, calendar, reminders, contacts, notes, status, and doctor tools directly, plus CLI and release skills for shell-level usage",
   "author": {
     "name": "Matthew Wagner",
     "email": "wagnermatt@icloud.com"
