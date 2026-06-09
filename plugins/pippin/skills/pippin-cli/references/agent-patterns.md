@@ -141,18 +141,38 @@ pippin mail send \
 
 ---
 
-## Error Handling Pattern
+## Error Handling Pattern (envelope v1)
 
-All action results return `{success: bool, action: string, details: {}}`. Check `success` before proceeding:
+Every `--format agent` response is an envelope: `{"v":1,"status":"ok|error","duration_ms":N,
+"data":…}` or `{…,"status":"error","error":{"code","message","remediation"}}`. Branch on
+`status`; the action payload (`{success, action, details}`) lives under `data` on success.
+
+The process **exit code** already mirrors the error (`0` ok, `3` not-found, `4`
+auth/permission, `5` bridge, `7` timeout), so the cheapest check is the exit code:
+
+```bash
+if pippin reminders complete <id> --format agent >/tmp/out.json; then
+  echo "ok: $(jq -c '.data' /tmp/out.json)"
+else
+  code=$?                                  # 4 = permission, 3 = not-found, ...
+  jq -r '.error | "\(.code): \(.message)"' /tmp/out.json
+  jq -r '.error.remediation // empty' /tmp/out.json   # show the fix to the user
+fi
+```
+
+Parsing the envelope directly:
 
 ```bash
 result=$(pippin reminders complete <id> --format agent)
-# result: {"success":true,"action":"complete","details":{"id":"..."}}
-
-# In a shell script:
-if echo "$result" | python3 -c "import sys,json; d=json.load(sys.stdin); exit(0 if d['success'] else 1)"; then
-  echo "Completed successfully"
+status=$(echo "$result" | jq -r '.status')
+if [ "$status" = "ok" ]; then
+  echo "Completed: $(echo "$result" | jq -c '.data')"
 else
-  echo "Failed: $result"
+  # access_denied here is almost always the launcher/TCC mismatch — see SKILL.md.
+  echo "Failed [$(echo "$result" | jq -r '.error.code')]: $(echo "$result" | jq -r '.error.message')"
 fi
 ```
+
+Common `error.code` values: `access_denied` (TCC — surface `.error.remediation`),
+`not_found`, `timeout`, `usage`. A `status:"ok"` with a `warnings` entry means partial
+results — re-run narrower for the rest.
