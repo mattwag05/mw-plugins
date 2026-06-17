@@ -4,6 +4,13 @@
 Notes, Contacts, Voice Memos, Messages) plus audio and browser. It is built for agents:
 every command speaks a stable, versioned JSON envelope under `--format agent`.
 
+**Current state:** stable **v0.33.0** (`pippin --version` to confirm), exposing **45 MCP
+tools** (mail, calendar, reminders, contacts, notes, memos, messages, status, doctor,
+agent-info, …). The pippin MCP server is attached for both the **Hermes/Talia gateway**
+(stdio, pointed at `~/.local/bin/pippin mcp-server`) and **Claude Cowork** (via the
+`pippin@mw-plugins` plugin's `.mcp.json`). Any agent *without* the MCP attached falls back
+to the CLI — see "How to call pippin" below.
+
 ## Trigger Phrases
 
 Use this skill when the user asks to:
@@ -18,12 +25,27 @@ Use this skill when the user asks to:
 
 ## How to call pippin
 
-Two equivalent surfaces — both produce the same agent JSON:
+Two equivalent surfaces — both produce the same agent JSON, because the MCP server is a
+thin wrapper that shells out to the CLI. Everything in this skill (commands, envelope,
+gotchas) applies identically to both.
 
 1. **MCP tools** (`mail_list`, `calendar_today`, `reminders_create`, `status`, …) when a
-   pippin MCP server is attached. Prefer these when available — no shell quoting.
-2. **CLI** (`pippin <area> <verb> … --format agent`). The MCP server itself just shells
-   out to the CLI, so everything below applies to both.
+   pippin MCP server is attached. **Prefer these when available** — no shell quoting, and
+   the host has already resolved the binary path and TCC identity for you.
+2. **CLI fallback** — when no pippin MCP server is attached (Hermes/Talia and Claude Cowork
+   have it; a bare Claude Code session, a scheduled task, or any other agent may not), or
+   when an MCP tool errors and you want to retry/diagnose at the shell, call the CLI
+   directly. **Invoke the stable path explicitly:**
+
+   ```bash
+   ~/.local/bin/pippin <area> <verb> … --format agent
+   ```
+
+   `~/.local/bin/pippin` is the TCC-granted binary (see Permissions below) — agents and
+   scheduled tasks should always use this path, **not** the brew symlink
+   `/opt/homebrew/bin/pippin`, whose grant is lost on every `brew upgrade`. Bare `pippin`
+   on PATH resolves to the stable copy too, but spelling out the absolute path removes any
+   doubt about which binary (and which grant) you're invoking.
 
 ## Use these habits every time (efficiency)
 
