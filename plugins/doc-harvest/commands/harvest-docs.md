@@ -44,6 +44,16 @@ This will:
 - Fall back to link crawling if no sitemap
 - Output a JSON manifest of discovered pages
 
+**If discovery returns 0 (or very few) pages, the site is likely a JS/SPA** whose
+nav and sitemap don't work with a static fetch (e.g. Apple, Google AI docs).
+Render the landing page with Scrapling, then re-run discovery against the real DOM:
+
+```bash
+SCRAPLING_HTML=/tmp/doc-harvest/landing.html \
+  "${CLAUDE_PLUGIN_ROOT}/scripts/scrapling-fetch.sh" "<url>" fetch >/dev/null
+python3 "${CLAUDE_PLUGIN_ROOT}/scripts/harvest.py" discover "<url>" --html /tmp/doc-harvest/landing.html
+```
+
 ### 4. Present Pages for Approval
 
 Show the user the discovered pages as a tree structure. Include:
@@ -65,24 +75,29 @@ Use AskUserQuestion to let the user:
 
 For each approved page:
 
-a. Fetch content — try WebFetch first:
-```
-WebFetch <url>
-```
-
-b. If WebFetch fails or returns poor content, fall back to curl + pandoc:
+a. Fetch content as clean Markdown with the Scrapling wrapper (renders JS,
+   bypasses anti-bot, and applies `--ai-targeted` main-content extraction):
 ```bash
-curl -sL "<url>" | pandoc -f html -t markdown --wrap=none
+"${CLAUDE_PLUGIN_ROOT}/scripts/scrapling-fetch.sh" "<url>" auto \
+  | python3 "${CLAUDE_PLUGIN_ROOT}/scripts/harvest.py" clean --base-url "<domain>" > "/tmp/doc-harvest/<page>.md"
 ```
+   - `auto` (default) does a fast static fetch, then auto-escalates to a JS
+     browser fetch if the result looks like an unrendered SPA shell.
+   - Force a mode when you know the site: `fetch` (JS/SPA), `stealthy`
+     (Cloudflare/anti-bot), or `get` (plain static).
+   - The wrapper prints Markdown to stdout; its progress/logs go to stderr.
 
-c. Clean the raw markdown:
-```bash
-echo '<raw_markdown>' | python3 "${CLAUDE_PLUGIN_ROOT}/scripts/harvest.py" clean --base-url "<domain>"
-```
+b. The `clean` step is now a light post-pass (heading normalization, image
+   absolutization, whitespace) — Scrapling's `--ai-targeted` already removed
+   nav/footer/cookie/share boilerplate at the DOM level.
 
-d. Report progress: `[n/total] Fetched: <title>`
+c. Report progress: `[n/total] Fetched: <title>`
 
-e. Wait 2 seconds between requests.
+d. Wait 2 seconds between requests.
+
+> Ad-hoc alternative: the Scrapling **MCP server** is registered with this plugin
+> (`.mcp.json`). For one-off interactive fetches you can call its tools directly
+> instead of the wrapper; the wrapper is the path for batch harvesting.
 
 ### 5b. Section Analysis and Parallel Agent Launch (50+ pages only)
 
@@ -205,8 +220,8 @@ Show the user:
 
 ## Tips
 
-- WebFetch is faster and produces cleaner markdown than curl+pandoc for most sites
-- For JavaScript-heavy sites (SPAs), WebFetch may return empty content — use the browser automation fallback if available
-- The clean step is important — it strips navigation, footers, cookie banners, and other boilerplate
+- `scrapling-fetch.sh` (auto mode) is the fetch path for all sites — it renders JS and applies `--ai-targeted`, so it handles SPAs that WebFetch returned empty on
+- For a known JS/SPA site, skip the auto-escalation and pass `fetch` directly; for Cloudflare/anti-bot sites use `stealthy`
+- Scrapling's `--ai-targeted` does the heavy de-boilerplating; the `clean` step is now just a light post-pass (headings, images, whitespace)
 - If a site has > 100 pages, strongly suggest the doc-harvester agent
 - Always respect rate limits — 2-second minimum between requests

@@ -4,9 +4,17 @@ doc-harvest: URL discovery, content cleaning, and CCL organization.
 
 Stdlib-only (no pip dependencies). Subcommands:
   discover <url>    — Find all pages under a URL prefix
+                      (--html <file>: parse a Scrapling-rendered HTML file for
+                       links instead of urllib — for JS/SPA sites whose nav and
+                       sitemap don't work with a static fetch)
   clean             — Clean raw markdown (stdin -> stdout)
   organize          — Generate CCL file tree from manifest
   update-index      — Update CCL root _index.md with new doc set
+
+Content fetching is done by scrapling-fetch.sh (Scrapling, dockerized), NOT this
+script — it renders JS, bypasses anti-bot, and emits --ai-targeted main-content
+Markdown. `clean` is now a light post-pass (headings/images/whitespace), not the
+primary boilerplate stripper.
 """
 
 import argparse
@@ -150,14 +158,33 @@ def cmd_discover(args):
     pages = []
     source = "unknown"
 
+    # --- JS/SPA path: parse a pre-rendered HTML file (from scrapling fetch) ---
+    # Static sitemap + urllib crawl fail on SPA sites whose nav is JS-rendered.
+    # The workflow renders the landing page with Scrapling, then re-runs discover
+    # with --html pointing at that file. We extract links from the real DOM and
+    # skip the sitemap/urllib paths entirely.
+    if getattr(args, "html", None):
+        html = Path(args.html).read_text(errors="replace")
+        extractor = LinkExtractor(url, path_prefix)
+        extractor.feed(html)
+        pages = extractor.links
+        source = "rendered-html"
+        if not pages:
+            print(
+                f"Warning: --html {args.html} yielded 0 links under {path_prefix} — "
+                "falling back to sitemap/static crawl (the rendered HTML may be a "
+                "thin SPA shell or the wrong page).",
+                file=sys.stderr,
+            )
+
     # --- Try sitemap.xml variants ---
     sitemap_urls = [
         f"{domain}/sitemap.xml",
         f"{domain}/sitemap_index.xml",
     ]
 
-    # Check robots.txt for Sitemap directives
-    robots = fetch_url(f"{domain}/robots.txt")
+    # Check robots.txt for Sitemap directives (skip if --html already found links)
+    robots = "" if pages else fetch_url(f"{domain}/robots.txt")
     if robots:
         for line in robots.splitlines():
             if line.strip().lower().startswith("sitemap:"):
@@ -165,7 +192,7 @@ def cmd_discover(args):
                 if sm_url not in sitemap_urls:
                     sitemap_urls.insert(0, sm_url)
 
-    for sm_url in sitemap_urls:
+    for sm_url in (sitemap_urls if not pages else []):
         sm_content = fetch_url(sm_url)
         if not sm_content:
             continue
@@ -291,41 +318,29 @@ def cmd_discover(args):
 # Subcommand: clean
 # ---------------------------------------------------------------------------
 
-# Block patterns that need DOTALL (match across lines)
-BLOCK_STRIP_PATTERNS = [
-    # Navigation heading blocks (match from heading to next heading or EOF)
-    r"(?m)^#{1,3}\s*(Navigation|Menu|Nav|Breadcrumb|Table of Contents|TOC|Site Map)\s*$.*?(?=^#{1,3}\s|\Z)",
-    # Footer boilerplate (from HR to end)
-    r"(?m)^---+\s*$\s*(?:Copyright|©|\(c\)|All rights reserved|Terms|Privacy|Legal).*?(?=\Z)",
-]
-
-# Line patterns — NO DOTALL (. must not cross newlines)
+# ponytail: Scrapling's --ai-targeted does DOM-level main-content extraction
+# upstream of this step, so nav/footer/share/newsletter boilerplate is already
+# gone. We keep only a few cheap line-level insurance patterns for the stray
+# bits that occasionally survive (or for content fetched without --ai-targeted).
 LINE_STRIP_PATTERNS = [
-    # Skip to content links
+    # Skip-to-content links
     r"(?m)^\[Skip to .*?\]\(.*?\)\s*$",
-    # Cookie consent banners
+    # Cookie / consent banners
     r"(?m)^[^\n]*(?:cookie|consent|privacy\s+(?:policy|notice))[^\n]*accept[^\n]*$",
-    # "Was this page helpful" blocks
+    # "Was this page helpful" feedback widgets
     r"(?m)^[^\n]*(?:Was this (?:page|article) helpful|Give feedback|Rate this)[^\n]*$",
-    # Edit on GitHub links
-    r"(?m)^\s*\[?\s*Edit (?:this page )?on GitHub\s*\]?\s*(?:\(.*?\))?\s*$",
-    # Share buttons
-    r"(?m)^[^\n]*(?:Share (?:this|on)|Tweet this|Share on Facebook|Share on LinkedIn)[^\n]*$",
-    # Newsletter signup
-    r"(?m)^[^\n]*(?:Subscribe to|Newsletter|Sign up for)[^\n]*(?:email|updates)[^\n]*$",
 ]
 
-BLOCK_COMPILED = [re.compile(p, re.IGNORECASE | re.DOTALL) for p in BLOCK_STRIP_PATTERNS]
 LINE_COMPILED = [re.compile(p, re.IGNORECASE) for p in LINE_STRIP_PATTERNS]
+# Block-level boilerplate stripping (nav/footer) is now Scrapling's --ai-targeted
+# job upstream, so cmd_clean no longer runs a block-pattern pass.
 
 
 def cmd_clean(args):
     """Clean raw markdown from stdin, write to stdout."""
     content = sys.stdin.read()
 
-    # Strip boilerplate patterns (block patterns first, then line patterns)
-    for pattern in BLOCK_COMPILED:
-        content = pattern.sub("", content)
+    # Strip the few line-level boilerplate patterns that survive --ai-targeted
     for pattern in LINE_COMPILED:
         content = pattern.sub("", content)
 
@@ -616,6 +631,11 @@ def main():
     # discover
     p_discover = subs.add_parser("discover", help="Find all pages under a URL prefix")
     p_discover.add_argument("url", help="Root URL of the documentation site")
+    p_discover.add_argument(
+        "--html",
+        help="Path to a Scrapling-rendered HTML file to extract links from "
+        "(for JS/SPA sites where sitemap + static crawl find nothing)",
+    )
 
     # clean
     p_clean = subs.add_parser("clean", help="Clean raw markdown (stdin → stdout)")

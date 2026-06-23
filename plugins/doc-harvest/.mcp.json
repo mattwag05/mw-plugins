@@ -1,0 +1,8 @@
+{
+  "mcpServers": {
+    "scrapling": {
+      "command": "docker",
+      "args": ["run", "--rm", "-i", "pyd4vinci/scrapling@sha256:2a0c05bdd78211a76cb7ab9565a91250787a326f9ca73c97cf764ccb536631a2", "mcp"]
+    }
+  }
+}

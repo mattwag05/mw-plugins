@@ -49,19 +49,19 @@ You will receive:
 
 For each page in the manifest:
 
-1. Fetch the page content using WebFetch (preferred) or curl fallback:
+1. Fetch + clean in one pipe using the Scrapling wrapper (renders JS, bypasses
+   anti-bot, applies `--ai-targeted` main-content extraction):
    ```bash
-   curl -sL "<url>" | pandoc -f html -t markdown --wrap=none
+   "${CLAUDE_PLUGIN_ROOT}/scripts/scrapling-fetch.sh" "<url>" auto \
+     | python3 "${CLAUDE_PLUGIN_ROOT}/scripts/harvest.py" clean --base-url "<domain>"
    ```
+   - `auto` auto-escalates static → JS browser fetch on SPA shells. Force
+     `fetch` (JS/SPA) or `stealthy` (anti-bot) when you know the site.
+   - `clean` is now a light post-pass; Scrapling already stripped the boilerplate.
 
-2. Clean the content:
-   ```bash
-   echo "<raw_markdown>" | python3 "${CLAUDE_PLUGIN_ROOT}/scripts/harvest.py" clean --base-url "<domain>"
-   ```
+2. Report progress: `[n/total] Fetched: <title>`
 
-3. Report progress: `[n/total] Fetched: <title>`
-
-4. Wait 2 seconds between requests to be polite to servers.
+3. Wait 2 seconds between requests to be polite to servers.
 
 ### 3. Organize into CCL
 
