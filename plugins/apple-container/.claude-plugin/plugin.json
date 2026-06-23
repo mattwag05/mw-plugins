@@ -1,0 +1,11 @@
+{
+  "name": "apple-container",
+  "version": "0.1.0",
+  "description": "Use Apple's `container` CLI to run Linux containers as lightweight VMs on Apple silicon, and migrate Docker / Docker Desktop workflows to it",
+  "author": {
+    "name": "Matthew Wagner",
+    "email": "wagnermatt@icloud.com"
+  },
+  "license": "MIT",
+  "keywords": ["apple-container", "container", "docker", "macos", "apple-silicon", "oci", "migration"]
+}
