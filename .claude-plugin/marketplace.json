@@ -10,6 +10,12 @@
   },
   "plugins": [
     {
+      "name": "apple-container",
+      "source": "./plugins/apple-container",
+      "description": "Use Apple's `container` CLI to run Linux containers as lightweight VMs on Apple silicon, and migrate Docker / Docker Desktop workflows to it",
+      "version": "0.1.0"
+    },
+    {
       "name": "autonomous-execution",
       "source": "./plugins/autonomous-execution",
       "description": "Instructs Claude to complete tasks autonomously by executing, verifying, diagnosing, and fixing — rather than asking the user to check things",
