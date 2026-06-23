@@ -72,8 +72,10 @@ container stop web ; container rm web             # stop then remove
 These are the things that *don't* behave like Docker — the actual reason a port goes wrong:
 
 1. **No `docker compose`.** There is no compose command. Multi-container apps must be wired by hand
-   (scripts + `container network create` on macOS 26) or with an external orchestrator. This is the
-   single biggest gap when moving a Compose-based project — plan for it.
+   (a bring-up script + `container network create` on macOS 26) or with an external orchestrator. This
+   is the single biggest gap when moving a Compose-based project — follow the
+   [Compose migration playbook](references/compose-migration.md) (field mapping, service-discovery DNS,
+   a worked `up.sh`/`down.sh`, and the `depends_on`/`restart` gaps).
 2. **Anonymous volumes are NOT auto-removed by `--rm`** (Docker removes them). You must
    `container volume rm <id>` manually, or they accumulate. Find them: `container volume ls -q | grep anon`.
 3. **x86/amd64 images run under Rosetta.** `container run --arch amd64 …` (or `--rosetta`) executes
@@ -121,6 +123,9 @@ Shell completions for zsh/bash/fish are documented in the upstream `how-to.md`
 
 - **Full command reference, every flag, every gotcha:**
   [references/docker-migration.md](references/docker-migration.md) (in this skill).
+- **Migrating a `docker compose` project:**
+  [references/compose-migration.md](references/compose-migration.md) — Compose-key→container mapping,
+  name-based service discovery, a worked multi-service `up.sh`/`down.sh`, and the lifecycle gaps.
 - **Upstream docs:** <https://github.com/apple/container/tree/main/docs> — `command-reference.md`,
   `how-to.md`, `technical-overview.md`, tutorials. API reference (Swift, for embedding):
   <https://apple.github.io/container/documentation/>
