@@ -1,7 +1,7 @@
 {
   "name": "doc-harvest",
-  "version": "1.0.0",
-  "description": "Scrape documentation websites into structured Claude Context Library entries with progressive disclosure navigation",
+  "version": "1.1.0",
+  "description": "Scrape documentation websites into structured Claude Context Library entries with progressive disclosure navigation. Uses Scrapling (dockerized) for JS-rendering, anti-bot-resistant fetching.",
   "author": {
     "name": "Matthew Wagner",
     "email": "wagnermatt@icloud.com"
