@@ -34,6 +34,12 @@
       "version": "1.0.0"
     },
     {
+      "name": "hermes-tweet",
+      "source": "./plugins/hermes-tweet",
+      "description": "Hermes Agent X/Twitter plugin guide with read-first workflows and approval-gated actions",
+      "version": "0.1.6"
+    },
+    {
       "name": "macos-automation",
       "source": "./plugins/macos-automation",
       "description": "Teach Claude how to automate Apple's native macOS apps (Mail, Calendar, Notes, Reminders) using AppleScript, JXA, and Swift",
