@@ -16,7 +16,10 @@
 # hidden-element sanitization), so the output is already nav/footer/boilerplate-free.
 #
 # Env:
-#   SCRAPLING_IMAGE      docker image (default: digest-pinned pyd4vinci/scrapling).
+#   CONTAINER_RUNTIME    container runtime CLI (default: docker). Set to `container`
+#                        to use Apple's Container CLI on Apple silicon
+#                        (run `container system start` first).
+#   SCRAPLING_IMAGE      container image (default: digest-pinned pyd4vinci/scrapling).
 #                        Re-pin after `docker pull pyd4vinci/scrapling:latest` via:
 #                        docker inspect --format '{{index .RepoDigests 0}}' pyd4vinci/scrapling:latest
 #   SCRAPLING_MIN_BYTES  auto-escalation threshold (default: 200)
@@ -26,6 +29,7 @@ set -euo pipefail
 
 URL="${1:?usage: scrapling-fetch.sh <url> [auto|get|fetch|stealthy]}"
 MODE="${2:-auto}"
+RUNTIME="${CONTAINER_RUNTIME:-docker}"
 IMAGE="${SCRAPLING_IMAGE:-pyd4vinci/scrapling@sha256:2a0c05bdd78211a76cb7ab9565a91250787a326f9ca73c97cf764ccb536631a2}"
 MIN_BYTES="${SCRAPLING_MIN_BYTES:-200}"
 
@@ -35,7 +39,7 @@ trap 'rm -rf "$STAGE"' EXIT
 # _run <subcommand> [extra args...] — fetch into STAGE/page.md; logs to stderr.
 _run() {
   local sub="$1"; shift
-  docker run --rm -v "$STAGE:/out" "$IMAGE" \
+  "$RUNTIME" run --rm -v "$STAGE:/out" "$IMAGE" \
     extract "$sub" "$URL" /out/page.md --ai-targeted "$@" >&2 || return 1
 }
 _bytes() { [ -s "$STAGE/page.md" ] && wc -c < "$STAGE/page.md" | tr -d ' ' || echo 0; }
@@ -65,7 +69,7 @@ fi
 # Optionally also render raw HTML for link discovery (SPA discover fallback).
 if [ -n "${SCRAPLING_HTML:-}" ]; then
   HTML_DIR="$(cd "$(dirname "$SCRAPLING_HTML")" && pwd)"
-  docker run --rm -v "$HTML_DIR:/htmlout" "$IMAGE" \
+  "$RUNTIME" run --rm -v "$HTML_DIR:/htmlout" "$IMAGE" \
     extract fetch "$URL" "/htmlout/$(basename "$SCRAPLING_HTML")" --network-idle >&2 || true
 fi
 

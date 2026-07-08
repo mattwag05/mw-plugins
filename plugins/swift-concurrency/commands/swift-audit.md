@@ -103,10 +103,15 @@ Then verdict:
 - `CONCURRENCY-SAFE` — zero issues found
 - `ISSUES FOUND: N critical, M high, P medium, Q low`
 
-## Swift 6.2 Behavioral Notes
+## Swift 6.4 Behavioral Notes
 
 Apply these rules while reviewing:
-- `nonisolated async func` in Swift 6.2 (NonisolatedNonsendingByDefault) stays on caller's actor — if it does blocking work, it needs `@concurrent`
+- `nonisolated async func` (SE-0461/NonisolatedNonsendingByDefault) stays on caller's actor — if it does blocking work, it needs `@concurrent`
+- `nonisolated async` now runs on caller's actor by default (Swift 6.2+); use `@concurrent` to opt into the global executor
 - SE-0418: structs/enums with all-Sendable stored properties are Sendable automatically — don't report these as gaps
+- `weak let` (SE-0481, Swift 6.3) can let classes earn proper Sendable, replacing `@unchecked Sendable`
+- `~Sendable` (SE-0518, Swift 6.4) lets you explicitly opt out of automatic Sendable inference
+- async `defer` (SE-0493, Swift 6.4) allows `await` inside `defer` blocks
+- Throwing `Task { }` without handling the error now warns (SE-0520, Swift 6.4)
 - `Task { }` inherits actor isolation from the enclosing scope; `Task.detached { }` does not — flag detached tasks that access actor state
 - `@concurrent` is the correct replacement for `DispatchQueue.global().async` wrapping an async function

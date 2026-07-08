@@ -1,6 +1,6 @@
-# Modern Swift 6.2 Features
+# Modern Swift Features (6.2–6.4)
 
-Beyond the concurrency model, Swift 6.2 introduces several language features that improve expressiveness, performance, and correctness. These are independent of actors and `async`/`await` but frequently appear alongside them in modern Swift code.
+Beyond the concurrency model, Swift 6.2–6.4 introduce several language features that improve expressiveness, performance, and correctness. These are independent of actors and `async`/`await` but frequently appear alongside them in modern Swift code. For concurrency-specific 6.3/6.4 changes, see `swift-6.3-6.4-changes.md`.
 
 ---
 
@@ -42,7 +42,7 @@ The size is part of the type. The compiler allocates storage on the stack, avoid
 
 ---
 
-## `weak let` (SE-0481)
+## `weak let` (SE-0481, Swift 6.3)
 
 Stored properties can now be declared `weak let`, and closures can capture weakly with `[weak let self]`:
 
@@ -57,6 +57,8 @@ someObject.onEvent = { [weak let self] in
 ```
 
 **What this eliminates:** The previous pattern required `weak var` for stored properties and `[weak self]` in closures followed by `guard let self = self else { return }` or optional chaining. `weak let` signals that the reference is intentionally weak and will not be reassigned after initialization, without requiring it to be a `var`.
+
+**Concurrency payoff:** because a `weak let` cannot be reassigned, a class whose only obstacle to `Sendable` was a mutable `weak var` can switch to `weak let` and earn proper compiler-checked `Sendable` — dropping an `@unchecked Sendable` escape hatch. See `swift-6.3-6.4-changes.md`.
 
 **Practical effect:** Cleaner capture lists, fewer intermediate `guard let` rebindings, and clearer intent at the declaration site.
 

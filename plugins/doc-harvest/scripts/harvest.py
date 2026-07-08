@@ -17,6 +17,8 @@ Markdown. `clean` is now a light post-pass (headings/images/whitespace), not the
 primary boilerplate stripper.
 """
 
+from __future__ import annotations  # allow PEP 604 (X | None) annotations on Python 3.9
+
 import argparse
 import json
 import re

@@ -1,12 +1,12 @@
 # swift-concurrency Plugin
 
-A Claude Code plugin that teaches correct Swift 6.2 concurrency patterns, provides
+A Claude Code plugin that teaches correct Swift 6.4 concurrency patterns, provides
 proactive code review, and generates phased migration plans.
 
 ## Why This Plugin Exists
 
-Swift 6.2 introduced "approachable concurrency" — a paradigm shift with changes that
-Claude doesn't know about by default:
+Swift 6.2 introduced "approachable concurrency" — a paradigm shift — which has now been
+refined through Swift 6.4. Key patterns Claude should know:
 
 - **`@concurrent` attribute (SE-0461)** — `nonisolated async` now runs on the *caller's*
   actor, not the global executor. `@concurrent` opts back into global executor.
@@ -26,7 +26,7 @@ block the main actor.
 
 Auto-activates when writing or reviewing Swift code with async/await, actors, or GCD.
 
-- Swift 6.2 approachable concurrency model (3 phases)
+- Approachable concurrency model (6.2+) with 6.3/6.4 enhancements
 - `@concurrent` attribute usage rules
 - Sendable enforcement hierarchy (6 strategies, prefer order)
 - Feature flags quick reference table
@@ -61,7 +61,7 @@ Auto-activates when writing or reviewing Swift code with async/await, actors, or
 Reviews 6 categories: Sendable gaps, actor isolation, reentrancy, GCD, missing @MainActor, task hygiene.
 
 **`swift-migration-planner`** (blue) — Analyzes a codebase and produces a 4-phase migration
-plan to Swift 6.2 strict concurrency. Use with "plan my Swift 6 migration".
+plan to Swift 6.4 strict concurrency. Use with "plan my Swift 6 migration".
 
 ### Command: `/swift-audit [path]`
 
