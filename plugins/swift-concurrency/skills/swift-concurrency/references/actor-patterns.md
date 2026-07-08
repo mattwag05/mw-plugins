@@ -1,4 +1,4 @@
-# Actor Patterns Reference — Swift 6.2
+# Actor Patterns Reference — Swift 6.2–6.4
 
 ## Actor Fundamentals
 

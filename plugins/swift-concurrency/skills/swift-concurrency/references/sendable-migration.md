@@ -1,4 +1,4 @@
-# Sendable Migration Reference — Swift 6.2
+# Sendable Migration Reference — Swift 6.2–6.4
 
 ## Diagnosing Sendable Warnings
 
@@ -124,7 +124,27 @@ final class OpaqueHandle: @unchecked Sendable {
 - `@MainActor`-isolated types (they are `Sendable` but via isolation, not property inference)
 - Types crossing module boundaries where the source module was compiled without Swift 6 mode
 
-**Practical rule:** In Swift 6.2, try adding `: Sendable` to a struct and let the compiler tell you which stored properties are the blockers. Fix those properties first before reaching for `@unchecked Sendable`.
+**Practical rule:** In Swift 6.2+, try adding `: Sendable` to a struct and let the compiler tell you which stored properties are the blockers. Fix those properties first before reaching for `@unchecked Sendable`.
+
+---
+
+## Opting *out*: `~Sendable` (SE-0518, Swift 6.4)
+
+The strategies above make a type `Sendable`. Sometimes the correct answer is the
+opposite: a type that must **not** cross isolation boundaries. In Swift 6.4, mark it
+`~Sendable` to suppress automatic inference and document the intent explicitly:
+
+```swift
+enum ExecutionResult: ~Sendable {
+    case success
+    case failure(NonSendableError)
+}
+```
+
+Prefer this over leaving a type accidentally-Sendable-by-inference when it wraps
+non-thread-safe state. Also note `weak let` (SE-0481, 6.3): switching a `weak var`
+to `weak let` can let a class earn real `Sendable` and drop an `@unchecked Sendable`.
+See `swift-6.3-6.4-changes.md`.
 
 ---
 

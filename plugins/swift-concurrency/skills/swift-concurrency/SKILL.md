@@ -7,17 +7,25 @@ description: >
   actor isolation, Swift 6 migration, or approachable concurrency.
 ---
 
-# Swift 6.2 Concurrency Patterns
+# Swift 6.4 Concurrency Patterns
 
 This skill ensures every Swift concurrency pattern you generate is correct under
-Swift 6.2 strict concurrency. Read it before writing or reviewing any async/actor code.
+Swift 6.4 strict concurrency. Read it before writing or reviewing any async/actor code.
+
+**Version context (as of mid-2026):** Swift **6.3.3** is the current stable release;
+Swift **6.4** (WWDC 2026) is the newest. The "approachable concurrency" model landed
+in 6.2 and is the established baseline here; 6.3 and 6.4 added ergonomic refinements
+(async `defer`, cancellation shields, `~Sendable`, typed-throws `Task`, a
+dropped-error warning). See `references/swift-6.3-6.4-changes.md` for the full delta
+and the [[swift-6-concurrency-migration-guide]] harvested in the vault.
 
 ---
 
-## Swift 6.2 Approachable Concurrency Model
+## Approachable Concurrency Model (Swift 6.2+)
 
 Swift 6.2 introduced "approachable concurrency" — a deliberate three-phase model
-designed so developers adopt only the complexity they need.
+designed so developers adopt only the complexity they need. It remains the baseline
+mental model in 6.3/6.4.
 
 **Phase A — Single-threaded default (SE-0466)**
 When you compile with `-Xswiftc -default-isolation MainActor` (or enable the
@@ -55,7 +63,7 @@ nonisolated func processPayload(_ data: Data) async -> Result { ... }
 // Ran on global executor — safe but implicit
 ```
 
-**Swift 6.2 correct:**
+**Swift 6.2+ correct (current default):**
 ```swift
 @concurrent func processPayload(_ data: Data) async -> Result { ... }
 // Explicit: runs on global executor regardless of caller's isolation
@@ -71,6 +79,62 @@ nonisolated func processPayload(_ data: Data) async -> Result { ... }
 - Simple async functions that just chain other awaits
 - Functions that update UI or access main-actor state
 - Short async operations (database reads via WAL, small JSON)
+
+---
+
+## New in Swift 6.3 & 6.4
+
+Swift 6.3 (2026-03-24) was mostly non-concurrency (C interop via `@c`, module
+selectors, performance attributes, the Android SDK). Swift 6.4 (WWDC 2026) is a
+concurrency-ergonomics release. Generate the following patterns when targeting 6.4.
+
+**Async `defer` (SE-0493)** — `defer` bodies in an `async` function may now `await`.
+Prefer it for asynchronous cleanup instead of a manual do/catch:
+```swift
+func importArticles() async throws {
+    let importer = try await Importer.open()
+    defer { await importer.close() }   // 6.4: allowed; runs before the function returns
+    try await importer.run()
+}
+```
+
+**Task cancellation shields (SE-0504)** — wrap cleanup/rollback that must finish even
+when the surrounding task is cancelled. Inside the shield `Task.isCancelled` reads `false`:
+```swift
+await withTaskCancellationShield {
+    await database.rollback()   // completes even if the parent task was cancelled
+}
+```
+Use sparingly — only for cleanup that would corrupt state if interrupted. Do **not**
+wrap ordinary work in a shield to "avoid cancellation"; that defeats structured concurrency.
+
+**Dropped-error warning + typed-throws `Task` (SE-0520)** — a throwing `Task` whose
+error is neither handled nor stored now warns. Either handle it or keep the handle:
+```swift
+// ⚠️ 6.4 warning — thrown error silently dropped
+Task { try await importArticles() }
+
+// Fix A: handle inside
+Task { do { try await importArticles() } catch { log(error) } }
+// Fix B: keep the handle and await it later (optionally pin the failure type)
+let task: Task<Void, any Error> = Task { try await importArticles() }
+```
+Tasks can now also pin their failure type: `Task<String, URLError> { … }`.
+
+**Async `Result` (SE-0530)** — capture an async throwing call into a `Result`:
+```swift
+let result = await Result { try await importArticles() }
+```
+
+**`~Sendable` explicit non-Sendable (SE-0518)** — document *intentional*
+non-conformance and suppress automatic `Sendable` inference:
+```swift
+enum ExecutionResult: ~Sendable { case success; case failure(NonSendableError) }
+```
+
+**`weak let` (SE-0481, landed in 6.3)** — immutable weak references. A class that
+needed `@unchecked Sendable` only because of a `weak var` can switch to `weak let`
+and qualify for proper `Sendable` checking (see the Sendable hierarchy below).
 
 ---
 
@@ -232,7 +296,7 @@ See `examples/actor-reentrancy.swift` for a complete runnable example.
 
 ## GCD Migration Decision Tree
 
-| Legacy pattern | Swift 6.2 replacement |
+| Legacy pattern | Modern (6.2+) replacement |
 |---|---|
 | `DispatchQueue.global().async { }` | `@concurrent func` + `Task { await fn() }` |
 | `DispatchQueue.main.async { }` | Direct call in `@MainActor` context |
@@ -249,7 +313,7 @@ full annotated migrations.
 
 ## SwiftLint Concurrency Rules
 
-Four opt-in SwiftLint rules are relevant to Swift 6.2 concurrency. Enable them in `.swiftlint.yml`:
+Four opt-in SwiftLint rules are relevant to Swift 6.4 concurrency. Enable them in `.swiftlint.yml`:
 
 ```yaml
 opt_in_rules:
@@ -268,6 +332,7 @@ Run `swiftlint --fix` after enabling — `redundant_sendable` has an auto-correc
 
 | Topic | File |
 |---|---|
+| Swift 6.3 & 6.4 changes (async defer, cancellation shields, ~Sendable, typed-throws Task) | `references/swift-6.3-6.4-changes.md` |
 | Sendable strategies + migration checklist | `references/sendable-migration.md` |
 | Actor reentrancy, @concurrent deep dive, SE-0470/0466/0472/0371 | `references/actor-patterns.md` |
 | SwiftUI @MainActor, .task, @Observable | `references/swiftui-concurrency.md` |
