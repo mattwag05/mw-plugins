@@ -36,3 +36,15 @@ Conventional-commit subjects (`feat(<plugin>): …`). End commit messages with t
 ## Dependencies
 
 Only `plugins/talia-connector/mcp/` has a dependency tree (a Node MCP server); the rest are plain skills. Dependabot watches that one npm manifest weekly (`.github/dependabot.yml`), grouping minor/patch bumps. Most deps there are **transitive** via the MCP SDK's HTTP transport — fix a flagged transitive CVE with `npm update <pkg> --package-lock-only` (lockfile-only, no `package.json` change) when the patched version is in-range.
+
+## doc-harvest gotchas
+
+**Real Obsidian vault path** is `~/Library/Mobile Documents/iCloud~md~obsidian/Documents/Context Library/` — NOT `Claude Context Library/` referenced in some skills. Vault layout uses `30-Technology/{slug}/` — `harvest.py organize` expects `contexts/technical/{slug}/` which doesn't exist on disk. Write to `30-Technology/` directly.
+
+**harvest.py needs `from __future__ import annotations`** for Python 3.9 compatibility (PEP 604 union syntax).
+
+**Apple Container CLI** — use `CONTAINER_RUNTIME=container` to run scrapling via `/usr/local/bin/container` instead of Docker. The shell script has the override baked in.
+
+**swift.org page churn** — pages get removed/renamed (cmake guide, cursor guides, workgroup URL 404). Always verify `_index.md` page_count against actual files post-harvest. DocC-rendered pages (migration guide) live on GitHub (`apple/swift-migration-guide`), not swift.org.
+
+**Dual-copy sync** — skills at `plugins/<name>/` exist in two places: workspace (`~/Projects/mw-plugins/`) and marketplace (`~/.claude/plugins/marketplaces/mw-plugins/`). Retarget/rewrite changes apply to workspace; sync to marketplace via `cp -r` from workspace after.
