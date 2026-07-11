@@ -1,0 +1,31 @@
+
+# --- OS / editor junk ---
+.DS_Store
+**/.DS_Store
+Thumbs.db
+
+# --- Secrets & credentials (never commit) ---
+.env
+.env.*
+!.env.example
+!.env.sample
+!.env.template
+*.pem
+*.key
+*.p12
+*.pfx
+*.keystore
+*.jks
+*.mobileprovision
+*.cer
+*.certSigningRequest
+id_rsa
+id_ed25519
+*_rsa
+*_ed25519
+secrets.yml
+secrets.yaml
+secrets.json
+credentials.json
+.secrets/
+*.secret
