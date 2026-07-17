@@ -132,7 +132,7 @@ Produce a 4-phase plan tailored to the codebase:
 
 ## pippin-specific Notes
 
-When analyzing the pippin project (`/Users/matthewwagner/Projects/pippin`):
+When analyzing the pippin project (`~/Projects/pippin`):
 
 - `MailBridge.swift:620-691` — canonical GCD Process runner; transform to `@concurrent + withCheckedThrowingContinuation` (see `examples/process-runner-async.swift`)
 - `MemosCommand.swift:155-212` — near-identical GCD pattern; deduplicate by extracting to shared async helper after migrating MailBridge

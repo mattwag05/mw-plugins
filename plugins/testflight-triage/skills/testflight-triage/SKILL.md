@@ -26,14 +26,10 @@ section to add new apps. The Apple ID appears in the ASC URL when viewing the ap
 
 ```
 APP_MAP:
-  headwater:
-    apple_id: "6760972554"
-    repo: "/Users/matthewwagner/Projects/Prevention Coach"
-    display_name: "Headwater"
-  swiftclaw:
-    apple_id: ""
-    repo: "/Users/matthewwagner/Projects/SwiftClaw"
-    display_name: "SwiftClaw"
+  myapp:
+    apple_id: "1234567890"
+    repo: "~/Projects/MyApp"
+    display_name: "My App"
 ```
 
 ---

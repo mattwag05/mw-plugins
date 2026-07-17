@@ -40,12 +40,6 @@
       "version": "1.0.0"
     },
     {
-      "name": "agent-cli-cli",
-      "source": "./plugins/agent-cli-cli",
-      "description": "[agent-cli] CLI reference for managing [agent]'s gateway on Raspberry Pi — config, gateway, cron, and security commands",
-      "version": "1.0.0"
-    },
-    {
       "name": "pippin",
       "source": "./plugins/pippin",
       "description": "Pippin integration — bundles the pippin MCP server (45 tools for mail, calendar, reminders, contacts, notes, memos, messages, status, doctor) plus CLI and release skills for shell-level usage; CLI fallback documented for agents without the MCP attached",
@@ -61,24 +55,6 @@
       "name": "calendar-organizer",
       "source": "./plugins/calendar-organizer",
       "description": "Extract, clean, and organize calendar schedules from messy sources into structured calendar data",
-      "version": "1.0.0"
-    },
-    {
-      "name": "[agent]-connector",
-      "source": "./plugins/[agent]-connector",
-      "description": "MCP bridge to [agent] (personal AI assistant) via [agent-cli] on Raspberry Pi — provides ask, status, memory search, sessions, cron, and messaging tools",
-      "version": "1.0.0"
-    },
-    {
-      "name": "remote-tasks",
-      "source": "./plugins/remote-tasks",
-      "description": "Async cross-machine task delegation via SSH and Beads — delegate work to Raspberry Pi and homelab-host workers over Tailscale",
-      "version": "1.0.0"
-    },
-    {
-      "name": "obsidian-homelab",
-      "source": "./plugins/obsidian-homelab",
-      "description": "Obsidian vault intelligence, homelab operations, and daily workflows for personal knowledge management and infrastructure.",
       "version": "1.0.0"
     },
     {

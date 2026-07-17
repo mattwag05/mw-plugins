@@ -3,7 +3,7 @@ name: autonomous-execution
 description: >-
   This skill activates when Claude is about to defer work to the user — asking them to
   "check if it's working," "verify in the browser," "confirm this looks right," "test this
-  endpoint," or any similar handoff. It also triggers on homelab configuration, Docker/container
+  endpoint," or any similar handoff. It also triggers on server configuration, Docker/container
   management, web service setup, API testing, UI verification, network configuration, reverse
   proxy setup, DNS changes, code generation, or any task where Claude can use its tools
   (WebFetch, Bash, WebSearch, etc.) to act and verify itself. If Claude catches itself about

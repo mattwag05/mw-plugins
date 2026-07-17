@@ -14,7 +14,7 @@ Before using any Xcode MCP request:
 
 1. **Xcode must be open** with the target project or workspace loaded
 2. **External agent access must be enabled:** Xcode → Settings → Intelligence → Model Context Protocol → "Allow external agents to use Xcode tools": ON
-3. The Xcode MCP is configured as a project-scoped server at `/Users/matthewwagner` — it is available in any Claude Code session started in or under that directory
+3. The Xcode MCP is configured as a user-scoped server — it is available in any Claude Code session under your home directory
 4. The MCP bridge was added via: `claude mcp add --transport stdio xcode -- xcrun mcpbridge`
 
 ### Intelligence Settings Overview

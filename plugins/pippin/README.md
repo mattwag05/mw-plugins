@@ -35,7 +35,7 @@ Useful when you want Claude to drive pippin from the shell (`pippin mail send ..
 
 - **pippin ≥ 0.17.0** installed and on `$PATH`
   - Homebrew: `brew tap mattwag05/tap && brew install pippin`
-  - From source: `git clone https://forgejo.example-tailnet.ts.net/matthewwagner/pippin && cd pippin && make install`
+  - From source: `git clone https://github.com/mattwag05/pippin && cd pippin && make install`
 - macOS 15+ with appropriate TCC permissions (run `pippin doctor` to audit)
 - Mail.app open for mail commands
 - `mlx-audio` installed for audio commands: `pipx install mlx-audio`
@@ -46,5 +46,5 @@ The bundled `.mcp.json` uses the bare command `pippin` so it resolves through `$
 
 ## Source
 
-- Plugin: `https://forgejo.example-tailnet.ts.net/matthewwagner/claude-plugins/src/branch/main/plugins/pippin`
-- pippin itself: `https://forgejo.example-tailnet.ts.net/matthewwagner/pippin`
+- Plugin: `https://github.com/mattwag05/mw-plugins/tree/main/plugins/pippin`
+- pippin itself: `https://github.com/mattwag05/pippin`

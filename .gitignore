@@ -29,3 +29,8 @@ secrets.json
 credentials.json
 .secrets/
 *.secret
+
+# --- Local agent context (not published) ---
+CLAUDE.md
+AGENTS.md
+.beads/
