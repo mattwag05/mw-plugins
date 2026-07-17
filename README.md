@@ -4,7 +4,9 @@ Matthew Wagner's personal marketplace of **skills, plugins, and extensions** for
 
 It started as a Claude Code plugin marketplace, but it isn't Claude-only anymore — it's the shared home for agent capabilities across the homelab: Claude Code, [agent-runtime]/[agent], [agent], and whatever comes next. Some entries are full Claude Code plugins (commands, agents, MCP servers); others are plain skills or reference bundles that any agent can load.
 
-## Using it as a Claude Code marketplace
+## From Claude Code
+
+Claude Code is one consumer among several — it reads the `marketplace.json` index:
 
 ```
 /plugin marketplace add mattwag05/mw-plugins
@@ -13,31 +15,33 @@ It started as a Claude Code plugin marketplace, but it isn't Claude-only anymore
 
 ## Layout
 
-The repo holds two kinds of artifact:
+mw-plugins is consumer-agnostic: several agents load from it, and each has its own
+discovery path. Nothing here is Claude-only by nature — `marketplace.json` is just
+the Claude Code index, not the repo's boundary.
 
 ```
-.claude-plugin/marketplace.json   # registry — lists the Claude Code plugins ONLY
-plugins/<name>/                    # (1) Claude Code plugins — registered above
-├── .claude-plugin/plugin.json     #     plugin manifest
-├── skills/<skill>/SKILL.md        #     one or more skills
-├── commands/  agents/  scripts/   #     optional, per plugin
-└── README.md
-agent-runtime-skills/<name>/SKILL.md      # (2) [agent-runtime] skills — NOT in the marketplace manifest
-agent-runtime-providers/<name>/           # (2) [agent-runtime] memory providers — NOT in the manifest (future)
+.claude-plugin/marketplace.json   # the Claude Code index (lists the plugins/ entries)
+plugins/<name>/                    # packaged as Claude Code plugins; skills/ payload is portable
+├── .claude-plugin/plugin.json
+├── skills/<skill>/SKILL.md
+└── commands/  agents/  scripts/   # optional, per plugin
+agent-runtime-skills/<name>/SKILL.md      # [agent-runtime] ([agent]) skills — loaded via skills.external_dirs
+agent-runtime-providers/<name>/           # [agent-runtime] memory providers (future) — symlinked into $HERMES_HOME/plugins/
 ```
 
-**(1) Claude Code plugins** live under `plugins/` and are registered in
-`.claude-plugin/marketplace.json`. Each entry is self-contained — Claude Code
-reads the manifest, and the `skills/` payload is portable to any agent that
-understands the [Agent Skills](https://docs.claude.com/en/docs/claude-code/skills)
-format.
+- **`plugins/`** — packaged as Claude Code plugins and indexed in `marketplace.json`.
+  Their `skills/` payloads use the portable
+  [Agent Skills](https://docs.claude.com/en/docs/claude-code/skills) format, so
+  [agent-runtime], [agent], or any skills-aware agent can load them too.
+- **`agent-runtime-skills/`** — skills for the [agent-runtime] agent ([agent]), loaded via
+  `skills.external_dirs` in `~/.agent-runtime/config.yaml`. Not in the marketplace manifest.
+- **`agent-runtime-providers/`** — [agent-runtime] memory providers (future), symlinked into
+  `$HERMES_HOME/plugins/`. Not in the manifest.
 
-**(2) [agent-runtime] artifacts** live under `agent-runtime-skills/` (and, in future,
-`agent-runtime-providers/`). These are **not** Claude Code plugins and are **not** listed
-in `marketplace.json` — Claude Code never loads them. The [agent-runtime] agent ([agent])
-consumes them directly: skills via `skills.external_dirs` in `~/.agent-runtime/config.yaml`,
-memory providers via `$HERMES_HOME/plugins/`. They live here so all of Matt's
-agent capabilities share one versioned home.
+The directory a capability lives in reflects how it's **packaged and discovered**,
+not which agent it "belongs" to. A portable skill under `plugins/` is fair game for
+every agent; the `agent-runtime-*` trees are only for capabilities that use [agent-runtime]-specific
+wiring (config keys, the `MemoryProvider` ABC) with no Claude Code equivalent.
 
 ## What's inside
 
