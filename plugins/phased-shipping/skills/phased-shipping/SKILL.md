@@ -21,7 +21,7 @@ The core insight is that the chat is a **coordination thread**, not an execution
 
 Stages 6 and 7 run in parallel. That's the whole point.
 
-**Known landmine you will hit:** if you open a PR stacked on another branch (base ≠ main), your project's CI probably won't run because workflows typically trigger only on PRs targeting main. See §5 *Stacked PRs* for the retarget-then-reopen fix — read it before opening the second PR, not after.
+**Known landmine you will hit:** on the manual stacking flow, if you open a PR stacked on another branch (base ≠ main), your project's CI probably won't run because workflows typically trigger only on PRs targeting main. See §5 *Stacked PRs — manual `--base` flow* for the retarget-then-reopen fix — read it before opening the second PR, not after. (GitHub's native stacked PRs run checks per-layer and don't have this problem; §1 tells you which path you're on.)
 
 ---
 
@@ -52,6 +52,31 @@ Tell the user the plan in 5-10 lines and confirm before proceeding. Example:
 > Plan: (1) browser fetch retry + pagination extensions (one PR, 2 commits). (2) Phase B jobs subsystem (same PR, 2 commits). (3) Phase C `pippin do` as a separate PR stacked on #5. Going (1)→(2)→(3).
 
 Confirming up front prevents you from silently accumulating scope mid-flow.
+
+### Detect the PR host
+
+Do this once, at plan time, **before you cut the first branch** — it decides which shipping
+path §5 takes.
+
+```bash
+git remote get-url --push origin
+```
+
+| Push URL of `origin` | Path | Where |
+|---|---|---|
+| `github.com` | Try GitHub's native stacked PRs; fall back if unavailable | §5 *Stacked PRs — GitHub*, then `references/github-stacked-prs.md` |
+| anything else (Forgejo, Gitea, GitLab, self-hosted) | Manual `--base` flow | §5 *Stacked PRs — manual `--base` flow* |
+
+**Key on `origin`'s push URL, not on "does any remote mention GitHub".** Plenty of projects are
+primary on a self-hosted forge and *mirrored* to GitHub, so they carry a second `github` remote
+while every PR is still reviewed on the forge. Those repos take the manual path — the mirror is
+a publishing target, not a review host. The inverse also happens: a GitHub-primary repo can
+carry a `.forgejo/` workflows directory left over from a migration, so **directory presence is
+not a host signal either.** If `origin` is ambiguous or the branch tracks a different remote,
+ask which host the PRs land on rather than guessing.
+
+On any non-GitHub host, the rest of this skill is exactly what it has always been. Nothing
+below assumes GitHub-only tooling outside the explicitly-labeled GitHub subsection in §5.
 
 ---
 
@@ -252,7 +277,34 @@ A second review pass sometimes surfaces something you missed. Options in order o
 
 Default to (1) unless you have a specific reason not to.
 
-### Stacked PRs
+### Stacked PRs — GitHub (`gh-stack`)
+
+*Only if §1's detection said GitHub. On any other host, skip to the manual flow below.*
+
+GitHub has native stacked PRs (public preview): one PR per layer, an auto-generated stack map
+in each, per-layer checks, and bottom-up merging that retargets the layers above for you. Probe
+for the tooling:
+
+```bash
+gh extension list | grep -q 'github/gh-stack' && echo "stacked path" || echo "manual path"
+```
+
+- **Present** → take the stacked path. One phase = one layer, no bundling.
+- **Missing** → tell the user the install line (`gh extension install github/gh-stack`) and
+  **continue on the manual flow below**. Don't auto-install.
+
+The stacked path retires two workarounds from the manual flow (the retarget-then-reopen CI
+dance, and the pre-merge retarget-everything-to-`main` mitigation) — don't apply them to a real
+stack.
+
+> For the full stacked-PR playbook — probe, phase→layer mapping, landing, worked example, and
+> how it interacts with §6's CI watching, see `references/github-stacked-prs.md`.
+
+### Stacked PRs — manual `--base` flow
+
+*The default everywhere: every non-GitHub host, and GitHub without `gh-stack`.* Commands are
+shown with `gh`; on another host substitute its CLI or web UI — the branch-per-phase shape and
+the gotchas below are the same.
 
 If phase N depends on phase N-1 that's already in an open PR:
 
@@ -266,7 +318,7 @@ Using `--base` means the PR's diff on GitHub shows only phase N's files, not the
 
 **Known gotcha**: if the project's CI workflow only triggers on PRs targeting `main` (check `.github/workflows/*.yml` for `pull_request: branches: [main]`), the stacked PR will show no CI runs. Fix: retarget the base to `main` with `gh pr edit <N> --base main`, then close+reopen the PR to trigger the `pull_request` event. The diff will include the stacked commits, but they've already been reviewed in the base PR.
 
-### Merging the stack (the `--delete-branch` footgun)
+### Merging the stack, manual flow (the `--delete-branch` footgun)
 
 When you merge a stack bottom-up, **`gh pr merge <N> --delete-branch` will silently CLOSE — not retarget — the next PR up the stack**, if that PR's base is the branch you just deleted and GitHub hasn't retargeted it yet. Auto-retarget races branch deletion and loses. I closed a mid-stack PR this way; recovering it (recreate the deleted base ref → `gh pr reopen` → `gh pr edit --base main` → merge) is fiddly because **you can't reopen a PR whose base branch no longer exists, and you can't change the base of a closed PR** — chicken-and-egg.
 
@@ -446,7 +498,10 @@ The commit lands on a fresh branch, cleanly stacked on the fixer's latest commit
 ## Appendix: things this skill assumes
 
 - Project uses **beads** for task tracking (`bd` in PATH, `.beads/` in repo)
-- Git hosted on GitHub with `gh` CLI authenticated
+- A git host with a PR/merge-request model and a CLI for it. §1 detects which. PRs reviewed on
+  GitHub with `gh` additionally unlock the native stacked-PR path (§5); **any other host —
+  Forgejo, Gitea, GitLab, self-hosted — runs the manual `--base` flow and is otherwise
+  unaffected by this skill's GitHub-specific sections**
 - PRs use branch-based workflow (not trunk-based)
 - CI configured to run on `pull_request` events
 - The user has a pre-push `/simplify` gate or is OK with running `/simplify` voluntarily
