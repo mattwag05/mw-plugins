@@ -153,6 +153,7 @@ pippin mail show <id> --format agent              # id is account||mailbox||nume
 pippin mail send --to <email> --subject <s> --body <t>
 pippin mail mark <id> --read|--unread
 pippin mail move <id> --to <mailbox>              # Trash, Junk, Sent, Drafts
+pippin mail apply-rules [--account NAME] [--live] # bulk move/mark by rule; PREVIEWS unless --live
 
 # Calendar
 pippin calendar today|remaining|upcoming [--fields id,title,startDate] --format agent

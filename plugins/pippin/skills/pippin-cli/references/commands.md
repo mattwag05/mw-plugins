@@ -34,6 +34,15 @@ pippin mail mark <id> --read | --unread [--dry-run]
 pippin mail move <id> --to <mailbox> [--dry-run]
 # Move message to another mailbox. Mailbox aliases: Trash, Junk, Sent, Drafts
 
+pippin mail apply-rules [--account NAME] [--mailbox INBOX] [--scan-limit 500] [--max-actions 200] [--min-age-days 14] [--skip-unread] [--live] [--rules-file PATH]
+# Execute the moveTo/markRead actions in ~/.config/pippin/triage-rules.json.
+# PREVIEWS ONLY unless --live — prints the plan grouped by sender and changes nothing.
+# Guardrails default-on: never touches mail newer than --min-age-days (a message
+# whose date won't parse is held, not moved); --max-actions caps each run and acts
+# oldest-first. A run that plans 0 is usually the age floor working, not a failure —
+# check the `matched` and `held*` counts before concluding nothing matched.
+# `mail triage` ignores moveTo/markRead entirely and stays read-only.
+
 pippin mail send --to <email> [--to <email>] --subject <subj> --body <text> [--cc <email>] [--bcc <email>] [--from NAME] [--attach <path>] [--dry-run]
 # Send email. --to is repeatable.
 

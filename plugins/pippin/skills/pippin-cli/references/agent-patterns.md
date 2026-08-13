@@ -40,6 +40,33 @@ pippin mail move "iCloud||INBOX||12345" --to Trash --format agent
 
 ---
 
+## Bulk Archiving by Rule
+
+For clutter that is sender-concentrated, an explicit rules file beats judging
+each message: it is predictable, free, and far faster than a per-message AI
+pass. Put `moveTo` / `markRead` on rules in
+`~/.config/pippin/triage-rules.json`, then let `apply-rules` execute them.
+
+```bash
+# Step 1: ALWAYS preview first — this changes nothing without --live
+pippin mail apply-rules --account iCloud --format agent
+
+# Step 2: Read the plan grouped by sender before acting. This is the step that
+# catches an over-broad rule — e.g. an @org.example domain rule intended for
+# bulk senders also sweeping up individual humans on that same domain.
+
+# Step 3: Apply, bounded
+pippin mail apply-rules --account iCloud --max-actions 50 --live --format agent
+```
+
+Guardrails are on by default: nothing newer than `--min-age-days` (14) is
+touched, `--max-actions` (200) caps a run acting oldest-first, and a message
+whose date won't parse is held rather than moved. A run reporting
+`planned: 0` with a non-zero `matched` is the age floor holding everything —
+not a matching failure. Moves are reversible; there is no hard-delete for mail.
+
+---
+
 ## Note-Taking Workflow
 
 Create a note, then verify it was created.
