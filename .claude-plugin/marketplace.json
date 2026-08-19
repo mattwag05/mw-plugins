@@ -4,81 +4,87 @@
     "name": "Matthew Wagner"
   },
   "metadata": {
-    "description": "Personal Claude Code plugin marketplace",
+    "description": "Claude Code adapters generated from portable Agent Plugins",
     "version": "1.0.0",
-    "pluginRoot": "./plugins"
+    "pluginRoot": "./client-adapters/claude-code/plugins"
   },
   "plugins": [
     {
       "name": "apple-container",
-      "source": "./plugins/apple-container",
-      "description": "Use Apple's `container` CLI to run Linux containers as lightweight VMs on Apple silicon, and migrate Docker / Docker Desktop (incl. Compose) workflows to it",
-      "version": "0.2.0"
+      "source": "./client-adapters/claude-code/plugins/apple-container",
+      "description": "Run Linux containers with Apple's container CLI and migrate Docker workflows to Apple Container.",
+      "version": "0.3.0"
     },
     {
       "name": "autonomous-execution",
-      "source": "./plugins/autonomous-execution",
-      "description": "Instructs Claude to complete tasks autonomously by executing, verifying, diagnosing, and fixing — rather than asking the user to check things",
-      "version": "0.1.0"
-    },
-    {
-      "name": "doc-harvest",
-      "source": "./plugins/doc-harvest",
-      "description": "Scrape documentation websites into structured Claude Context Library entries with progressive disclosure navigation. Uses Scrapling (dockerized) for JS-rendering, anti-bot-resistant fetching.",
-      "version": "1.1.0"
-    },
-    {
-      "name": "internet-skill-finder",
-      "source": "./plugins/internet-skill-finder",
-      "description": "Search and recommend Agent Skills from 7 verified GitHub repositories",
-      "version": "1.0.0"
-    },
-    {
-      "name": "macos-automation",
-      "source": "./plugins/macos-automation",
-      "description": "Teach Claude how to automate Apple's native macOS apps (Mail, Calendar, Notes, Reminders) using AppleScript, JXA, and Swift",
-      "version": "1.0.0"
-    },
-    {
-      "name": "pippin",
-      "source": "./plugins/pippin",
-      "description": "Pippin integration — bundles the pippin MCP server (45 tools for mail, calendar, reminders, contacts, notes, memos, messages, status, doctor) plus CLI and release skills for shell-level usage; CLI fallback documented for agents without the MCP attached",
-      "version": "1.3.2"
-    },
-    {
-      "name": "swift-concurrency",
-      "source": "./plugins/swift-concurrency",
-      "description": "Swift 6.2 concurrency patterns, proactive code review, and migration planning for modern Swift async/await, actors, and Sendable",
-      "version": "1.0.0"
+      "source": "./client-adapters/claude-code/plugins/autonomous-execution",
+      "description": "Complete verifiable work with available tools before asking the user to intervene.",
+      "version": "0.2.0"
     },
     {
       "name": "calendar-organizer",
-      "source": "./plugins/calendar-organizer",
-      "description": "Extract, clean, and organize calendar schedules from messy sources into structured calendar data",
-      "version": "1.0.0"
+      "source": "./client-adapters/claude-code/plugins/calendar-organizer",
+      "description": "Extract schedules from files, images, and text, then produce structured calendar data and ICS files.",
+      "version": "1.1.0"
     },
     {
-      "name": "xcode-mcp",
-      "source": "./plugins/xcode-mcp",
-      "description": "Teach Claude Code to effectively use the Xcode MCP bridge for building, testing, fixing, and managing Xcode projects via natural-language requests",
-      "version": "1.0.0"
+      "name": "doc-harvest",
+      "source": "./client-adapters/claude-code/plugins/doc-harvest",
+      "description": "Harvest documentation websites into structured local references and navigate existing documentation sets.",
+      "version": "1.2.0"
     },
     {
-      "name": "testflight-triage",
-      "source": "./plugins/testflight-triage",
-      "description": "Scrape Apple App Store Connect TestFlight (crashes, feedback, builds, testers) via Chrome automation and triage into beads issues for backlog tracking",
-      "version": "1.0.0"
+      "name": "i-have-adhd",
+      "source": "./client-adapters/claude-code/plugins/i-have-adhd",
+      "description": "Shape responses for an ADHD reader with direct actions, bounded steps, visible state, and fewer tangents.",
+      "version": "0.3.0"
     },
     {
-      "name": "unslop",
-      "source": "./plugins/unslop",
-      "description": "Edit writing to remove common AI patterns and add a more natural human voice",
-      "version": "0.1.0"
+      "name": "internet-skill-finder",
+      "source": "./client-adapters/claude-code/plugins/internet-skill-finder",
+      "description": "Search verified GitHub repositories for Agent Skills and inspect matching skills.",
+      "version": "1.1.0"
+    },
+    {
+      "name": "macos-automation",
+      "source": "./client-adapters/claude-code/plugins/macos-automation",
+      "description": "Automate native macOS apps with AppleScript, JXA, Swift, and EventKit.",
+      "version": "1.1.0"
     },
     {
       "name": "phased-shipping",
-      "source": "./plugins/phased-shipping",
-      "description": "Ship a multi-phase engineering plan as a sequence of stacked PRs — beads for task tracking, background subagents to fix red CI without blocking the main thread, and narrative PR bodies that read like chapters in the project's story",
+      "source": "./client-adapters/claude-code/plugins/phased-shipping",
+      "description": "Ship a multi-phase engineering plan as a sequence of stacked pull requests.",
+      "version": "1.2.0"
+    },
+    {
+      "name": "pippin",
+      "source": "./client-adapters/claude-code/plugins/pippin",
+      "description": "Use Pippin through MCP or its CLI for Apple mail, calendar, reminders, contacts, notes, memos, messages, and diagnostics.",
+      "version": "1.4.0"
+    },
+    {
+      "name": "swift-concurrency",
+      "source": "./client-adapters/claude-code/plugins/swift-concurrency",
+      "description": "Write, review, and migrate Swift code using current concurrency patterns and strict checking.",
+      "version": "1.2.0"
+    },
+    {
+      "name": "testflight-triage",
+      "source": "./client-adapters/claude-code/plugins/testflight-triage",
+      "description": "Review TestFlight crashes, feedback, builds, and testers through browser automation, then track actionable work.",
+      "version": "1.1.0"
+    },
+    {
+      "name": "unslop",
+      "source": "./client-adapters/claude-code/plugins/unslop",
+      "description": "Edit writing to remove common AI patterns and add a more natural human voice.",
+      "version": "0.2.0"
+    },
+    {
+      "name": "xcode-mcp",
+      "source": "./client-adapters/claude-code/plugins/xcode-mcp",
+      "description": "Build, test, fix, and manage Xcode projects through the Xcode MCP bridge.",
       "version": "1.1.0"
     }
   ]

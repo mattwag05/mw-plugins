@@ -1,0 +1,9 @@
+{
+  "name": "phased-shipping",
+  "version": "1.2.0",
+  "description": "Ship a multi-phase engineering plan as a sequence of stacked pull requests.",
+  "author": {
+    "name": "Matthew Wagner"
+  },
+  "repository": "https://github.com/mattwag05/mw-plugins"
+}

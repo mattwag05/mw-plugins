@@ -1,0 +1,19 @@
+{
+  "name": "apple-container",
+  "version": "0.3.0",
+  "description": "Run Linux containers with Apple's container CLI and migrate Docker workflows to Apple Container.",
+  "author": {
+    "name": "Matthew Wagner"
+  },
+  "repository": "https://github.com/mattwag05/mw-plugins",
+  "license": "MIT",
+  "keywords": [
+    "apple-container",
+    "container",
+    "docker",
+    "macos",
+    "apple-silicon",
+    "oci",
+    "migration"
+  ]
+}

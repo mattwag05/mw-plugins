@@ -1,0 +1,10 @@
+{
+  "$schema": "https://agent-plugins.org/schemas/1.0.0/plugin.schema.json",
+  "name": "unslop",
+  "version": "0.2.0",
+  "description": "Edit writing to remove common AI patterns and add a more natural human voice.",
+  "author": { "name": "Lauren Tan" },
+  "homepage": "https://github.com/poteto/plugins/tree/main/pstack/skills/unslop",
+  "repository": "https://github.com/poteto/plugins",
+  "license": "MIT"
+}

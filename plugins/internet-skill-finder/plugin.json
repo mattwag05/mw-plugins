@@ -1,0 +1,10 @@
+{
+  "$schema": "https://agent-plugins.org/schemas/1.0.0/plugin.schema.json",
+  "name": "internet-skill-finder",
+  "version": "1.1.0",
+  "description": "Search verified GitHub repositories for Agent Skills and inspect matching skills.",
+  "author": { "name": "Matthew Wagner" },
+  "repository": "https://github.com/mattwag05/mw-plugins",
+  "license": "MIT",
+  "keywords": ["skills", "discovery", "search", "plugins", "github"]
+}

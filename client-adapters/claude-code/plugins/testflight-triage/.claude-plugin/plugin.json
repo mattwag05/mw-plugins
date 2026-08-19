@@ -1,0 +1,16 @@
+{
+  "name": "testflight-triage",
+  "version": "1.1.0",
+  "description": "Review TestFlight crashes, feedback, builds, and testers through browser automation, then track actionable work.",
+  "author": {
+    "name": "Matthew Wagner"
+  },
+  "repository": "https://github.com/mattwag05/mw-plugins",
+  "keywords": [
+    "testflight",
+    "app-store-connect",
+    "triage",
+    "browser-automation",
+    "ios"
+  ]
+}

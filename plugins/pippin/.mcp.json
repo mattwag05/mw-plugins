@@ -1,9 +1,0 @@
-{
-  "mcpServers": {
-    "pippin": {
-      "type": "stdio",
-      "command": "pippin",
-      "args": ["mcp-server"]
-    }
-  }
-}

@@ -1,0 +1,10 @@
+{
+  "$schema": "https://agent-plugins.org/schemas/1.0.0/plugin.schema.json",
+  "name": "macos-automation",
+  "version": "1.1.0",
+  "description": "Automate native macOS apps with AppleScript, JXA, Swift, and EventKit.",
+  "author": { "name": "Matthew Wagner" },
+  "repository": "https://github.com/mattwag05/mw-plugins",
+  "license": "MIT",
+  "keywords": ["macos", "automation", "applescript", "jxa", "mail", "calendar", "notes", "reminders", "eventkit"]
+}

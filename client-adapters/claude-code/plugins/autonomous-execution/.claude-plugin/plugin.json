@@ -1,0 +1,9 @@
+{
+  "name": "autonomous-execution",
+  "version": "0.2.0",
+  "description": "Complete verifiable work with available tools before asking the user to intervene.",
+  "author": {
+    "name": "Matthew Wagner"
+  },
+  "repository": "https://github.com/mattwag05/mw-plugins"
+}

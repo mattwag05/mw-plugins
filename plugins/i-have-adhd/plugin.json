@@ -1,0 +1,11 @@
+{
+  "$schema": "https://agent-plugins.org/schemas/1.0.0/plugin.schema.json",
+  "name": "i-have-adhd",
+  "version": "0.3.0",
+  "description": "Shape responses for an ADHD reader with direct actions, bounded steps, visible state, and fewer tangents.",
+  "author": { "name": "Ayoub Ghriss" },
+  "homepage": "https://github.com/ayghri/i-have-adhd",
+  "repository": "https://github.com/ayghri/i-have-adhd",
+  "license": "MIT",
+  "keywords": ["adhd", "accessibility", "output-style", "productivity"]
+}

@@ -1,0 +1,9 @@
+{
+  "$schema": "https://agent-plugins.org/schemas/1.0.0/plugin.schema.json",
+  "name": "swift-concurrency",
+  "version": "1.2.0",
+  "description": "Write, review, and migrate Swift code using current concurrency patterns and strict checking.",
+  "author": { "name": "Matthew Wagner" },
+  "repository": "https://github.com/mattwag05/mw-plugins",
+  "keywords": ["swift", "concurrency", "async", "actor", "sendable", "swift6"]
+}

@@ -1,0 +1,9 @@
+{
+  "$schema": "https://agent-plugins.org/schemas/1.0.0/plugin.schema.json",
+  "name": "pippin",
+  "version": "1.4.0",
+  "description": "Use Pippin through MCP or its CLI for Apple mail, calendar, reminders, contacts, notes, memos, messages, and diagnostics.",
+  "author": { "name": "Matthew Wagner" },
+  "repository": "https://github.com/mattwag05/mw-plugins",
+  "keywords": ["pippin", "mcp", "mail", "calendar", "reminders", "notes", "contacts", "macos", "automation"]
+}

@@ -1,0 +1,9 @@
+{
+  "$schema": "https://agent-plugins.org/schemas/1.0.0/plugin.schema.json",
+  "name": "calendar-organizer",
+  "version": "1.1.0",
+  "description": "Extract schedules from files, images, and text, then produce structured calendar data and ICS files.",
+  "author": { "name": "Matthew Wagner" },
+  "repository": "https://github.com/mattwag05/mw-plugins",
+  "keywords": ["calendar", "schedule", "ics", "excel", "parsing"]
+}

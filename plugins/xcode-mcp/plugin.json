@@ -1,0 +1,9 @@
+{
+  "$schema": "https://agent-plugins.org/schemas/1.0.0/plugin.schema.json",
+  "name": "xcode-mcp",
+  "version": "1.1.0",
+  "description": "Build, test, fix, and manage Xcode projects through the Xcode MCP bridge.",
+  "author": { "name": "Matthew Wagner" },
+  "repository": "https://github.com/mattwag05/mw-plugins",
+  "keywords": ["xcode", "mcp", "swift", "build", "test", "ios", "macos", "swiftui"]
+}

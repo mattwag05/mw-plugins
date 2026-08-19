@@ -1,45 +1,62 @@
 # mw-plugins
 
-Personal Claude Code plugin marketplace — **skills, plugins, and extensions** for AI coding agents.
+Portable Agent Plugins with generated Claude Code compatibility packages.
 
-Entries are packaged as Claude Code plugins (commands, agents, MCP servers), but their `skills/` payloads use the portable [Agent Skills](https://docs.claude.com/en/docs/claude-code/skills) format, so any skills-aware agent can load them too.
+Each package under `plugins/` follows [Agent Plugins v1.0.0](https://github.com/agentplugins/agent-plugins-spec/blob/main/spec/1.0.0.md). Skills follow the [Agent Skills specification](https://agentskills.io/specification). The files under `client-adapters/claude-code/plugins/` are generated because current Claude Code releases still require legacy manifests.
 
-## From Claude Code
+## Install with Claude code
 
-```
+```text
 /plugin marketplace add mattwag05/mw-plugins
 /plugin install <plugin-name>@mw-plugins
 ```
 
-## Layout
+## Repository layout
 
-```
-.claude-plugin/marketplace.json   # the Claude Code index (lists the plugins/ entries)
+```text
 plugins/<name>/
-├── .claude-plugin/plugin.json
-├── skills/<skill>/SKILL.md
-└── commands/  agents/  scripts/   # optional, per plugin
+├── plugin.json
+├── mcp.json                     # optional
+└── skills/<skill>/SKILL.md
+
+client-adapters/claude-code/
+├── sources/<name>/              # authored Claude-only wrappers
+├── plugins/<name>/              # generated compatibility packages
+└── config.json
+
+.claude-plugin/marketplace.json  # client distribution metadata
+scripts/build_claude_adapters.py
 ```
 
-## What's inside
+Regenerate compatibility packages after changing a portable plugin:
 
-| Plugin | Description |
+```bash
+python3 scripts/build_claude_adapters.py
+python3 scripts/build_claude_adapters.py --check
+```
+
+## Plugins
+
+| Plugin | Purpose |
 | --- | --- |
-| `apple-container` | Run Linux containers with Apple's `container` CLI on Apple silicon; migrate Docker/Compose workflows |
-| `autonomous-execution` | Complete tasks autonomously — execute, verify, diagnose, and fix rather than asking the user to check things |
-| `calendar-organizer` | Extract, clean, and organize calendar schedules from messy sources into structured calendar data |
-| `doc-harvest` | Scrape documentation websites into structured context-library entries with progressive disclosure navigation |
-| `internet-skill-finder` | Search and recommend Agent Skills from verified GitHub repositories |
-| `macos-automation` | Automate Apple's native macOS apps (Mail, Calendar, Notes, Reminders) with AppleScript, JXA, and Swift |
-| `phased-shipping` | Ship a multi-phase engineering plan as a sequence of stacked PRs |
-| `pippin` | Bundles the pippin MCP server (mail, calendar, reminders, contacts, notes, memos, messages) plus CLI skills |
-| `swift-concurrency` | Swift 6 concurrency patterns, proactive code review, and migration planning |
-| `testflight-triage` | Scrape App Store Connect TestFlight feedback via Chrome automation and triage into issues |
-| `unslop` | Edit writing to remove common AI patterns and add a more natural human voice |
-| `xcode-mcp` | Drive the Xcode MCP bridge for building, testing, fixing, and managing Xcode projects |
+| `apple-container` | Run Linux containers with Apple's `container` CLI and migrate Docker workflows. |
+| `autonomous-execution` | Finish verifiable work with available tools before asking the user to intervene. |
+| `calendar-organizer` | Extract schedules and produce structured events and ICS files. |
+| `doc-harvest` | Harvest documentation sites and navigate indexed local references. |
+| `i-have-adhd` | Shape responses for an ADHD reader with direct, bounded next actions. |
+| `internet-skill-finder` | Search verified GitHub repositories for Agent Skills. |
+| `macos-automation` | Automate Mail, Calendar, Notes, and Reminders on macOS. |
+| `phased-shipping` | Ship multi-phase engineering work as stacked pull requests. |
+| `pippin` | Use Pippin through MCP or its command-line interface. |
+| `swift-concurrency` | Write, review, and migrate Swift concurrency code. |
+| `testflight-triage` | Review TestFlight data and track actionable work. |
+| `unslop` | Remove common AI writing patterns and restore a natural voice. |
+| `xcode-mcp` | Build, test, fix, and manage Xcode projects through MCP. |
 
-See `.claude-plugin/marketplace.json` for versions and full descriptions.
+Versions and adapter source paths are recorded in `.claude-plugin/marketplace.json`.
 
 ## Attribution
 
-`unslop` is copied from Lauren Tan's [poteto/plugins](https://github.com/poteto/plugins/blob/main/pstack/skills/unslop/SKILL.md) repository and is used under the MIT License. The bundled [license](plugins/unslop/LICENSE) retains the upstream copyright notice.
+`unslop` is copied from Lauren Tan's [poteto/plugins](https://github.com/poteto/plugins/blob/main/pstack/skills/unslop/SKILL.md) repository under the MIT License. Its [bundled license](plugins/unslop/LICENSE) retains the upstream copyright notice. The upstream `SKILL.md` is preserved byte-for-byte.
+
+`i-have-adhd` is adapted from Ayoub Ghriss's [i-have-adhd](https://github.com/ayghri/i-have-adhd) repository under the MIT License. Its [bundled license](plugins/i-have-adhd/LICENSE) retains the upstream copyright notice.
