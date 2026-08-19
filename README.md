@@ -35,6 +35,11 @@ plugins/<name>/
 | `pippin` | Bundles the pippin MCP server (mail, calendar, reminders, contacts, notes, memos, messages) plus CLI skills |
 | `swift-concurrency` | Swift 6 concurrency patterns, proactive code review, and migration planning |
 | `testflight-triage` | Scrape App Store Connect TestFlight feedback via Chrome automation and triage into issues |
+| `unslop` | Edit writing to remove common AI patterns and add a more natural human voice |
 | `xcode-mcp` | Drive the Xcode MCP bridge for building, testing, fixing, and managing Xcode projects |
 
 See `.claude-plugin/marketplace.json` for versions and full descriptions.
+
+## Attribution
+
+`unslop` is copied from Lauren Tan's [poteto/plugins](https://github.com/poteto/plugins/blob/main/pstack/skills/unslop/SKILL.md) repository and is used under the MIT License. The bundled [license](plugins/unslop/LICENSE) retains the upstream copyright notice.

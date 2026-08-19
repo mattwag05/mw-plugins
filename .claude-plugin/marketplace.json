@@ -70,6 +70,12 @@
       "version": "1.0.0"
     },
     {
+      "name": "unslop",
+      "source": "./plugins/unslop",
+      "description": "Edit writing to remove common AI patterns and add a more natural human voice",
+      "version": "0.1.0"
+    },
+    {
       "name": "phased-shipping",
       "source": "./plugins/phased-shipping",
       "description": "Ship a multi-phase engineering plan as a sequence of stacked PRs — beads for task tracking, background subagents to fix red CI without blocking the main thread, and narrative PR bodies that read like chapters in the project's story",
