@@ -31,7 +31,7 @@
       "name": "doc-harvest",
       "source": "./client-adapters/claude-code/plugins/doc-harvest",
       "description": "Harvest documentation websites into structured local references and navigate existing documentation sets.",
-      "version": "1.2.0"
+      "version": "1.2.1"
     },
     {
       "name": "i-have-adhd",

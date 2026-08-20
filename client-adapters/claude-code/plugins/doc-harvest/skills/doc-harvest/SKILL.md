@@ -2,7 +2,7 @@
 name: doc-harvest
 description: Harvest a documentation website into a local, indexed reference set. Use for site discovery, batch scraping, content cleanup, and progressive-disclosure indexes.
 metadata:
-  version: "1.2.0"
+  version: "1.2.1"
 allowed-tools: Bash Read Write Edit Glob Grep WebFetch AskUserQuestion
 ---
 
@@ -91,7 +91,8 @@ d. Wait 2 seconds between requests.
 
 > Ad-hoc alternative: the Scrapling **MCP server** is registered in this plugin's
 > `mcp.json`. For one-off interactive fetches you can call its tools directly
-> instead of the wrapper; the wrapper is the path for batch harvesting.
+> instead of the wrapper; the wrapper is the path for batch harvesting. Both
+> paths use Apple Container, so `container system start` must succeed first.
 
 ### 5b. section analysis and parallel Agent launch (50+ pages only)
 
@@ -215,6 +216,7 @@ Show the user:
 ## Tips
 
 - `scrapling-fetch.sh` (auto mode) is the fetch path for all sites: it renders JS and applies `--ai-targeted`, so it handles SPAs that WebFetch returned empty on
+- Scrapling runs through Apple's `container` CLI. Start it with `container system start` before harvesting
 - For a known JS/SPA site, skip the auto-escalation and pass `fetch` directly; for Cloudflare/anti-bot sites use `stealthy`
 - Scrapling's `--ai-targeted` does the heavy de-boilerplating; the `clean` step is now just a light post-pass (headings, images, whitespace)
 - If a site has > 100 pages, strongly suggest the doc-harvester agent

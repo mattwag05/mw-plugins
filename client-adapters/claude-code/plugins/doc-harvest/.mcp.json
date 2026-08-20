@@ -2,7 +2,7 @@
   "mcpServers": {
     "scrapling": {
       "type": "stdio",
-      "command": "docker",
+      "command": "container",
       "args": [
         "run",
         "--rm",

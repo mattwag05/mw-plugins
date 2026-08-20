@@ -1,6 +1,6 @@
 {
   "name": "doc-harvest",
-  "version": "1.2.0",
+  "version": "1.2.1",
   "description": "Harvest documentation websites into structured local references and navigate existing documentation sets.",
   "author": {
     "name": "Matthew Wagner"

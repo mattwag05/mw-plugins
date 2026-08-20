@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# doc-harvest: fetch a URL as clean Markdown via Scrapling (dockerized).
+# doc-harvest: fetch a URL as clean Markdown via Scrapling in Apple Container.
 #
 # Prints clean Markdown to STDOUT. Progress + Scrapling logs go to STDERR, so
 # this pipes straight into the clean step:
@@ -16,12 +16,11 @@
 # hidden-element sanitization), so the output is already nav/footer/boilerplate-free.
 #
 # Env:
-#   CONTAINER_RUNTIME    container runtime CLI (default: docker). Set to `container`
-#                        to use Apple's Container CLI on Apple silicon
-#                        (run `container system start` first).
+#   CONTAINER_RUNTIME    compatible container runtime CLI (default: container).
+#                        Run `container system start` before using the default.
 #   SCRAPLING_IMAGE      container image (default: digest-pinned pyd4vinci/scrapling).
-#                        Re-pin after `docker pull pyd4vinci/scrapling:latest` via:
-#                        docker inspect --format '{{index .RepoDigests 0}}' pyd4vinci/scrapling:latest
+#                        Re-pin after `container image pull pyd4vinci/scrapling:latest`
+#                        and inspect it with `container image inspect`.
 #   SCRAPLING_MIN_BYTES  auto-escalation threshold (default: 200)
 #   SCRAPLING_HTML       if set to a path, also save the raw rendered HTML there
 #                        (for link discovery on SPA sites — see harvest.py discover --html)
@@ -29,7 +28,7 @@ set -euo pipefail
 
 URL="${1:?usage: scrapling-fetch.sh <url> [auto|get|fetch|stealthy]}"
 MODE="${2:-auto}"
-RUNTIME="${CONTAINER_RUNTIME:-docker}"
+RUNTIME="${CONTAINER_RUNTIME:-container}"
 IMAGE="${SCRAPLING_IMAGE:-pyd4vinci/scrapling@sha256:2a0c05bdd78211a76cb7ab9565a91250787a326f9ca73c97cf764ccb536631a2}"
 MIN_BYTES="${SCRAPLING_MIN_BYTES:-200}"
 

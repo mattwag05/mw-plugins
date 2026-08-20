@@ -11,7 +11,7 @@ Stdlib-only (no pip dependencies). Subcommands:
   organize          — Generate CCL file tree from manifest
   update-index      — Update CCL root _index.md with new doc set
 
-Content fetching is done by scrapling-fetch.sh (Scrapling, dockerized), NOT this
+Content fetching is done by scrapling-fetch.sh (Scrapling in Apple Container), NOT this
 script — it renders JS, bypasses anti-bot, and emits --ai-targeted main-content
 Markdown. `clean` is now a light post-pass (headings/images/whitespace), not the
 primary boilerplate stripper.
