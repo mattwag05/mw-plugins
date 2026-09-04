@@ -1,0 +1,6 @@
+interface:
+  display_name: "Project housekeeping"
+  short_description: "Clean up project clutter and reconcile unfinished work"
+  default_prompt: "Use $project-housekeeping to inspect project clutter and unfinished Git work, make safe cleanup changes, and prepare approved pushes."
+policy:
+  allow_implicit_invocation: true

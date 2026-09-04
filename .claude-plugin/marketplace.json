@@ -64,6 +64,18 @@
       "version": "1.4.0"
     },
     {
+      "name": "project-housekeeping",
+      "source": "./client-adapters/claude-code/plugins/project-housekeeping",
+      "description": "Clean up redundant project material and reconcile unfinished Git work with recoverable cleanup and approved pushes.",
+      "version": "0.1.0"
+    },
+    {
+      "name": "session-closeout",
+      "source": "./client-adapters/claude-code/plugins/session-closeout",
+      "description": "Update records from verified session learnings and prepare completed work for commit and approved push.",
+      "version": "0.1.0"
+    },
+    {
       "name": "swift-concurrency",
       "source": "./client-adapters/claude-code/plugins/swift-concurrency",
       "description": "Write, review, and migrate Swift code using current concurrency patterns and strict checking.",

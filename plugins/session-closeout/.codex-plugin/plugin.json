@@ -1,0 +1,17 @@
+{
+  "name": "session-closeout",
+  "version": "0.1.0",
+  "description": "Update records from verified session learnings and prepare completed work for commit and approved push.",
+  "author": { "name": "Matthew Wagner" },
+  "repository": "https://github.com/mattwag05/mw-plugins",
+  "skills": "./skills/",
+  "interface": {
+    "displayName": "Session closeout",
+    "shortDescription": "Update session records and prepare verified commits",
+    "longDescription": "Review completed work, update related documentation and permitted memories, apply unslop, and prepare scoped commits. Ask before named pushes unless already authorized.",
+    "developerName": "Matthew Wagner",
+    "category": "Productivity",
+    "capabilities": ["Interactive", "Write"],
+    "defaultPrompt": ["Use $session-closeout to update session records and prepare verified commits and approved pushes."]
+  }
+}

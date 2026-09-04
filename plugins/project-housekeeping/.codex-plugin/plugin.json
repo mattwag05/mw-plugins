@@ -1,0 +1,17 @@
+{
+  "name": "project-housekeeping",
+  "version": "0.1.0",
+  "description": "Clean up redundant project material and reconcile unfinished Git work with recoverable cleanup and approved pushes.",
+  "author": { "name": "Matthew Wagner" },
+  "repository": "https://github.com/mattwag05/mw-plugins",
+  "skills": "./skills/",
+  "interface": {
+    "displayName": "Project housekeeping",
+    "shortDescription": "Clean up project clutter and reconcile unfinished work",
+    "longDescription": "Inspect project artifacts, related references, permitted memories, and unfinished Git work. Apply recoverable cleanup and unslop, validate changes, and ask before named pushes unless already authorized.",
+    "developerName": "Matthew Wagner",
+    "category": "Productivity",
+    "capabilities": ["Interactive", "Write"],
+    "defaultPrompt": ["Use $project-housekeeping to clean up project clutter and reconcile unfinished Git work."]
+  }
+}

@@ -48,6 +48,8 @@ python3 scripts/build_claude_adapters.py --check
 | `macos-automation` | Automate Mail, Calendar, Notes, and Reminders on macOS. |
 | `phased-shipping` | Ship multi-phase engineering work as stacked pull requests. |
 | `pippin` | Use Pippin through MCP or its command-line interface. |
+| `project-housekeeping` | Clean up redundant project material and reconcile unfinished Git work. Requires `unslop`. |
+| `session-closeout` | Update records from session learnings and prepare verified commits and approved pushes. Requires `unslop`. |
 | `swift-concurrency` | Write, review, and migrate Swift concurrency code. |
 | `testflight-triage` | Review TestFlight data and track actionable work. |
 | `unslop` | Remove common AI writing patterns and restore a natural voice. |

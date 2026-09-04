@@ -1,0 +1,9 @@
+{
+  "name": "session-closeout",
+  "version": "0.1.0",
+  "description": "Update records from verified session learnings and prepare completed work for commit and approved push.",
+  "author": {
+    "name": "Matthew Wagner"
+  },
+  "repository": "https://github.com/mattwag05/mw-plugins"
+}

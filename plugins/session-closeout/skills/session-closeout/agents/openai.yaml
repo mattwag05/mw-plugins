@@ -1,0 +1,6 @@
+interface:
+  display_name: "Session closeout"
+  short_description: "Update session records and prepare verified commits"
+  default_prompt: "Use $session-closeout to update records from this session, validate completed work, and prepare scoped commits and approved pushes."
+policy:
+  allow_implicit_invocation: true
