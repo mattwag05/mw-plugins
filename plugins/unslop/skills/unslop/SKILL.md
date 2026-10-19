@@ -78,3 +78,7 @@ Removing patterns is half the job. Sterile, voiceless writing is just as obvious
 29. **Active voice.** Prefer it. Catch "is/are/was/were + past participle" and name the actor: "queries are validated" becomes "the compiler validates queries", "the file is parsed by the loader" becomes "the loader parses the file". Passive is fine only when the actor is unknown or genuinely doesn't matter.
 30. **Cut adverbs, or use a stronger verb.** "runs quickly" becomes "is fast" or the number. "significantly improves" becomes the measured delta. An adverb propping up a weak verb means the verb is wrong.
 31. **Prefer the plain word.** "utilize" becomes "use", "leverage" becomes "use", "facilitate" becomes "help", "numerous" becomes "many", "in the event that" becomes "if". The fancier synonym is rarely clearer.
+
+### Patient-facing material
+
+32. **No headings in pasted patient text.** When unslopping anything a patient will read (Klara texts, portal replies, emails, handout copy), rewrite it as plain flowing paragraphs with no headings and no bullet lists. Let sentence order carry the structure. Section structure stays reserved for designed HTML/PDF handouts, where headings do work paragraphs can't. Keep every number and clinical claim verbatim while rewriting.
