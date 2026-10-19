@@ -1,0 +1,9 @@
+{
+  "$schema": "https://agent-plugins.org/schemas/1.0.0/plugin.schema.json",
+  "name": "anti-loop",
+  "version": "0.1.0",
+  "description": "Stop agents from rerunning or rewording tool calls whose output they already have, with an enforcing extension for the Pi coding agent.",
+  "author": { "name": "Matthew Wagner" },
+  "repository": "https://github.com/mattwag05/mw-plugins",
+  "keywords": ["agents", "reliability", "local-models", "pi", "loops"]
+}

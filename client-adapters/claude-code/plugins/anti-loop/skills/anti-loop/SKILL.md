@@ -1,0 +1,64 @@
+---
+name: anti-loop
+description: >-
+  Use while iterating with tools: rerunning a measurement, benchmark, test or command to
+  "double-check", rewording a call after it returned the same output, retrying after a tool
+  error, or continuing after a guard blocked a call. Use when the user asks "what happened?",
+  "are you stuck?" or says "you're looping". Also use when setting up an agent on a small or
+  local model, where repeated identical calls are the most common failure.
+metadata:
+  version: "0.1.0"
+---
+
+# Anti-loop
+
+A result you already have will not change if you run the call again or reword it. Rerunning is not investigation. It spends time and context and hides the real next step: deciding what the result means.
+
+## Rules
+
+1. **Say what each result showed.** After every batch of tool results, write one line: what you learned and what you will do next. If you cannot write that line, you are about to loop.
+2. **Never rerun a call whose output you already have.** Collapsing whitespace, swapping quotes, `python -c` for a heredoc, `echo` for `printf`, adding a comment: all of these are the same call. The same output from a reworded call is the same evidence, not new evidence.
+3. **Measure once, then act.** When a measurement answers the question, act on it: change the code, run a *different* check, or report. Repeat a measurement only after a change that could move it, and say which change.
+4. **Three identical errors means stop.** Read the error (a missing argument, wrong format, wrong path), change approach, and tell the user what happened.
+5. **A block is information.** When a guard or the user blocks a call, do not retry it or a reworded version. Explain in text what you were trying to learn, what the output already shows, and what you would do instead.
+6. **Questions get answers.** When the user asks "what happened?" or "are you stuck?", answer in text before calling any tool.
+
+Progress means a file changed or a result you have not seen before. Ten tool calls without either means you should stop gathering evidence: state your hypothesis in one sentence, then act on it or report the blocker.
+
+## What a loop looks like
+
+```text
+python3 -c "...benchmark..."      -> real work: 0.001s
+python3 -c "... import sys ..."   -> real work: 0.001s   (reworded, same result)
+python3 - <<'EOF' ... EOF         -> real work: 0.001s   (reworded again)
+```
+
+The first result already said the code is fast and the delay is elsewhere. The next step was to look at the deliberate `sleep` calls, not to measure again.
+
+## Enforcing it in Pi
+
+Prose rules reduce loops but cannot prevent them. `assets/pi/no-progress-guard.ts` is an extension for the [Pi coding agent](https://github.com/earendil-works/pi) that enforces the rules above:
+
+| Trigger | Action |
+| --- | --- |
+| An exact call (whitespace-normalized) already returned the same output twice | Block the third run and quote the output it already returned |
+| The same output (20+ characters) seen 3 times from any calls | Annotate the result: rewording will not change it |
+| The same output seen 4 times, or a blocked call retried | Pause tools and request a text-only explanation |
+| 10 calls with no file change and no new result | Steer toward a hypothesis and action |
+| 6 assistant turns with tool calls and no prose | Ask for a one-line status |
+| A question from the user after a stop | Answer with tools off, with the repeated outputs in context |
+
+A successful `edit` or `write` resets the repeat counts. State lasts for the session, so a follow-up message does not re-arm reruns. The guard keeps only in-memory hashes and short excerpts. File changes made through `bash` do not count as progress.
+
+Install:
+
+```bash
+mkdir -p ~/.pi/agent/extensions
+cp assets/pi/no-progress-guard.ts ~/.pi/agent/extensions/
+```
+
+Then `/reload` in an open Pi session, or start a new one. Run the tests with `node --test assets/pi/test/`. They replay a real 2026-10-19 Qwen session that reworded one benchmark until it was aborted three times without an explanation.
+
+Tested on Pi 1.3.0, 0.80.6 and 0.73.1. Pi 1.x delivers the explanation request as a separate turn. Older releases ignore `turn_end` entries and `terminate`, so the request also travels in the tool result, a third call while paused aborts the run, and `agent_end` restores tools.
+
+For small local models, also cut the prompt: skills, prompt templates and MCP or memory tool sets each add schema and instructions the model must read on every request. Loading only the tools a task needs (for example `pi --no-skills --no-prompt-templates --no-extensions -e <guard>`) cut one 27B setup from 8,189 to 2,575 first-request tokens.

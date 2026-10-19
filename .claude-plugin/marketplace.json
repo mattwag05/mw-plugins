@@ -10,6 +10,12 @@
   },
   "plugins": [
     {
+      "name": "anti-loop",
+      "source": "./client-adapters/claude-code/plugins/anti-loop",
+      "description": "Stop agents from rerunning or rewording tool calls whose output they already have, with an enforcing extension for the Pi coding agent.",
+      "version": "0.1.0"
+    },
+    {
       "name": "apple-container",
       "source": "./client-adapters/claude-code/plugins/apple-container",
       "description": "Run Linux containers with Apple's container CLI and migrate Docker workflows to Apple Container.",
@@ -19,7 +25,7 @@
       "name": "autonomous-execution",
       "source": "./client-adapters/claude-code/plugins/autonomous-execution",
       "description": "Complete verifiable work with available tools before asking the user to intervene.",
-      "version": "0.2.0"
+      "version": "0.2.1"
     },
     {
       "name": "calendar-organizer",

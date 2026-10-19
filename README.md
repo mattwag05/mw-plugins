@@ -39,6 +39,7 @@ python3 scripts/build_claude_adapters.py --check
 
 | Plugin | Purpose |
 | --- | --- |
+| `anti-loop` | Stop agents from rerunning or rewording tool calls whose output they already have; includes an enforcing Pi extension. |
 | `apple-container` | Run Linux containers with Apple's `container` CLI and migrate Docker workflows. |
 | `autonomous-execution` | Finish verifiable work with available tools before asking the user to intervene. |
 | `calendar-organizer` | Extract schedules and produce structured events and ICS files. |

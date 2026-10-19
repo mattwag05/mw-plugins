@@ -1,6 +1,6 @@
 {
   "name": "autonomous-execution",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "description": "Complete verifiable work with available tools before asking the user to intervene.",
   "author": {
     "name": "Matthew Wagner"

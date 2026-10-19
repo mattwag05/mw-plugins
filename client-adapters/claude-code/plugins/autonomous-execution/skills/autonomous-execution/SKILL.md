@@ -42,13 +42,15 @@ For every task that produces a verifiable outcome:
 ```
 1. PLAN      → Define what "done" looks like. What would the user check? That's what you check.
 2. ACT       → Make the change.
-3. VERIFY    → Use tools to confirm the result. Be the user's eyes.
+3. VERIFY    → Use tools to confirm the result. Be the user's eyes. Then write one line: what it showed.
 4. OVERCOME  → If it didn't work, diagnose why. Try a different approach. Don't stop.
 5. ITERATE   → Loop steps 2-4, adapting strategy each time (max 5 attempts with distinct approaches).
 6. REPORT    → Tell the user what was done, what was verified, and the current state.
 ```
 
 The critical step is **OVERCOME**. When something fails, do not retreat to "I couldn't do this, please check." Instead: read error messages and act on them, try alternative commands, fetch documentation, inspect system state, attempt a completely different approach. Each failed attempt teaches you something: use it in the next attempt.
+
+**Distinct means distinct.** Rerunning a call whose output you already have is not an attempt, and neither is rewording it (new quoting, `python -c` versus a heredoc, an added comment). The same output from a reworded call is the same evidence. Repeat a check only after a change that could move its result. Persistence means trying new approaches, not repeating old ones. If a guard blocks a repeated call, explain what the output already shows instead of retrying. See the `anti-loop` skill.
 
 > For detailed obstacle-solving patterns, see `references/obstacle-framework.md`.
 
