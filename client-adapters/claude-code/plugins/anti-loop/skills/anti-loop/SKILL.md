@@ -7,7 +7,7 @@ description: >-
   "are you stuck?" or says "you're looping". Also use when setting up an agent on a small or
   local model, where repeated identical calls are the most common failure.
 metadata:
-  version: "0.1.0"
+  version: "0.2.0"
 ---
 
 # Anti-loop
@@ -42,13 +42,17 @@ Prose rules reduce loops but cannot prevent them. `assets/pi/no-progress-guard.t
 | Trigger | Action |
 | --- | --- |
 | An exact call (whitespace-normalized) already returned the same output twice | Block the third run and quote the output it already returned |
-| The same output (20+ characters) seen 3 times from any calls | Annotate the result: rewording will not change it |
-| The same output seen 4 times, or a blocked call retried | Pause tools and request a text-only explanation |
-| 10 calls with no file change and no new result | Steer toward a hypothesis and action |
-| 6 assistant turns with tool calls and no prose | Ask for a one-line status |
+| The same output (20+ characters) seen 3 times from any calls | Annotate the result: rewording will not change it; the 4th stops the run |
+| One command rerun only to view other parts of its output (`\| sed -n`, `head`, `tail`, `grep`, `wc`) | Annotate at 3 runs (save it to a file once), block after 6, stop on retry |
+| 5 edits in a row that leave a check's output unchanged | Annotate at 3 (read the failing assertion first), stop at 5 |
+| A command that deletes or overwrites paths outside the working directory | Annotate the 2nd run, block the 3rd (scratch paths are exempt) |
+| An edit or write that changes nothing | Annotate it; it does not count as progress |
+| 10, 20 and 30 calls with no file change and no new evidence | Steer, steer again, stop |
+| 6 assistant turns with tool calls and no prose | Ask for a status line; if ignored once, block calls from messages without one |
+| A stop | Pause tools and request a text-only explanation |
 | A question from the user after a stop | Answer with tools off, with the repeated outputs in context |
 
-A successful `edit` or `write` resets the repeat counts. State lasts for the session, so a follow-up message does not re-arm reruns. The guard keeps only in-memory hashes and short excerpts. File changes made through `bash` do not count as progress.
+A file-changing `edit` or `write` resets the repeat counts. State lasts for the session, so a follow-up message does not re-arm reruns. The guard keeps only in-memory hashes and short excerpts. File changes made through `bash` do not count as progress.
 
 Install:
 
@@ -57,7 +61,7 @@ mkdir -p ~/.pi/agent/extensions
 cp assets/pi/no-progress-guard.ts ~/.pi/agent/extensions/
 ```
 
-Then `/reload` in an open Pi session, or start a new one. Run the tests with `node --test assets/pi/test/`. They replay a real 2026-10-19 Qwen session that reworded one benchmark until it was aborted three times without an explanation.
+Then `/reload` in an open Pi session, or start a new one. Run the tests with `node --test assets/pi/test/`. They replay two real 2026-10-19 Qwen sessions: one reworded a benchmark until it was aborted three times without an explanation; the other paged one program run through 45 `sed` windows, made 11 edits that never changed a failing test, and deleted files in the home directory 40 times.
 
 Tested on Pi 1.3.0, 0.80.6 and 0.73.1. Pi 1.x delivers the explanation request as a separate turn. Older releases ignore `turn_end` entries and `terminate`, so the request also travels in the tool result, a third call while paused aborts the run, and `agent_end` restores tools.
 

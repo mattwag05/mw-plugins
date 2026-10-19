@@ -2,7 +2,10 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
-import guard from "../no-progress-guard.ts";
+import { mkdtempSync, writeFileSync } from "node:fs";
+import { tmpdir } from "node:os";
+import { join } from "node:path";
+import guard, { LIMITS, pipeline, producerOf, outsideTargets } from "../no-progress-guard.ts";
 
 const ALL_TOOLS = ["read", "bash", "edit", "write"];
 
@@ -11,7 +14,7 @@ function harness() {
   const handlers = {};
   let active = [...ALL_TOOLS];
   const log = { blocked: [], notes: [], annotated: [], continued: 0, executed: 0, aborts: 0 };
-  const ctx = { abort: () => { log.aborts += 1; } };
+  const ctx = { cwd: "/home/user/Desktop", abort: () => { log.aborts += 1; } };
   const pi = {
     on: (name, fn) => ((handlers[name] ??= []).push(fn)),
     getActiveTools: () => [...active],
@@ -24,6 +27,11 @@ function harness() {
 
   // Runs one assistant message: its tool calls, their results, then turn_end.
   function turn({ text = "", calls = [] }, resultFor) {
+    const message = { role: "assistant", content: [
+      ...(text ? [{ type: "text", text }] : []),
+      ...calls.map((c) => ({ type: "toolCall", name: c.name, arguments: c.input })),
+    ] };
+    emit("message_end", { message });
     for (const call of calls) {
       const id = call.id ?? `c${n++}`;
       const decision = emit("tool_call", { toolName: call.name, toolCallId: id, input: call.input });
@@ -34,10 +42,6 @@ function harness() {
         content: [{ type: "text", text: result.text }], isError: result.isError ?? false });
       if (out?.content) log.annotated.push(out.content.at(-1).text);
     }
-    const message = { role: "assistant", content: [
-      ...(text ? [{ type: "text", text }] : []),
-      ...calls.map((c) => ({ type: "toolCall", name: c.name, arguments: c.input })),
-    ] };
     const boundary = emit("turn_end", { message });
     for (const e of boundary?.entries ?? []) log.notes.push(e.content);
     if (boundary?.continue) log.continued += 1;
@@ -65,12 +69,10 @@ test("today's labyrinth loop: stops and forces an explanation before the user ha
     if (b?.continue) { stoppedAt = i; break; }
   }
   assert.ok(stoppedAt !== null, "guard must force an explanation turn");
-  // Old guard: first block after these same 13 calls, then two more aborts, 30 calls and no explanation.
-  assert.equal(h.log.executed, 13);
-  assert.equal(h.log.blocked.length, 0, "the stop comes from the repeated result, not an abort path");
+  // Old guard: first block after 13 calls, then two more aborts, 30 calls and no explanation.
+  assert.ok(h.log.executed <= 13, `stopped after ${h.log.executed} executed calls`);
   assert.deepEqual(h.tools(), [], "tools are off for the explanation reply");
   assert.match(h.log.notes.at(-1), /Tools are off for this reply/);
-  assert.ok(h.log.annotated.some((t) => /3 times, from differently worded calls/.test(t)), "third repeat is annotated");
 });
 
 test("a question after a stop gets a text-only answer carrying the evidence; tools return when settled", () => {
@@ -109,13 +111,26 @@ test("an exact rerun is blocked on the third try, and a retry after the block st
   assert.equal(h.log.executed, 2);
 });
 
-test("a successful edit is progress: repeated test output after edits never trips the guard", () => {
+const edit = (i) => ({ name: "edit", input: { path: "a.py", edits: [{ oldText: `old ${i}`, newText: `new ${i}` }] } });
+
+test("edits that change a check's output are progress: the same check after each edit never trips the guard", () => {
   const h = harness();
   for (let i = 0; i < 6; i++) {
-    h.turn({ text: "Fixing the next case.", calls: [{ name: "edit", input: { path: "a.py", i } }] }, fixed("Successfully replaced 1 block(s)"));
-    h.turn({ text: "Running tests.", calls: [bash("python3 -m pytest -q")] }, fixed("1 failed, 28 passed in 0.12s"));
+    h.turn({ text: "Fixing the next case.", calls: [edit(i)] }, fixed("Successfully replaced 1 block(s)"));
+    h.turn({ text: "Running tests.", calls: [bash("python3 -m pytest -q")] }, fixed(`${6 - i} failed, ${23 + i} passed in 0.12s`));
   }
   assert.deepEqual(h.log, { blocked: [], notes: [], annotated: [], continued: 0, executed: 12, aborts: 0 });
+});
+
+test("edits that leave a check's output unchanged are flagged at 3 and stop the run at 5", () => {
+  const h = harness();
+  for (let i = 0; i < 6 && !h.log.continued; i++) {
+    h.turn({ text: "Adjusting the assertion.", calls: [edit(i)] }, fixed("Successfully replaced 1 block(s)"));
+    h.turn({ text: "Running tests.", calls: [bash("python3 test_x.py 2>&1 | tail -4")] }, fixed("Ran 29 tests\n\nFAILED (failures=1)"));
+  }
+  assert.ok(h.log.annotated.some((t) => /last 3 edits did not change this check's output/.test(t)));
+  assert.equal(h.log.continued, 1);
+  assert.match(h.log.notes.at(-1), /5 edits in a row/);
 });
 
 test("a silent tool-only streak gets one status prompt; a long no-progress stretch gets one steer", () => {
@@ -125,12 +140,12 @@ test("a silent tool-only streak gets one status prompt; a long no-progress stret
   // Cycle through old outputs with new commands: every result is repeated evidence, none is new.
   for (let i = 0; i < 12; i++) h.turn({ text: "Checking again.", calls: [bash(`cat g${i}`)] }, fixed(`listing number ${i % 6} with enough text`));
   assert.equal(h.log.continued, 0);
-  assert.equal(h.log.notes.filter((n) => /without a file change or a new result/.test(n)).length, 1);
+  assert.equal(h.log.notes.filter((n) => /without a file change or new evidence/.test(n)).length, 1);
 });
 
 test("short generic outputs are not compared across different commands", () => {
   const h = harness();
-  for (let i = 0; i < 8; i++) h.turn({ text: "Step.", calls: [bash(`mkdir -p d${i}`)] }, fixed(""));
+  for (let i = 0; i < 8; i++) h.turn({ text: "Creating a directory.", calls: [bash(`mkdir -p d${i}`)] }, fixed(""));
   assert.equal(h.log.continued, 0);
   assert.equal(h.log.blocked.length, 0);
 });
@@ -158,4 +173,77 @@ test("old-style before_agent_start without messageType still answers a question 
   const start = h.emit("before_agent_start", { prompt: "What happened?", systemPrompt: "SYS" });
   assert.deepEqual(h.tools(), []);
   assert.match(start.systemPrompt, /seen 4x/);
+});
+
+// Replays assistant steps from a fixture until the guard forces an explanation turn.
+function replay(steps, results, { compliant = false } = {}) {
+  const h = harness();
+  for (const e of steps) {
+    const b = h.turn(compliant && !e.text ? { ...e, text: "Checking the next part of the output." } : e, (call, id) => results.get(id) ?? { text: "" });
+    if (b?.continue) break;
+  }
+  return h;
+}
+const paging = JSON.parse(readFileSync(new URL("./labyrinth-paging-20261019.json", import.meta.url)));
+const pagingResults = new Map(paging.filter((e) => e.kind === "result").map((e) => [e.id, e]));
+const pagingSteps = paging.filter((e) => e.kind === "assistant");
+const usesRm = (e) => e.calls.some((c) => (c.input?.command ?? "").includes("rm -f ~/.labyrinth"));
+
+test("second session, edit-test thrash: stops at the 5th ineffective edit instead of running ~100 calls", () => {
+  const h = replay(pagingSteps, pagingResults);
+  assert.equal(h.log.continued, 1);
+  assert.match(h.log.notes.at(-1), /5 edits in a row did not change the output/);
+  assert.ok(h.log.executed <= 40, `stopped after ${h.log.executed} executed calls`);
+});
+
+test("second session, paging one command through sed windows: warned at 3 runs, blocked after 6, stopped on retry", () => {
+  const start = pagingSteps.findIndex(usesRm);
+  const h = replay(pagingSteps.slice(start), pagingResults, { compliant: true });
+  assert.ok(h.log.annotated.some((t) => /same command 3 times only to view different parts/.test(t)));
+  assert.ok(h.log.blocked.some((b) => /run this command 6 times only to view/.test(b.decision.reason)));
+  assert.match(h.log.notes.at(-1), /rerunning one command to view different parts/);
+});
+
+test("second session, repeated rm of files in the home directory: annotated on the 2nd run, blocked on the 3rd", () => {
+  const rmSteps = pagingSteps.filter(usesRm).map((e) => ({ ...e, calls: e.calls.filter((c) => (c.input?.command ?? "").includes("rm -f ~/.labyrinth")) }));
+  const h = replay(rmSteps.slice(-3), pagingResults, { compliant: true });
+  assert.ok(h.log.annotated.some((t) => /has now deleted or overwritten .*\.labyrinth_best\.json/.test(t)));
+  assert.match(h.log.blocked[0].decision.reason, /deletes or overwrites .*outside the project, and has already done so 2 times/);
+});
+
+test("a status request ignored once makes silent tool calls wait for a status line", () => {
+  const h = harness();
+  for (let i = 0; i < 7; i++) h.turn({ calls: [bash(`ls dir${i}`)] }, fixed(`listing number ${i} with enough text`));
+  h.turn({ calls: [bash("ls next")] }, fixed("unreachable output text here"));
+  assert.match(h.log.blocked.at(-1).decision.reason, /asked for a status line and this message has none/);
+  h.turn({ text: "Listings look fine; checking the next directory.", calls: [bash("ls next")] }, fixed("a listing that is new to the guard"));
+  assert.equal(h.log.blocked.length, 1, "a message with prose runs again");
+});
+
+test("edits and writes that change nothing are not progress", () => {
+  const dir = mkdtempSync(join(tmpdir(), "guard-"));
+  const file = join(dir, "same.txt");
+  writeFileSync(file, "unchanged\n");
+  const h = harness();
+  h.turn({ text: "Rewriting the file.", calls: [{ name: "write", input: { path: file, content: "unchanged\n" } }] }, fixed("Successfully wrote"));
+  h.turn({ text: "Editing a line.", calls: [{ name: "edit", input: { path: file, edits: [{ oldText: "x", newText: "x" }] } }] }, fixed("Successfully replaced 1 block(s)"));
+  assert.equal(h.log.annotated.filter((t) => /left the file unchanged/.test(t)).length, 2);
+});
+
+test("the no-progress budget steers at 10 and 20 calls and stops at 30", () => {
+  const h = harness();
+  for (let i = 0; i < 15; i++) h.turn({ text: "Collecting a listing.", calls: [bash(`ls a${i}`)] }, fixed(`listing number ${i} with enough text`));
+  for (let i = 0; i < 30 && !h.log.continued; i++) h.turn({ text: "Collecting a listing.", calls: [bash(`ls b${i}`)] }, fixed(`listing number ${i % 15} with enough text`));
+  assert.equal(h.log.notes.filter((n) => /tool calls without a file change or new evidence\. Stop/.test(n)).length, 2);
+  assert.equal(h.log.continued, 1);
+  assert.match(h.log.notes.at(-1), /30 tool calls without a file change/);
+});
+
+test("pipeline parsing keeps quoted pipes and || intact, and strips only trailing view stages", () => {
+  assert.deepEqual(pipeline(`grep -E "a|b" f | wc -l`), [`grep -E "a|b" f `, " wc -l"]);
+  assert.equal(pipeline("make || echo failed").length, 1);
+  assert.equal(producerOf(`python3 run.py 2>&1 | sed -n '1,36p'`).producer, "python3 run.py");
+  assert.equal(producerOf(`python3 run.py 2>&1 | grep -n x | head -5`).producer, "python3 run.py");
+  assert.equal(producerOf("python3 run.py | python3 summarize.py").producer, "python3 run.py | python3 summarize.py");
+  assert.deepEqual(outsideTargets('grep -E "a|b" f > /tmp/ok.txt; rm -rf ./build 2>&1 >/dev/null', "/tmp/x"), []);
 });
