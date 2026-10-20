@@ -1,15 +1,17 @@
 import { createHash } from "node:crypto";
-import { readFileSync } from "node:fs";
+import { readFileSync, statSync } from "node:fs";
 import { homedir } from "node:os";
-import { resolve } from "node:path";
+import { isAbsolute, resolve } from "node:path";
 
 // No-progress guard for small local models. Keeps only in-memory hashes and short
 // output excerpts for the current session; nothing is written to disk.
 //
-// An edit/write that changes a file resets the repeat counts; the no-progress budget
-// also resets on a result never seen before from a command not yet run.
-// shortcut: file changes made through bash (sed -i, scripts) do not count as
-// progress; add a mutation heuristic if that causes false stops in practice.
+// A tool call that changes a file resets the repeat counts. Files are compared
+// before and after: the edit/write target, plus project files a bash command names.
+// The no-progress budget also resets on a result never seen before from a command
+// not yet run.
+// shortcut: a bash command that changes files without naming them (globs, build
+// scripts) is not seen as progress; name-based detection covered every 2026-10-19 case.
 export const LIMITS = {
   rerunBlockAfter: 2,   // identical call + identical result twice -> block a third run
   resultWarnAt: 3,      // same output from any spelling of a call -> annotate it
@@ -21,7 +23,11 @@ export const LIMITS = {
   sideEffectBlockAt: 2, // runs that delete/overwrite paths outside the project -> block the next
   budgetCalls: [10, 20, 30], // calls with no progress -> steer, steer again, stop
   toolOnlyTurns: 6,     // assistant turns with tool calls and no prose -> ask for a status line
-  proseBlocksStop: 3,   // calls blocked for a missing status line -> stop
+  proseBlocksMax: 2,    // calls blocked for a missing status line before letting one through
+  shrinkRatio: 0.7,     // a file that drops below 70% of its size...
+  shrinkBytes: 2000,    // ...and loses at least this much gets flagged
+  snapshotFiles: 8,     // files compared per bash call
+  snapshotBytes: 2_000_000,
   minResultChars: 20,   // shorter outputs ("", "OK") are too generic to compare across calls
   minProseChars: 8,     // "Tests pass." counts as a status line
 };
@@ -39,7 +45,64 @@ const excerpt = (text) => (text.length > 300 ? `${text.slice(0, 300)}…` : text
 const proseOf = (message) => (message?.role === "assistant" && Array.isArray(message.content) ? message.content : [])
   .filter((p) => p.type === "text").map((p) => p.text).join("").trim();
 const EXPLAIN = "Answer the user in plain text: (1) what you were trying to learn, (2) what the repeated output already tells you, " +
-  "(3) the concrete change or different check you would make next, or what blocks you. Do not ask to rerun the command.";
+  "(3) the concrete change or different check you would make next, or what blocks you, and (4) what you have not verified. " +
+  "Do not claim a fix works unless a result above shows it. Do not ask to rerun the command.";
+// Commands that write files; used only to word the note when a write changed nothing.
+const WRITE_HINT = /writeFileSync|writeFile\(|\.write_text\(|open\([^)]*['"][wa]|\bsed\s+-i|\bperl\s+-[a-z]*i|\btee\b|[^0-9&>]>>?\s*[\w./]/;
+
+// Removes per-run noise (process ids, timestamps, addresses) so reruns compare equal.
+export function stable(text) {
+  return text
+    .replace(/\[\d+:\d+:\d{4}\/\d{6}\.\d+:/g, "[")             // Chromium log prefix pid:tid:date/time
+    .replace(/\((?:node|pid):\d+\)/g, "(pid)")
+    .replace(/\b\d{4}-\d{2}-\d{2}[T ]\d{2}:\d{2}:\d{2}(?:\.\d+)?Z?/g, "<time>")
+    .replace(/\b0x[0-9a-f]{8,}\b/gi, "0x<addr>");
+}
+
+// Project files a command or tool input names, resolved and limited to the working directory.
+export function namedFiles(text, cwd) {
+  if (!cwd) return [];
+  const found = new Set();
+  for (const m of text.matchAll(/(?:^|[\s'"`(=,])((?:\.{0,2}\/)?[\w@.\-/]+\.[A-Za-z0-9]{1,6})(?=$|[\s'"`),;:|&<>])/g)) {
+    const path = isAbsolute(m[1]) ? m[1] : resolve(cwd, m[1]);
+    if (path === cwd || !path.startsWith(`${cwd}/`)) continue;
+    try { if (statSync(path).isFile()) found.add(path); } catch { /* not a file */ }
+    if (found.size >= LIMITS.snapshotFiles) break;
+  }
+  return [...found];
+}
+
+function snapshot(paths) {
+  const snap = new Map();
+  for (const path of paths) {
+    try {
+      const st = statSync(path);
+      snap.set(path, st.size > LIMITS.snapshotBytes
+        ? { size: st.size, hash: `mtime:${st.mtimeMs}` }
+        : { size: st.size, hash: sha(readFileSync(path)) });
+    } catch {
+      snap.set(path, null); // does not exist yet
+    }
+  }
+  return snap;
+}
+
+// Files whose contents changed between two snapshots, with shrink warnings.
+function compare(before) {
+  const after = snapshot(before.keys());
+  const changed = [], shrunk = [];
+  for (const [path, was] of before) {
+    const now = after.get(path);
+    // Absent before and after: the guard cannot tell, so give the call the benefit of the doubt.
+    if (was === null && now === null) { changed.push(path); continue; }
+    if (was?.hash === now?.hash) continue;
+    changed.push(path);
+    if (was && now && now.size < was.size * LIMITS.shrinkRatio && was.size - now.size >= LIMITS.shrinkBytes) {
+      shrunk.push(`${path.split("/").pop()} shrank from ${was.size} to ${now.size} bytes`);
+    }
+  }
+  return { changed, shrunk };
+}
 const STATUS = "Status check: before your next tool call, write one line saying what the last results showed and what you will do next.";
 const note = (content, customType = "no-progress-guard") => ({ type: "custom_message", customType, content, display: true });
 
@@ -86,22 +149,6 @@ export function outsideTargets(command, cwd) {
     .filter((t) => !SCRATCH.test(t) && !(cwd && (t === cwd || t.startsWith(`${cwd}/`)))))].sort();
 }
 
-function isNoopMutation(toolName, input, cwd) {
-  if (toolName === "edit") {
-    const edits = Array.isArray(input?.edits) ? input.edits : [input ?? {}];
-    return edits.length > 0 && edits.every((e) => typeof e.oldText === "string" && e.oldText === e.newText);
-  }
-  if (toolName === "write" && typeof input?.path === "string" && typeof input?.content === "string") {
-    try {
-      const path = resolve(cwd ?? process.cwd(), input.path.replace(/^~(?=\/|$)/, homedir()));
-      return readFileSync(path, "utf8") === input.content;
-    } catch {
-      return false; // new or unreadable file: the write is real
-    }
-  }
-  return false;
-}
-
 export default function noProgressGuard(pi) {
   let calls;            // exact call hash -> { result, count }
   let results;          // result hash -> { count, excerpt }
@@ -116,7 +163,7 @@ export default function noProgressGuard(pi) {
   let savedTools = null;
   let pausedBlocks = 0;
   const blockedIds = new Set(); // blocked calls never ran, so their results are not evidence
-  const noopIds = new Set();
+  const snapshots = new Map(); // toolCallId -> file contents before the call
   const sideEffectIds = new Map();
 
   const resetProgress = () => {
@@ -187,12 +234,13 @@ export default function noProgressGuard(pi) {
       return block(event, `Tools are paused by the no-progress guard. ${EXPLAIN}`, true);
     }
     if (requireProse && !lastProse) {
-      if (++proseBlocks >= LIMITS.proseBlocksStop) {
-        stop("You kept calling tools without the status line the guard asked for.");
-        return block(event, `Blocked: no status line. Tools are paused. ${EXPLAIN}`, true);
+      // Status lines are for legibility, not loop control: never stop a run over them.
+      if (++proseBlocks > LIMITS.proseBlocksMax) {
+        sawProse();
+      } else {
+        return block(event, "Blocked: the guard asked for a status line and this message has none. " +
+          "Write one line saying what the last results showed and what you will do next, then call the tool in that same message.");
       }
-      return block(event, "Blocked: the guard asked for a status line and this message has none. " +
-        "Write one line saying what the last results showed and what you will do next, then call the tool in that same message.");
     }
 
     const prior = calls.get(sha(`${event.toolName}:${normalize(event.input)}`));
@@ -207,12 +255,15 @@ export default function noProgressGuard(pi) {
         "Rerunning it cannot tell you anything new. In one sentence, say what that output means, then make a code change, run a different check, or tell the user what blocks you.");
     }
 
-    if (MUTATING.has(event.toolName)) {
-      if (isNoopMutation(event.toolName, event.input, ctx?.cwd)) noopIds.add(event.toolCallId);
+    const command = event.toolName === "bash" ? event.input?.command : null;
+    if (MUTATING.has(event.toolName) && typeof event.input?.path === "string") {
+      const path = resolve(ctx?.cwd ?? process.cwd(), event.input.path.replace(/^~(?=\/|$)/, homedir()));
+      snapshots.set(event.toolCallId, snapshot([path]));
       return;
     }
-    const command = event.toolName === "bash" ? event.input?.command : null;
     if (typeof command !== "string") return;
+    const files = namedFiles(command, ctx?.cwd);
+    if (files.length) snapshots.set(event.toolCallId, snapshot(files));
 
     const { producer } = producerOf(command);
     const p = producers.get(sha(producer));
@@ -242,25 +293,42 @@ export default function noProgressGuard(pi) {
   pi.on("tool_result", (event) => {
     if (blockedIds.delete(event.toolCallId)) return;
     const text = textOf(event.content);
-    if (MUTATING.has(event.toolName) && !event.isError) {
-      if (noopIds.delete(event.toolCallId)) {
-        sinceProgress += 1;
-        return { content: [...event.content, { type: "text", text: "\n[no-progress guard] This left the file unchanged, so it does not count as progress." }] };
-      }
-      epoch += 1;
-      resetProgress();
-      return;
-    }
-    noopIds.delete(event.toolCallId);
     const notes = [];
     const annotate = () => (notes.length ? { content: [...event.content, ...notes.map((t) => ({ type: "text", text: `\n[no-progress guard] ${t}` }))] } : undefined);
 
+    const before = snapshots.get(event.toolCallId);
+    snapshots.delete(event.toolCallId);
+    const { changed, shrunk } = before ? compare(before) : { changed: [], shrunk: [] };
+    if (shrunk.length) {
+      notes.push(`${shrunk.join("; ")}. Check that this did not delete code: scripted replace and splice edits fail silently. Read the file before going on.`);
+    }
+    if (MUTATING.has(event.toolName) && !event.isError) {
+      if (before && !changed.length) {
+        sinceProgress += 1;
+        notes.push("This left the file unchanged, so it does not count as progress.");
+        return annotate();
+      }
+      epoch += 1;
+      resetProgress();
+      return annotate();
+    }
+    const command = event.toolName === "bash" ? event.input?.command : null;
+    if (changed.length) {
+      // A bash command that changed project files is an edit, not a check.
+      epoch += 1;
+      resetProgress();
+      return annotate();
+    }
+    if (before && typeof command === "string" && !event.isError && WRITE_HINT.test(command)) {
+      notes.push(`This command looks like a file write, but ${[...before.keys()].map((f) => f.split("/").pop()).join(", ")} did not change. ` +
+        "If it used a string replace, the pattern probably did not match. Prefer the edit tool, which reports a miss.");
+    }
+
     const callKey = sha(`${event.toolName}:${normalize(event.input)}`);
-    const resultKey = sha(JSON.stringify([event.toolName, Boolean(event.isError), text]));
+    const resultKey = sha(JSON.stringify([event.toolName, Boolean(event.isError), stable(text)]));
     const call = calls.get(callKey);
     calls.set(callKey, { result: resultKey, count: call?.result === resultKey ? call.count + 1 : 1 });
 
-    const command = event.toolName === "bash" ? event.input?.command : null;
     let rerunProducer = false;
     if (typeof command === "string") {
       const { producer } = producerOf(command);

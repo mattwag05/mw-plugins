@@ -1,6 +1,6 @@
 {
   "name": "anti-loop",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "description": "Stop agents from rerunning or rewording tool calls whose output they already have, with an enforcing extension for the Pi coding agent.",
   "author": {
     "name": "Matthew Wagner"

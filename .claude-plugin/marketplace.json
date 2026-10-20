@@ -13,7 +13,7 @@
       "name": "anti-loop",
       "source": "./client-adapters/claude-code/plugins/anti-loop",
       "description": "Stop agents from rerunning or rewording tool calls whose output they already have, with an enforcing extension for the Pi coding agent.",
-      "version": "0.2.0"
+      "version": "0.3.0"
     },
     {
       "name": "apple-container",

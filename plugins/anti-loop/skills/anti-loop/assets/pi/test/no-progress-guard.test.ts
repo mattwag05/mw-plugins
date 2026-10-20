@@ -5,16 +5,16 @@ import { readFileSync } from "node:fs";
 import { mkdtempSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
-import guard, { LIMITS, pipeline, producerOf, outsideTargets } from "../no-progress-guard.ts";
+import guard, { LIMITS, pipeline, producerOf, outsideTargets, stable, namedFiles } from "../no-progress-guard.ts";
 
 const ALL_TOOLS = ["read", "bash", "edit", "write"];
 
 // Minimal stand-in for the Pi ExtensionAPI surface the guard uses.
-function harness() {
+function harness(opts = {}) {
   const handlers = {};
   let active = [...ALL_TOOLS];
   const log = { blocked: [], notes: [], annotated: [], continued: 0, executed: 0, aborts: 0 };
-  const ctx = { cwd: "/home/user/Desktop", abort: () => { log.aborts += 1; } };
+  const ctx = { cwd: opts.cwd ?? "/home/user/Desktop", abort: () => { log.aborts += 1; } };
   const pi = {
     on: (name, fn) => ((handlers[name] ??= []).push(fn)),
     getActiveTools: () => [...active],
@@ -246,4 +246,79 @@ test("pipeline parsing keeps quoted pipes and || intact, and strips only trailin
   assert.equal(producerOf(`python3 run.py 2>&1 | grep -n x | head -5`).producer, "python3 run.py");
   assert.equal(producerOf("python3 run.py | python3 summarize.py").producer, "python3 run.py | python3 summarize.py");
   assert.deepEqual(outsideTargets('grep -E "a|b" f > /tmp/ok.txt; rm -rf ./build 2>&1 >/dev/null', "/tmp/x"), []);
+});
+
+const voxel = JSON.parse(readFileSync(new URL("./voxel-forest-20261019.json", import.meta.url)));
+const voxelResults = new Map(voxel.filter((e) => e.kind === "result").map((e) => [e.id, e]));
+
+test("third session (voxel world): status-line enforcement never stops a run, and lets a silent call through after 2 blocks", () => {
+  const h = harness();
+  let blockedInARow = 0, maxInARow = 0;
+  for (const e of voxel) {
+    if (e.kind === "user") { h.emit("agent_end", { messages: [] }); continue; }
+    if (e.kind !== "assistant") continue;
+    const before = h.log.blocked.length;
+    h.turn(e, (call, id) => voxelResults.get(id) ?? { text: "" });
+    blockedInARow = h.log.blocked.length > before ? blockedInARow + 1 : 0;
+    maxInARow = Math.max(maxInARow, blockedInARow);
+  }
+  // v3 stopped this session twice with "You kept calling tools without the status line".
+  assert.equal(h.log.continued, 0);
+  assert.ok(h.log.blocked.length > 0, "silent calls are still blocked");
+  assert.ok(maxInARow <= LIMITS.proseBlocksMax, `at most ${LIMITS.proseBlocksMax} blocks in a row, saw ${maxInARow}`);
+});
+
+// A real project directory, so file snapshots see what bash commands change.
+function project(files) {
+  const dir = mkdtempSync(join(tmpdir(), "guard-proj-"));
+  for (const [name, body] of Object.entries(files)) writeFileSync(join(dir, name), body);
+  return dir;
+}
+
+test("a bash patch that deletes most of a file is flagged, and counts as an edit", () => {
+  const dir = project({ "main.js": "x".repeat(20000) });
+  const h = harness({ cwd: dir });
+  // Mirrors the voxel session: a node -e splice that printed success while cutting 300 lines.
+  h.turn({ text: "Removing the debug hook.", calls: [bash(`node -e "require('fs').writeFileSync('main.js', s)" && echo debug removed: true`)] },
+    () => { writeFileSync(join(dir, "main.js"), "x".repeat(7800)); return { text: "debug removed: true\nOK" }; });
+  assert.match(h.log.annotated.at(-1), /main\.js shrank from 20000 to 7800 bytes.*did not delete code/);
+});
+
+test("a bash write that changes nothing is called out instead of counting as progress", () => {
+  const dir = project({ "main.js": "const a = 1;\n" });
+  const h = harness({ cwd: dir });
+  h.turn({ text: "Patching the loop.", calls: [bash(`node -e "let s=require('fs').readFileSync('main.js','utf8'); s=s.replace('nope','x'); require('fs').writeFileSync('main.js', s)" && echo patched`)] },
+    fixed("patched\nOK"));
+  assert.match(h.log.annotated.at(-1), /looks like a file write, but main\.js did not change.*pattern probably did not match/);
+});
+
+test("bash patches count as edits, so a check that keeps failing the same way after each patch is caught", () => {
+  const dir = project({ "main.js": "v0" });
+  const h = harness({ cwd: dir });
+  for (let i = 1; i <= 6 && !h.log.continued; i++) {  // the first check only sets the baseline
+    h.turn({ text: "Adding another guard.", calls: [bash(`node -e "require('fs').writeFileSync('main.js','v${i}')" && echo guard added`)] },
+      () => { writeFileSync(join(dir, "main.js"), `v${i}`); return { text: "guard added\nOK" }; });
+    // Same error each time; only the Chromium pid:tid/timestamp prefix differs.
+    h.turn({ text: "Rerunning headless Chrome.", calls: [bash("chrome --headless --dump-dom http://localhost:8765/ 2>&1 | grep CONSOLE")] },
+      fixed(`[${7000 + i}:32${i}5153:1019/1953${i}9.361128:INFO:CONSOLE:521] "TypeError: Cannot read properties of undefined (reading 'x')"`));
+  }
+  assert.ok(h.log.annotated.some((t) => /last 3 edits did not change this check's output/.test(t)));
+  assert.equal(h.log.continued, 1);
+});
+
+test("stable() strips per-run noise but keeps real differences", () => {
+  assert.equal(stable("[7837:3265153:1019/195339.361128:INFO:CONSOLE:520] boom"), stable("[7905:3265850:1019/195353.446772:INFO:CONSOLE:520] boom"));
+  assert.equal(stable("(node:5926) Warning"), stable("(node:6100) Warning"));
+  assert.notEqual(stable("real work: 0.001s"), stable("real work: 23.44s"), "durations are evidence, not noise");
+});
+
+test("namedFiles finds project files a command names and ignores paths outside the project", () => {
+  const dir = project({ "main.js": "", "world.js": "" });
+  assert.deepEqual(namedFiles(`node --check main.js && node --check ./world.js && cat /etc/hosts ../x.js missing.js`, dir).map((f) => f.split("/").pop()).sort(), ["main.js", "world.js"]);
+});
+
+test("a stop's explanation asks what is still unverified", () => {
+  const h = harness();
+  for (let i = 0; i < 4; i++) h.turn({ calls: [bash(`probe ${i}`)] }, fixed("real work for 22 commands: 0.001s"));
+  assert.match(h.log.notes.at(-1), /\(4\) what you have not verified/);
 });
