@@ -10,6 +10,13 @@ Stdlib-only (no pip dependencies). Subcommands:
   clean             — Clean raw markdown (stdin -> stdout)
   organize          — Generate CCL file tree from manifest
   update-index      — Update CCL root _index.md with new doc set
+  find              — Locate an existing doc set in the library by slug or source URL
+  diff              — Compare a staged re-harvest against the stored doc set
+  install           — Back up the stored doc set, then apply a staged re-harvest
+  validate          — Check a doc-set dir for nav boilerplate, empty pages, bad links
+  registry          — Rebuild doc-navigator's known-docs.md from the library
+
+The library root comes from --ccl-root or $DOC_HARVEST_CCL (see ccl_root()).
 
 Content fetching is done by scrapling-fetch.sh (Scrapling in Apple Container), NOT this
 script — it renders JS, bypasses anti-bot, and emits --ai-targeted main-content
@@ -21,7 +28,9 @@ from __future__ import annotations  # allow PEP 604 (X | None) annotations on Py
 
 import argparse
 import json
+import os
 import re
+import shutil
 import sys
 import xml.etree.ElementTree as ET
 from datetime import date
@@ -342,6 +351,13 @@ def cmd_clean(args):
     """Clean raw markdown from stdin, write to stdout."""
     content = sys.stdin.read()
 
+    # Browser-rendered pages can still carry site chrome ahead of the content: drop
+    # everything before the first H1 when asked.
+    if args.from_h1:
+        m = re.search(r"^# .+$", content, re.M)
+        if m:
+            content = content[m.start():]
+
     # Strip the few line-level boilerplate patterns that survive --ai-targeted
     for pattern in LINE_COMPILED:
         content = pattern.sub("", content)
@@ -620,6 +636,172 @@ def cmd_update_index(args):
 
 
 # ---------------------------------------------------------------------------
+# Library lookup, re-harvest diff/install, validation, registry
+# ---------------------------------------------------------------------------
+
+FM_RE = re.compile(r"\A---\n(.*?)\n---\n", re.S)
+
+
+def frontmatter(path: Path) -> dict:
+    """Minimal `key: value` frontmatter reader (enough for our own pages)."""
+    m = FM_RE.match(path.read_text(encoding="utf-8", errors="replace")[:2000] + "\n")
+    out = {}
+    for line in (m.group(1).splitlines() if m else []):
+        k, _, v = line.partition(":")
+        if v and not k.startswith((" ", "-")):
+            out[k.strip()] = v.strip()
+    return out
+
+
+def ccl_root(arg: str | None) -> Path:
+    """--ccl-root, else $DOC_HARVEST_CCL, else the first Obsidian vault named
+    'Context Library' / 'Claude Context Library'. Never guess a path that is missing."""
+    cand = arg or os.environ.get("DOC_HARVEST_CCL")
+    if not cand:
+        docs = Path.home() / "Library/Mobile Documents/iCloud~md~obsidian/Documents"
+        for name in ("Context Library", "Claude Context Library"):
+            if (docs / name).is_dir():
+                cand = str(docs / name)
+                break
+    if not cand or not Path(cand).expanduser().is_dir():
+        print("Error: library root not found; pass --ccl-root or set DOC_HARVEST_CCL", file=sys.stderr)
+        sys.exit(1)
+    return Path(cand).expanduser()
+
+
+def doc_sets(root: Path):
+    """Yield (dir, frontmatter) for each doc-set root: an _index.md with source_url + harvested."""
+    for idx in root.rglob("_index.md"):
+        if len(idx.relative_to(root).parts) > 4:
+            continue
+        fm = frontmatter(idx)
+        if "source_url" in fm and "harvested" in fm:
+            yield idx.parent, fm
+
+
+def cmd_find(args):
+    root = ccl_root(args.ccl_root)
+    needle = args.query.lower().rstrip("/")
+    hits = [(d, fm) for d, fm in doc_sets(root)
+            if d.name.lower() == needle or needle in fm["source_url"].lower()]
+    for d, fm in hits:
+        print(json.dumps({"dir": str(d), "slug": d.name, "source_url": fm["source_url"],
+                          "harvested": fm["harvested"], "page_count": fm.get("page_count")}))
+    sys.exit(0 if hits else 1)
+
+
+def _pages(d: Path) -> dict[str, str]:
+    """source_url -> relative path for every page under d."""
+    return {fm["source_url"].rstrip("/"): str(f.relative_to(d))
+            for f in d.rglob("*.md") if (fm := frontmatter(f)).get("source_url")}
+
+
+def cmd_diff(args):
+    old, new = _pages(Path(args.existing)), _pages(Path(args.staged))
+    added = sorted(set(new) - set(old))
+    # Hubs (_index.md) are curated and never re-staged, so they are not "removed".
+    missing = sorted(u for u in set(old) - set(new) if not old[u].endswith("_index.md"))
+    # Renamed: a missing old URL and an added URL that share a title.
+    title = lambda d, u, r: frontmatter(d / r).get("name", "")
+    old_t = {title(Path(args.existing), u, r): u for u, r in old.items() if u in missing}
+    renamed = [(old_t[title(Path(args.staged), u, new[u])], u) for u in added
+               if title(Path(args.staged), u, new[u]) in old_t]
+    ren_old = {a for a, _ in renamed}
+    ren_new = {b for _, b in renamed}
+    rep = {"updated": len(set(old) & set(new)),
+           "added": [u for u in added if u not in ren_new],
+           "removed": [u for u in missing if u not in ren_old],
+           "renamed": [{"from": a, "to": b} for a, b in renamed]}
+    print(json.dumps(rep, indent=1))
+
+
+def cmd_install(args):
+    """Back up the stored set, copy staged pages over it, refresh root index metadata,
+    and list added pages in their section _index.md."""
+    existing, staged = Path(args.existing), Path(args.staged)
+    today = date.today().isoformat()
+    backup = Path(args.backup) if args.backup else existing.parent.parent / f".doc-harvest-backups/{existing.name}-{today}"
+    if backup.exists():
+        print(f"Error: backup {backup} already exists", file=sys.stderr)
+        sys.exit(1)
+    backup.parent.mkdir(parents=True, exist_ok=True)
+    shutil.copytree(existing, backup)
+    old = _pages(existing)
+    added = []
+    for f in sorted(staged.rglob("*.md")):
+        rel = f.relative_to(staged)
+        url = frontmatter(f).get("source_url", "").rstrip("/")
+        target = existing / old[url] if url in old else existing / rel   # renamed pages keep their path
+        target.parent.mkdir(parents=True, exist_ok=True)
+        if url not in old:
+            added.append((target, frontmatter(f).get("name", rel.stem).replace(f" - {args.suffix}", "")))
+        shutil.copyfile(f, target)
+    for target, name in added:   # list new pages in their section index
+        idx = target.parent / "_index.md"
+        if idx.exists() and f"({target.name})" not in idx.read_text() and f"**{name}**" not in idx.read_text():
+            with idx.open("a") as fh:
+                fh.write(f"- [{name}]({target.name})\n")
+    # touch dates on untouched hub indexes and refresh the root metadata
+    root_idx = existing / "_index.md"
+    pages = len(_pages(existing))
+    for idx in existing.rglob("_index.md"):
+        t = idx.read_text()
+        t = re.sub(r"^last_updated: .*$", f"last_updated: {today}", t, flags=re.M)
+        if idx == root_idx:
+            t = re.sub(r"^harvested: .*$", f"harvested: {today}", t, flags=re.M)
+            t = re.sub(r"^page_count: .*$", f"page_count: {pages}", t, flags=re.M)
+        idx.write_text(t)
+    print(json.dumps({"backup": str(backup), "pages": pages, "added": [str(t.relative_to(existing)) for t, _ in added]}))
+
+
+BOILERPLATE = ("Skip Navigation", "Explore Get Started", "Stay Updated", "Cookie Preferences", "Back to top")
+
+
+def cmd_validate(args):
+    d = Path(args.dir)
+    problems, per_section, total = [], {}, 0
+    for f in sorted(d.rglob("*.md")):
+        if f.name == "_index.md":
+            continue
+        total += 1
+        sec = f.relative_to(d).parts[0] if len(f.relative_to(d).parts) > 1 else "root"
+        per_section[sec] = per_section.get(sec, 0) + 1
+        body = FM_RE.sub("", f.read_text(encoding="utf-8") + "\n", count=1)
+        rel = str(f.relative_to(d))
+        if len(body.strip()) < args.min_chars:
+            problems.append(f"{rel}: body under {args.min_chars} chars")
+        if "doc://" in body:
+            problems.append(f"{rel}: unresolved doc:// link")
+        if any(b in body for b in BOILERPLATE):
+            problems.append(f"{rel}: site navigation boilerplate")
+        if not frontmatter(f).get("source_url"):
+            problems.append(f"{rel}: missing source_url")
+    if args.manifest:
+        expected = len(json.loads(Path(args.manifest).read_text())["pages"])
+        if total > expected:
+            problems.append(f"page count {total} exceeds manifest {expected}")
+        # Hubs are skipped on re-harvest, so a lower count is only noted.
+        print(f"manifest pages: {expected}  files: {total}", file=sys.stderr)
+    print(json.dumps({"files": total, "per_section": per_section, "problems": problems}, indent=1))
+    sys.exit(1 if problems else 0)
+
+
+def cmd_registry(args):
+    """Rewrite doc-navigator's known-docs.md from the doc sets found in the library."""
+    root = ccl_root(args.ccl_root)
+    rows = []
+    for d, fm in sorted(doc_sets(root), key=lambda x: x[0].name):
+        rows.append(f"| {fm.get('name', d.name)} | {d.name} | {d.relative_to(root)}/ | "
+                    f"{re.sub(r'^https?://', '', fm['source_url'])} | {fm.get('page_count', '?')} | {fm['harvested']} |")
+    out = ("# Known harvested documentation\n\nGenerated by `harvest.py registry` from the library "
+           f"at `{root}`. Do not hand-edit.\n\n"
+           "| Name | Slug | Library path | Source | Pages | Harvested |\n|------|------|------|------|------|------|\n"
+           + "\n".join(rows) + "\n")
+    Path(args.out).write_text(out)
+    print(json.dumps({"rows": len(rows), "out": args.out}))
+
+
+# ---------------------------------------------------------------------------
 # Argument parser
 # ---------------------------------------------------------------------------
 
@@ -642,6 +824,8 @@ def main():
     # clean
     p_clean = subs.add_parser("clean", help="Clean raw markdown (stdin → stdout)")
     p_clean.add_argument("--base-url", default="", help="Base URL for absolutizing relative images")
+    p_clean.add_argument("--from-h1", action="store_true",
+                         help="Drop everything before the first H1 (site chrome on browser-rendered pages)")
 
     # organize
     p_organize = subs.add_parser("organize", help="Generate CCL file tree from manifest")
@@ -656,6 +840,29 @@ def main():
     p_update.add_argument("--slug", required=True, help="Doc set slug")
     p_update.add_argument("--name", required=True, help="Doc set display name")
 
+    p_find = subs.add_parser("find", help="Locate a stored doc set by slug or source URL fragment")
+    p_find.add_argument("query")
+    p_find.add_argument("--ccl-root")
+
+    p_diff = subs.add_parser("diff", help="Compare a staged re-harvest against the stored doc set")
+    p_diff.add_argument("--existing", required=True)
+    p_diff.add_argument("--staged", required=True)
+
+    p_inst = subs.add_parser("install", help="Back up the stored doc set and apply a staged re-harvest")
+    p_inst.add_argument("--existing", required=True)
+    p_inst.add_argument("--staged", required=True)
+    p_inst.add_argument("--backup", help="backup dir (default: <library>/.doc-harvest-backups/<slug>-<date>)")
+    p_inst.add_argument("--suffix", default="Apple HIG", help="title suffix stripped when listing new pages")
+
+    p_val = subs.add_parser("validate", help="Check a doc-set dir for boilerplate, empty pages, bad links")
+    p_val.add_argument("dir")
+    p_val.add_argument("--manifest")
+    p_val.add_argument("--min-chars", type=int, default=200)
+
+    p_reg = subs.add_parser("registry", help="Rebuild known-docs.md from the library")
+    p_reg.add_argument("--ccl-root")
+    p_reg.add_argument("--out", required=True)
+
     args = parser.parse_args()
 
     if args.command == "discover":
@@ -666,6 +873,9 @@ def main():
         cmd_organize(args)
     elif args.command == "update-index":
         cmd_update_index(args)
+    else:
+        {"find": cmd_find, "diff": cmd_diff, "install": cmd_install,
+         "validate": cmd_validate, "registry": cmd_registry}[args.command](args)
 
 
 if __name__ == "__main__":

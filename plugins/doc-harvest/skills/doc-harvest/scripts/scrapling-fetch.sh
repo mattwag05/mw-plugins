@@ -22,6 +22,10 @@
 #                        Re-pin after `container image pull pyd4vinci/scrapling:latest`
 #                        and inspect it with `container image inspect`.
 #   SCRAPLING_MIN_BYTES  auto-escalation threshold (default: 200)
+#   SCRAPLING_SELECTOR   CSS selector for the main content (e.g. main, article). Use it
+#                        when --ai-targeted leaves site chrome in the output, which it
+#                        does on the browser `fetch` path (seen on developer.apple.com).
+#                        Apple docs are better served by apple_json.py (about 1s/page).
 #   SCRAPLING_HTML       if set to a path, also save the raw rendered HTML there
 #                        (for link discovery on SPA sites — see harvest.py discover --html)
 set -euo pipefail
@@ -32,6 +36,12 @@ RUNTIME="${CONTAINER_RUNTIME:-container}"
 IMAGE="${SCRAPLING_IMAGE:-pyd4vinci/scrapling@sha256:2a0c05bdd78211a76cb7ab9565a91250787a326f9ca73c97cf764ccb536631a2}"
 MIN_BYTES="${SCRAPLING_MIN_BYTES:-200}"
 
+# Preflight: never pull the multi-GB image implicitly. Pulling is a deliberate step.
+if ! "$RUNTIME" image inspect "$IMAGE" >/dev/null 2>&1; then
+  printf 'scrapling-fetch: image not present (~2.7 GB). Run: %s image pull %s\n' "$RUNTIME" "$IMAGE" >&2
+  exit 3
+fi
+
 STAGE="$(mktemp -d "${TMPDIR:-/tmp}/scrapling-fetch.XXXXXX")"
 trap 'rm -rf "$STAGE"' EXIT
 
@@ -39,7 +49,8 @@ trap 'rm -rf "$STAGE"' EXIT
 _run() {
   local sub="$1"; shift
   "$RUNTIME" run --rm -v "$STAGE:/out" "$IMAGE" \
-    extract "$sub" "$URL" /out/page.md --ai-targeted "$@" >&2 || return 1
+    extract "$sub" "$URL" /out/page.md --ai-targeted \
+    ${SCRAPLING_SELECTOR:+--css-selector "$SCRAPLING_SELECTOR"} "$@" >&2 || return 1
 }
 _bytes() { [ -s "$STAGE/page.md" ] && wc -c < "$STAGE/page.md" | tr -d ' ' || echo 0; }
 
