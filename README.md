@@ -39,6 +39,7 @@ python3 scripts/build_claude_adapters.py --check
 
 | Plugin | Purpose |
 | --- | --- |
+| `ambition` | Rework a task or prompt into a more ambitious version by raising its altitude, depth, or range. |
 | `anti-loop` | Stop agents from rerunning or rewording tool calls whose output they already have; includes an enforcing Pi extension. |
 | `apple-container` | Run Linux containers with Apple's `container` CLI and migrate Docker workflows. |
 | `autonomous-execution` | Finish verifiable work with available tools before asking the user to intervene. |
@@ -61,5 +62,7 @@ Versions and adapter source paths are recorded in `.claude-plugin/marketplace.js
 ## Attribution
 
 `unslop` is copied from Lauren Tan's [poteto/plugins](https://github.com/poteto/plugins/blob/main/pstack/skills/unslop/SKILL.md) repository under the MIT License. Its [bundled license](plugins/unslop/LICENSE) retains the upstream copyright notice. The upstream `SKILL.md` is preserved byte-for-byte.
+
+`ambition` paraphrases techniques from Felix Rieseberg's post [How to be more ambitious: A tutorial for humans with models](https://felixrieseberg.com/how-to-be-more-ambitious-a-tutorial-for-humans-with-models/).
 
 `i-have-adhd` is adapted from Ayoub Ghriss's [i-have-adhd](https://github.com/ayghri/i-have-adhd) repository under the MIT License. Its [bundled license](plugins/i-have-adhd/LICENSE) retains the upstream copyright notice.

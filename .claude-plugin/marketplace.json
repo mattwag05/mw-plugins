@@ -10,6 +10,12 @@
   },
   "plugins": [
     {
+      "name": "ambition",
+      "source": "./client-adapters/claude-code/plugins/ambition",
+      "description": "Turn a routine request into a more ambitious one by raising its altitude, depth, or range, then verify the result outside the model.",
+      "version": "0.1.0"
+    },
+    {
       "name": "anti-loop",
       "source": "./client-adapters/claude-code/plugins/anti-loop",
       "description": "Stop agents from rerunning or rewording tool calls whose output they already have, with an enforcing extension for the Pi coding agent.",
