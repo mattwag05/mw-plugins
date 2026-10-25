@@ -28,14 +28,14 @@ Read the known-docs registry to find the relevant documentation:
 Read references/known-docs.md
 ```
 
-Match the user's request to a known doc set by name, slug, or source domain.
+Match the user's request to a known doc set by name, slug, or source domain. If the set is missing from the registry, run `python3 ../doc-harvest/scripts/harvest.py find <slug>` before concluding it was never harvested; the registry is generated and can be stale (`harvest.py registry` rebuilds it).
 
 ### Step 2: read the root index
 
 Read the doc set's root `_index.md` to understand its structure:
 
 ```
-Read ~/Library/Mobile Documents/iCloud~md~obsidian/Documents/Claude Context Library/contexts/technical/{slug}/_index.md
+Read <library root>/{library path from the registry}/_index.md
 ```
 
 This gives you:
@@ -48,7 +48,7 @@ This gives you:
 Based on the user's question, read the relevant section's `_index.md`:
 
 ```
-Read ~/Library/Mobile Documents/iCloud~md~obsidian/Documents/Claude Context Library/contexts/technical/{slug}/{section}/_index.md
+Read <library root>/{library path from the registry}/{section}/_index.md
 ```
 
 This lists all pages in that section with descriptions.
@@ -58,7 +58,7 @@ This lists all pages in that section with descriptions.
 Read only the page(s) that answer the user's question:
 
 ```
-Read ~/Library/Mobile Documents/iCloud~md~obsidian/Documents/Claude Context Library/contexts/technical/{slug}/{section}/{page}.md
+Read <library root>/{library path from the registry}/{section}/{page}.md
 ```
 
 ### Step 5: cite the source
