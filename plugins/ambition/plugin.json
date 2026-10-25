@@ -1,0 +1,9 @@
+{
+  "$schema": "https://agent-plugins.org/schemas/1.0.0/plugin.schema.json",
+  "name": "ambition",
+  "version": "0.1.0",
+  "description": "Turn a routine request into a more ambitious one by raising its altitude, depth, or range, then verify the result outside the model.",
+  "author": { "name": "Matthew Wagner" },
+  "repository": "https://github.com/mattwag05/mw-plugins",
+  "keywords": ["prompting", "planning", "ambition", "workflow"]
+}
