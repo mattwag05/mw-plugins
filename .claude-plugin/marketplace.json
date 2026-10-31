@@ -103,7 +103,7 @@
       "name": "unslop",
       "source": "./client-adapters/claude-code/plugins/unslop",
       "description": "Edit writing to remove common AI patterns and add a more natural human voice.",
-      "version": "0.2.0"
+      "version": "0.3.0"
     },
     {
       "name": "xcode-mcp",

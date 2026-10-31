@@ -77,8 +77,13 @@ Removing patterns is half the job. Sterile, voiceless writing is just as obvious
 28. **Shorten or split dense sentences.** If the reader has to backtrack to parse a sentence, break it in two or drop clauses. One idea per sentence.
 29. **Active voice.** Prefer it. Catch "is/are/was/were + past participle" and name the actor: "queries are validated" becomes "the compiler validates queries", "the file is parsed by the loader" becomes "the loader parses the file". Passive is fine only when the actor is unknown or genuinely doesn't matter.
 30. **Cut adverbs, or use a stronger verb.** "runs quickly" becomes "is fast" or the number. "significantly improves" becomes the measured delta. An adverb propping up a weak verb means the verb is wrong.
-31. **Prefer the plain word.** "utilize" becomes "use", "leverage" becomes "use", "facilitate" becomes "help", "numerous" becomes "many", "in the event that" becomes "if". The fancier synonym is rarely clearer.
+31. **Prefer the plain word.** "utilize" becomes "use", "leverage" becomes "use", "facilitate" becomes "help", "numerous" becomes "many", "in the event that" becomes "if". The fancier synonym is rarely clearer. Labels follow the same rule. "Conditions you have" becomes "Pre-existing conditions", the term people already know.
 
 ### Patient-facing material
 
 32. **No headings in pasted patient text.** When unslopping anything a patient will read (Klara texts, portal replies, emails, handout copy), rewrite it as plain flowing paragraphs with no headings and no bullet lists. Let sentence order carry the structure. Section structure stays reserved for designed HTML/PDF handouts, where headings do work paragraphs can't. Keep every number and clinical claim verbatim while rewriting.
+
+### Screens and summaries
+
+33. **Lead with the action, put the explanation behind it.** On a list, card, or dashboard, people scan for what to do. Show a short actionable title and its key status, and move the why, context, and evidence to the detail view a tap away. Body text that restates the title adds nothing, so cut it. A card titled "Blood Pressure Check" that opens with "Checking your blood pressure regularly is one of the most effective ways to..." keeps the title and shows "Due in March" under it. Front-loaded context makes a screen look daunting. In prose the same rule puts the answer or action first and the detail after.
+34. **Name items as goals, the same way across a set.** "Sleep", "Nutrition", and "Exercise" are categories. "Sleep 7 to 9 hours", "Eat 25 g fiber", and "Move 30 minutes" tell the reader what to do. A list that puts "Sleep" next to "Blood Pressure Check" mixes two styles. Pick the actionable form and use it for every item.

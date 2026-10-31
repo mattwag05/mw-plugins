@@ -1,6 +1,6 @@
 {
   "name": "unslop",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "description": "Edit writing to remove common AI patterns and add a more natural human voice.",
   "author": {
     "name": "Lauren Tan"

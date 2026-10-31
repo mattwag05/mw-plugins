@@ -61,7 +61,7 @@ Versions and adapter source paths are recorded in `.claude-plugin/marketplace.js
 
 ## Attribution
 
-`unslop` is copied from Lauren Tan's [poteto/plugins](https://github.com/poteto/plugins/blob/main/pstack/skills/unslop/SKILL.md) repository under the MIT License. Its [bundled license](plugins/unslop/LICENSE) retains the upstream copyright notice. The upstream `SKILL.md` is preserved byte-for-byte.
+`unslop` is copied from Lauren Tan's [poteto/plugins](https://github.com/poteto/plugins/blob/main/pstack/skills/unslop/SKILL.md) repository under the MIT License. Its [bundled license](plugins/unslop/LICENSE) retains the upstream copyright notice. This copy adds local rules to the upstream `SKILL.md`.
 
 `ambition` paraphrases techniques from Felix Rieseberg's post [How to be more ambitious: A tutorial for humans with models](https://felixrieseberg.com/how-to-be-more-ambitious-a-tutorial-for-humans-with-models/).
 
