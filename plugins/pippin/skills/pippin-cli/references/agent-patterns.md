@@ -13,9 +13,9 @@ Gather mail, calendar, and reminders in parallel for a daily summary.
 open -a Mail && sleep 4
 
 # Parallel gather (run all three, then process)
-pippin mail list --unread --limit 10 --format agent
-pippin calendar remaining --format agent
-pippin reminders list --format agent
+pippin mail list --unread --limit 10
+pippin calendar remaining
+pippin reminders list
 ```
 
 Process results: summarize unread mail count, list today's remaining events, list open reminders.
@@ -28,14 +28,14 @@ Search for specific emails, read them, then act.
 
 ```bash
 # Step 1: Search
-pippin mail search "meeting request" --after 2026-03-08 --format agent
+pippin mail search "meeting request" --after 2026-03-08
 
 # Step 2: Read a specific message (use full compound ID from step 1)
-pippin mail show "iCloud||INBOX||12345" --format agent
+pippin mail show "iCloud||INBOX||12345"
 
 # Step 3: Act
-pippin mail mark "iCloud||INBOX||12345" --read --format agent
-pippin mail move "iCloud||INBOX||12345" --to Trash --format agent
+pippin mail mark "iCloud||INBOX||12345" --read
+pippin mail move "iCloud||INBOX||12345" --to Trash
 ```
 
 ---
@@ -49,14 +49,14 @@ pass. Put `moveTo` / `markRead` on rules in
 
 ```bash
 # Step 1: ALWAYS preview first — this changes nothing without --live
-pippin mail apply-rules --account iCloud --format agent
+pippin mail apply-rules --account iCloud
 
 # Step 2: Read the plan grouped by sender before acting. This is the step that
 # catches an over-broad rule — e.g. an @org.example domain rule intended for
 # bulk senders also sweeping up individual humans on that same domain.
 
 # Step 3: Apply, bounded
-pippin mail apply-rules --account iCloud --max-actions 50 --live --format agent
+pippin mail apply-rules --account iCloud --max-actions 50 --live
 ```
 
 Guardrails are on by default: nothing newer than `--min-age-days` (14) is
@@ -73,13 +73,13 @@ Create a note, then verify it was created.
 
 ```bash
 # Step 1: Create
-pippin notes create "Meeting Notes Mar 10" --body "Discussed Q1 goals." --folder "Work" --format agent
+pippin notes create "Meeting Notes Mar 10" --body "Discussed Q1 goals." --folder "Work"
 
 # Step 2: Search to confirm (note IDs are returned in action result details)
-pippin notes search "Meeting Notes Mar 10" --format agent
+pippin notes search "Meeting Notes Mar 10"
 
 # Step 3: Append more content
-pippin notes edit <id-from-step-2> --body "Action items: ..." --append --format agent
+pippin notes edit <id-from-step-2> --body "Action items: ..." --append
 ```
 
 ---
@@ -90,13 +90,13 @@ List, complete, and create reminders.
 
 ```bash
 # Step 1: List open reminders
-pippin reminders list --format agent
+pippin reminders list
 
 # Step 2: Complete one
-pippin reminders complete <id> --format agent
+pippin reminders complete <id>
 
 # Step 3: Create a new one with a due date
-pippin reminders create "Follow up with Alice" --due 2026-03-15 --priority high --format agent
+pippin reminders create "Follow up with Alice" --due 2026-03-15 --priority high
 ```
 
 ---
@@ -107,18 +107,17 @@ Check free time, create an event, verify it appears.
 
 ```bash
 # Step 1: Check what's on the schedule
-pippin calendar upcoming --format agent
+pippin calendar upcoming
 
 # Step 2: Create an event
 pippin calendar create \
   --title "1:1 with Bob" \
   --start "2026-03-12T14:00:00" \
   --end "2026-03-12T15:00:00" \
-  --alert 15m \
-  --format agent
+  --alert 15m
 
 # Step 3: Search for it to get the ID
-pippin calendar search --query "1:1 with Bob" --format agent
+pippin calendar search --query "1:1 with Bob"
 ```
 
 ---
@@ -129,17 +128,17 @@ Open a page, snapshot it, interact with elements.
 
 ```bash
 # Step 1: Open URL
-pippin browser open "https://example.com" --format agent
+pippin browser open "https://example.com"
 
 # Step 2: Snapshot — get interactive elements with @ref IDs
-pippin browser snapshot --format agent
+pippin browser snapshot
 
 # Step 3: Click a link or fill a form
 pippin browser click "@ref3"
 pippin browser fill "@ref7" "search query"
 
 # Step 4: Snapshot again to see result
-pippin browser snapshot --format agent
+pippin browser snapshot
 
 # Step 5: Fetch raw content (no browser needed for simple pages)
 pippin browser fetch "https://example.com/api/data"
@@ -153,44 +152,44 @@ Find a contact and get their email for sending mail.
 
 ```bash
 # Step 1: Search contacts
-pippin contacts search "Alice Smith" --format agent
+pippin contacts search "Alice Smith"
 
 # Step 2: Get full details
-pippin contacts show <identifier> --format agent
+pippin contacts show <identifier>
 
 # Step 3: Use email in mail send
 pippin mail send \
   --to "alice@example.com" \
   --subject "Following up" \
   --body "Hi Alice, ..." \
-  --format agent
+  --confirm   # without this it only previews
 ```
 
 ---
 
-## Error handling pattern (envelope v1)
+## Error handling pattern (envelope v4)
 
-Every `--format agent` response is an envelope: `{"v":1,"status":"ok|error","duration_ms":N,
-"data":…}` or `{…,"status":"error","error":{"code","message","remediation"}}`. Branch on
+Every response is an envelope: `{"v":4,"status":"ok|error","duration_ms":N,
+"data":…}` or `{…,"status":"error","error":{"code","message","next_step","remediation"?}}`. Branch on
 `status`; the action payload (`{success, action, details}`) lives under `data` on success.
 
 The process **exit code** already mirrors the error (`0` ok, `3` not-found, `4`
 auth/permission, `5` bridge, `7` timeout), so the cheapest check is the exit code:
 
 ```bash
-if pippin reminders complete <id> --format agent >/tmp/out.json; then
+if pippin reminders complete <id> >/tmp/out.json; then
   echo "ok: $(jq -c '.data' /tmp/out.json)"
 else
   code=$?                                  # 4 = permission, 3 = not-found, ...
   jq -r '.error | "\(.code): \(.message)"' /tmp/out.json
-  jq -r '.error.remediation // empty' /tmp/out.json   # show the fix to the user
+  jq -c '.error.next_step' /tmp/out.json   # retryable, retry_after_seconds, next_call, human_action
 fi
 ```
 
 Parsing the envelope directly:
 
 ```bash
-result=$(pippin reminders complete <id> --format agent)
+result=$(pippin reminders complete <id>)
 status=$(echo "$result" | jq -r '.status')
 if [ "$status" = "ok" ]; then
   echo "Completed: $(echo "$result" | jq -c '.data')"
@@ -201,5 +200,5 @@ fi
 ```
 
 Common `error.code` values: `access_denied` (TCC: surface `.error.remediation`),
-`not_found`, `timeout`, `usage`. A `status:"ok"` with a `warnings` entry means partial
+`not_found`, `timeout`, `usage`. A `status:"ok"` with `partial:true` means incomplete
 results: re-run narrower for the rest.

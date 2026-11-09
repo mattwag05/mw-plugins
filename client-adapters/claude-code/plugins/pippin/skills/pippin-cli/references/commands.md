@@ -1,7 +1,7 @@
 # Pippin CLI: command reference
 
-Binary: `/opt/homebrew/bin/pippin` (check `pippin --version`). All structured commands
-support `--format agent` (envelope v1) and `--fields a,b,c` projection: see
+Binary: `/opt/homebrew/bin/pippin` (check `pippin --version`). All commands write
+envelope v4 JSON, and list commands take `--fields a,b,c|all` projection: see
 `../SKILL.md` and `output-formats.md`. TCC permissions attach to the *launching app*; see
 the Permissions section of `../SKILL.md`.
 
@@ -43,14 +43,14 @@ pippin mail apply-rules [--account NAME] [--mailbox INBOX] [--scan-limit 500] [-
 # check the `matched` and `held*` counts before concluding nothing matched.
 # `mail triage` ignores moveTo/markRead entirely and stays read-only.
 
-pippin mail send --to <email> [--to <email>] --subject <subj> --body <text> [--cc <email>] [--bcc <email>] [--from NAME] [--attach <path>] [--dry-run]
-# Send email. --to is repeatable.
+pippin mail send --to <email> [--to <email>] --subject <subj> --body <text> [--cc <email>] [--bcc <email>] [--from NAME] [--attach <path>] [--dry-run] [--confirm]
+# Send email. --to is repeatable. Previews unless --confirm is passed.
 
-pippin mail reply <id> --body <text> [--to <email>] [--cc <email>] [--from NAME] [--attach <path>] [--dry-run]
-# Reply to a message.
+pippin mail reply <id> --body <text> [--to <email>] [--cc <email>] [--from NAME] [--attach <path>] [--dry-run] [--confirm]
+# Reply to a message. Previews unless --confirm is passed.
 
-pippin mail forward <id> --to <email> [--body <text>] [--cc <email>] [--dry-run]
-# Forward a message.
+pippin mail forward <id> --to <email> [--body <text>] [--cc <email>] [--dry-run] [--confirm]
+# Forward a message. Previews unless --confirm is passed.
 
 pippin mail attachments <id> [--save-dir <path>]
 # List (and optionally save) attachments from a message.
@@ -193,7 +193,7 @@ pippin notes list [--folder NAME] [--limit 50] [--fields id,title,folder,...]
 
 pippin notes show <id>
 # Full note details (id, title, body HTML, plainText, folder, dates).
-# In --format agent mode: returns plainText instead of HTML body.
+# Returns plainText instead of the HTML body.
 
 pippin notes search <query> [--folder NAME] [--limit 50] [--fields id,title,...]
 # Search by title or body.

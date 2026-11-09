@@ -2,16 +2,16 @@
 name: pippin-cli
 description: Use Pippin through MCP or its command-line interface for Apple mail, calendar, reminders, contacts, notes, memos, messages, audio, browser work, permissions, and diagnostics.
 metadata:
-  version: "1.4.0"
+  version: "1.5.0"
 ---
 
 # Pippin CLI skill
 
 `pippin` is a macOS CLI that automates Apple's native apps (Mail, Calendar, Reminders,
 Notes, Contacts, Voice Memos, Messages) plus audio and browser. It is built for agents:
-every command speaks a stable, versioned JSON envelope under `--format agent`.
+every command speaks a stable, versioned JSON envelope.
 
-**Current state:** stable **v0.33.0** (`pippin --version` to confirm), exposing **45 MCP
+**Current state:** `pippin --version` reports the release, exposing **76 MCP
 tools** (mail, calendar, reminders, contacts, notes, memos, messages, status, doctor,
 agent-info, …). The pippin MCP server is attached for both the **[agent-runtime]/[agent] gateway**
 (stdio, pointed at `~/.local/bin/pippin mcp-server`) and **Claude Cowork** (via the
@@ -32,8 +32,8 @@ Use this skill when the user asks to:
 
 ## How to call pippin
 
-Two equivalent surfaces: both produce the same agent JSON, because the MCP server is a
-thin wrapper that shells out to the CLI. Everything in this skill (commands, envelope,
+Two equivalent surfaces: both produce the same agent JSON, because the MCP server runs
+the same commands as the CLI. Everything in this skill (commands, envelope,
 gotchas) applies identically to both.
 
 1. **MCP tools** (`mail_list`, `calendar_today`, `reminders_create`, `status`, …) when a
@@ -45,7 +45,7 @@ gotchas) applies identically to both.
    directly. **Invoke the stable path explicitly:**
 
    ```bash
-   ~/.local/bin/pippin <area> <verb> … --format agent
+   ~/.local/bin/pippin <area> <verb> …
    ```
 
    `~/.local/bin/pippin` is the TCC-granted binary (see Permissions below): agents and
@@ -58,13 +58,14 @@ gotchas) applies identically to both.
 
 These are the difference between fast, cheap calls and slow, token-heavy ones:
 
-1. **Always pass `--format agent`** when you (not a human) consume the output. Compact
-   JSON in a versioned envelope. Never parse `text` output.
+1. **Read the envelope.** Every command writes compact JSON in a versioned envelope, so
+   no format flag is needed.
 2. **Project with `--fields`** to return only the keys you need: universal on every
    structured command, including `mail list/search/activity`, `calendar events/search/
    today`, `reminders list/search`, `notes list/search`, `contacts list/search`.
-   `pippin mail list --limit 20 --fields id,subject,from --format agent` is far cheaper
-   than the full payload.
+   `pippin mail list --limit 20 --fields id,subject,from` is far cheaper than the default.
+   List and search rows already default to essential fields; `--fields all` returns
+   whole rows.
 3. **Bound the work**: pass `--limit` and the narrowest filters you can (`--account`,
    `--mailbox`, `--folder`, `--after/--before`, `--range`). Broad/unbounded queries are
    what hit soft timeouts.
@@ -74,25 +75,28 @@ These are the difference between fast, cheap calls and slow, token-heavy ones:
 5. **Run independent reads in parallel** (e.g. mail + calendar + reminders for a briefing),
    then process together.
 
-## Output: the agent envelope (v1)
+## Output: the agent envelope (v4)
 
-Every `--format agent` response is wrapped in a versioned envelope. **Parse `.data`, not
-the top level.**
+Every command and every error writes one compact JSON envelope. There is no other format:
+`--format agent` is an accepted no-op, and `--format text|json` are usage errors. **Parse
+`.data`, not the top level.**
 
 Success:
 ```json
-{"v":1,"status":"ok","duration_ms":142,"data":<payload>,"warnings":["…"]?}
+{"v":4,"status":"ok","duration_ms":142,"partial":true?,"warnings":["…"]?,"next_cursor":"…"?,"data":<payload>}
 ```
 Error:
 ```json
-{"v":1,"status":"error","duration_ms":51,"error":{"code":"access_denied","message":"…","remediation":{…}}}
+{"v":4,"status":"error","duration_ms":51,"error":{"code":"access_denied","message":"…","next_step":{"retryable":false,"human_action":"…"},"remediation":{…}?}}
 ```
 
-- The previous raw payload now lives under `data` unchanged: `jq '.data | length'`,
-  `jq '.data[].id'`, etc.
-- `warnings` (optional) carries non-fatal advisories such as partial-results notices.
-- **Always branch on `status`** before reading `data`. On error, read `error.code`
-  (stable, snake_case) and `error.remediation` for the fix.
+- `data` stays the same type with or without pagination; the cursor is top-level
+  `next_cursor`, omitted on the last page.
+- `partial: true` means the answer is incomplete, so empty `data` is not "nothing found".
+- `warnings` (optional) carries non-fatal advisories.
+- **Always branch on `status`** before reading `data`. On error, act on `error.next_step`:
+  `retryable` and `retry_after_seconds` say whether and when to retry, `next_call`
+  (`{tool, args, argv}`) gives the call to make, and `human_action` says what a person must do.
 
 ### Partial results (soft timeout)
 
@@ -128,7 +132,7 @@ Two consequences that bite agents:
   scheduled tasks should invoke `~/.local/bin/pippin` explicitly**, never the brew symlink.
 - **The prompt only appears in an interactive session.** `pippin permissions` (or
   `pippin init`) triggers every promptable permission in one pass, but only from a real
-  TTY. Under MCP, `--format agent/json`, or a non-TTY pipe it **refuses to prompt** (an
+  TTY. Under MCP or a non-TTY pipe it **refuses to prompt** (an
   unanswerable dialog would just hang) and prints a read-only report instead, and EventKit
   commands fast-fail with `access_denied` rather than blocking.
 
@@ -137,7 +141,7 @@ Two consequences that bite agents:
 works from any launcher. (`make install` refreshes the binary at the same path without
 losing the grant.)
 
-- **Check state any time** without prompting: `pippin permissions --status --format agent`
+- **Check state any time** without prompting: `pippin permissions --status`
   or `pippin doctor`: each integration reports `granted` / `not_determined` /
   `manual_required` + whether it's promptable.
 - **Voice Memos and Messages need Full Disk Access**, which has *no* prompt: grant it
@@ -152,54 +156,55 @@ launcher to enable.
 
 ```bash
 # Mail (Mail.app must be running)
-pippin mail accounts --format agent
-pippin mail list [--account NAME] [--mailbox INBOX] [--unread] [--limit 20] [--fields id,subject,from] --format agent
-pippin mail search <query> [--account NAME] [--after YYYY-MM-DD] [--body] [--limit 10] [--fields id,subject] --format agent
-pippin mail activity [--since YYYY-MM-DD] [--fields id,from] --format agent
-pippin mail show <id> --format agent              # id is account||mailbox||numericId
-pippin mail send --to <email> --subject <s> --body <t>
+pippin mail accounts
+pippin mail list [--account NAME] [--mailbox INBOX] [--unread] [--limit 20] [--fields id,subject,from]
+pippin mail search <query> [--account NAME] [--after YYYY-MM-DD] [--body] [--limit 10] [--fields id,subject]
+pippin mail activity [--since YYYY-MM-DD] [--fields id,from]
+pippin mail show <id>              # id is account||mailbox||numericId
+pippin mail send --to <email> --subject <s> --body <t> --confirm  # previews without --confirm (also reply, forward)
+pippin job run -- mail cache fill                 # build the index that speeds list/search without Full Disk Access
 pippin mail mark <id> --read|--unread
 pippin mail move <id> --to <mailbox>              # Trash, Junk, Sent, Drafts
 pippin mail apply-rules [--account NAME] [--live] # bulk move/mark by rule; PREVIEWS unless --live
 
 # Calendar
-pippin calendar today|remaining|upcoming [--fields id,title,startDate] --format agent
-pippin calendar events [--from YYYY-MM-DD] [--to YYYY-MM-DD] [--range today|week|month] --format agent
-pippin calendar search --query <q> [--fields id,title] --format agent
+pippin calendar today|remaining|upcoming [--fields id,title,startDate]
+pippin calendar events [--from YYYY-MM-DD] [--to YYYY-MM-DD] [--range today|week|month]
+pippin calendar search --query <q> [--fields id,title]
 pippin calendar create --title <t> --start <date> [--end <date>] [--notes <n>] [--alert 15m]
-pippin calendar show <id> --format agent
+pippin calendar show <id>
 
 # Reminders   (note: title is POSITIONAL; --list takes an EventKit ID from `reminders lists`)
-pippin reminders list [--completed] [--priority high|medium|low] [--fields id,title,dueDate] --format agent
+pippin reminders list [--completed] [--priority high|medium|low] [--fields id,title,dueDate]
 pippin reminders create <title> [--due YYYY-MM-DD] [--priority high|medium|low] [--notes <n>]
 pippin reminders complete <id>
-pippin reminders search <query> --format agent
+pippin reminders search <query>
 
 # Notes
-pippin notes list [--folder NAME] [--limit 50] [--fields id,title] --format agent
-pippin notes show <id> --format agent             # agent mode returns plainText, not HTML body
-pippin notes search <query> --format agent
+pippin notes list [--folder NAME] [--limit 50] [--fields id,title]
+pippin notes show <id>             # returns plainText, not HTML body
+pippin notes search <query>
 pippin notes create <title> [--body <text>] [--folder NAME]
 pippin notes edit <id> [--body <text>] [--append]
 
 # Contacts   (--fields here selects which CN keys are *fetched* — server-side)
-pippin contacts list [--group NAME] [--fields id,fullName,emails] --format agent
-pippin contacts search <query> --format agent
-pippin contacts show <id> --format agent
+pippin contacts list [--group NAME] [--fields id,fullName,emails]
+pippin contacts search <query>
+pippin contacts show <id>
 
 # Voice Memos / Messages (require Full Disk Access)
-pippin memos list [--since YYYY-MM-DD] [--limit 20] --format agent
+pippin memos list [--since YYYY-MM-DD] [--limit 20]
 pippin memos transcribe <id>
 
 # Audio / Browser (gated behind PIPPIN_EXPERIMENTAL=1)
 pippin audio speak <text> [--voice af_heart] [--output-file path.wav]
-pippin browser open <url> --format agent ; pippin browser snapshot --format agent
+pippin browser open <url> ; pippin browser snapshot
 
 # System / diagnostics
-pippin status --format agent                       # whole-system dashboard (broad — may be partial)
+pippin status                       # whole-system dashboard (broad — may be partial)
 pippin permissions [--status] [--format agent]     # grant (interactive) or report TCC state
 pippin doctor                                      # permissions + dependency health
-pippin agent-info --format agent                   # capability/feature probe
+pippin agent-info                   # capability/feature probe
 pippin --version
 ```
 
