@@ -73,7 +73,7 @@
       "name": "pippin",
       "source": "./client-adapters/claude-code/plugins/pippin",
       "description": "Use Pippin through MCP or its CLI for Apple mail, calendar, reminders, contacts, notes, memos, messages, and diagnostics.",
-      "version": "1.4.0"
+      "version": "1.5.0"
     },
     {
       "name": "project-housekeeping",
