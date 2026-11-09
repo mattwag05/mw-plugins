@@ -78,6 +78,7 @@ Removing patterns is half the job. Sterile, voiceless writing is just as obvious
 29. **Active voice.** Prefer it. Catch "is/are/was/were + past participle" and name the actor: "queries are validated" becomes "the compiler validates queries", "the file is parsed by the loader" becomes "the loader parses the file". Passive is fine only when the actor is unknown or genuinely doesn't matter.
 30. **Cut adverbs, or use a stronger verb.** "runs quickly" becomes "is fast" or the number. "significantly improves" becomes the measured delta. An adverb propping up a weak verb means the verb is wrong.
 31. **Prefer the plain word.** "utilize" becomes "use", "leverage" becomes "use", "facilitate" becomes "help", "numerous" becomes "many", "in the event that" becomes "if". The fancier synonym is rarely clearer. Labels follow the same rule. "Conditions you have" becomes "Pre-existing conditions", the term people already know.
+31a. **Frame first, name last.** When a sentence names the hardest, best, or main thing, open with the frame and end on the specific thing. "Mail was the hard part." becomes "The hardest part was Mail." Avoid the clipped topic-first verdict.
 
 ### Patient-facing material
 
