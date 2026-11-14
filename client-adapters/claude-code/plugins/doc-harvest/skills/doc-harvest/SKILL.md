@@ -37,7 +37,7 @@ python3 "scripts/harvest.py" find "<slug-or-url-fragment>"
 - **Found** (prints `dir`, `harvested`, `page_count`): this is an **update**. Use the
   re-harvest flow below (steps 5R-7R). Never write a second copy.
 - **Not found**: a new harvest. Choose the doc-set dir under the library (default
-  `30-Technology/<slug>/`) and continue with steps 3-9.
+  `raw/docs/<slug>/`) and continue with steps 3-9.
 
 ### Apple developer docs: use the JSON API
 
@@ -197,7 +197,7 @@ Review the plan, then write files with `--write`:
 python3 "scripts/harvest.py" organize --slug "<slug>" --manifest "<manifest_path>" --write --ccl-root "<ccl_path>"
 ```
 
-The library root is resolved as in step 2b; the doc-set dir is `<root>/30-Technology/<slug>/`
+The library root is resolved as in step 2b; the doc-set dir is `<root>/raw/docs/<slug>/`
 (pass `--ccl-root` the library root and write under that dir).
 
 ### 7. Write page content
