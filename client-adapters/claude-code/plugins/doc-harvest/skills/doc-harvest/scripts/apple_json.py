@@ -18,7 +18,7 @@ Subcommands:
 
 Example:
   apple_json.py crawl https://developer.apple.com/design/human-interface-guidelines -o m.json
-  apple_json.py stage -m m.json -o /tmp/stage --existing "$CCL/30-Technology/apple-hig"
+  apple_json.py stage -m m.json -o /tmp/stage --existing "$CCL/raw/docs/apple-hig"
 """
 
 from __future__ import annotations
