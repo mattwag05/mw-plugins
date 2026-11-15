@@ -89,6 +89,70 @@ class SyncSkillsTest(unittest.TestCase):
         self.assertEqual(run("check", *self.args)[0], 0)
         self.assertIn(" 0 changes", run(*self.args)[1])
 
+    def _talia_and_iris(self):
+        h = self.home
+        talia = h / ".hermes/skills/research"  # SKILL.md at a category root, plus siblings
+        (talia / "llm-wiki").mkdir(parents=True)
+        (talia / "references").mkdir()
+        (talia / "SKILL.md").write_text("---\nname: research\n---\nhermes research\n")
+        (talia / "llm-wiki/SKILL.md").write_text("---\nname: llm-wiki\n---\n")
+        (talia / "DESCRIPTION.md").write_text("cat\n")
+        iris = h / ".hermes/profiles/iris/skills/research"  # category with no skill of its own
+        (iris / "arxiv").mkdir(parents=True)
+        (iris / "DESCRIPTION.md").write_text("cat\n")
+        (iris / "arxiv/SKILL.md").write_text("---\nname: arxiv\n---\n")
+        theo = h / ".hermes/profiles/theo/skills/software-development/plan"
+        theo.mkdir(parents=True)
+        (theo / "SKILL.md").write_text("---\nname: plan\n---\ntheo plan\n")
+        return talia, iris, theo
+
+    def test_category_without_own_skill_gets_the_link_inside(self):
+        _, iris, _ = self._talia_and_iris()
+        code, out = run(*self.args, "--apply")
+        self.assertEqual(code, 0, out)
+        link = iris / "research"
+        self.assertTrue(link.is_symlink() and Path(os.readlink(link)) == self.home / ".agents/skills/research")
+        self.assertTrue((iris / "arxiv/SKILL.md").is_file())
+        self.assertIn(" 0 changes", run(*self.args)[1])
+        code, out = run("check", *self.args)
+        self.assertEqual(code, 0, out)
+        self.assertIn("OK", out)
+
+    def test_same_name_skill_is_untouched_without_the_flag(self):
+        talia, _, theo = self._talia_and_iris()
+        before = snapshot(self.home / ".hermes")
+        run(*self.args, "--apply")
+        self.assertIn("hermes research", (talia / "SKILL.md").read_text())
+        self.assertTrue((theo / "SKILL.md").is_file())
+        self.assertFalse((self.home / ".hermes/profiles/theo/skills/plan").exists())
+
+    def test_replace_conflicts_backs_up_and_removes_only_the_colliding_skill(self):
+        talia, _, theo = self._talia_and_iris()
+        code, out = run(*self.args, "--replace-conflicts")  # dry run says what it will do
+        self.assertEqual(code, 0, out)
+        self.assertIn(f"displace    {talia / 'SKILL.md'}", out)
+        self.assertIn(f"displace    {theo}", out)
+        self.assertTrue((theo / "SKILL.md").is_file(), "dry run must not remove")
+        code, out = run(*self.args, "--replace-conflicts", "--apply")
+        self.assertEqual(code, 0, out)
+        canon = self.home / ".agents/skills"
+        self.assertFalse((talia / "SKILL.md").exists())
+        for kept in ("llm-wiki/SKILL.md", "DESCRIPTION.md"):
+            self.assertTrue((talia / kept).is_file(), kept)
+        self.assertTrue((talia / "references").is_dir())
+        link = talia / "research"
+        self.assertTrue(link.is_symlink() and Path(os.readlink(link)) == canon / "research")
+        self.assertFalse(theo.exists())
+        tplan = self.home / ".hermes/profiles/theo/skills/plan"
+        self.assertTrue(tplan.is_symlink() and Path(os.readlink(tplan)) == canon / "plan")
+        backup = next((self.home / "backups").iterdir())
+        self.assertIn("hermes research", (backup / ".hermes/skills/research/SKILL.md").read_text())
+        self.assertIn("theo plan", (backup / ".hermes/profiles/theo/skills/software-development/plan/SKILL.md").read_text())
+        self.assertIn(" 0 changes", run(*self.args, "--replace-conflicts")[1])
+        code, out = run("check", *self.args)
+        self.assertEqual(code, 0, out)
+        self.assertIn("OK", out)
+
     def test_retired_names_are_moved_out_and_stay_out(self):
         h = self.home
         (h / ".agents/skills/triage").mkdir()

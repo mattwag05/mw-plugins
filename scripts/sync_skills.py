@@ -14,6 +14,8 @@ Content comes from `git archive <ref>`, so uncommitted edits are never installed
 Anything replaced is moved to <home>/backups/<timestamp>-core-skill-sync/. A directory
 holding nested skills (a category), or a runtime that already has a skill with the same
 name, is never touched: it is reported as a conflict (two same-named skills hide each other).
+A category with no skill of its own gets the core link inside it. With --replace-conflicts, a
+same-named skill elsewhere is backed up and removed (its siblings stay) and the core skill linked.
 """
 import argparse
 import hashlib
@@ -81,7 +83,13 @@ def runtime_dirs(home):
     return [d for d in dirs if d.parent.is_dir()]
 
 
-def plan(home, skills, keep_retired=False):
+def link_path(rdir, name):
+    """Where the core link for name lives: a category dir with no skill of its own holds it inside."""
+    top = rdir / name
+    return top / name if top.is_dir() and not top.is_symlink() and not (top / "SKILL.md").exists() else top
+
+
+def plan(home, skills, keep_retired=False, replace_conflicts=False):
     canon = home / ".agents/skills"
     actions = []
     for name, src in skills.items():
@@ -97,12 +105,24 @@ def plan(home, skills, keep_retired=False):
             old = rdir / name
             if old.is_symlink() or (old.exists() and is_single_skill(old)):
                 actions.append(("retire", name, None, old))
+            elif link_path(rdir, name) != old and link_path(rdir, name).is_symlink():
+                actions.append(("retire", name, None, link_path(rdir, name)))
             elif old.exists():
                 actions.append(("conflict", name, None, old))
     for rdir in runtime_dirs(home):
         taken = names_in(rdir)
         for name in skills:
-            link, target = rdir / name, canon / name
+            top, target = rdir / name, canon / name
+            freed = False  # the skill at a category root is being displaced, so the category takes the link inside
+            if replace_conflicts:
+                # Matt, 2026-11-15: core replaces a same-named Hermes skill; siblings in its category stay.
+                for d in taken.get(name, ()):
+                    if d == top and is_single_skill(d):
+                        continue  # replace-dir below handles it
+                    actions.append(("displace", name, None, d if is_single_skill(d) else d / "SKILL.md"))
+                    freed = freed or d == top
+                taken[name] = [d for d in taken.get(name, ()) if d == top and is_single_skill(d)]
+            link = top / name if freed else link_path(rdir, name)
             ours = link.is_symlink() and Path(os.readlink(link)) == target
             if any(d != link for d in taken.get(name, ())):
                 # Another skill here already uses this name; two same-named skills hide each other in Hermes.
@@ -170,7 +190,7 @@ def apply(home, commit, ref, skills, actions, keep_retired=False):
         if kind == "unlink":
             dest.unlink()  # our own symlink; nothing to back up
             continue
-        if kind == "retire":
+        if kind in ("retire", "displace"):
             stash(dest)
             continue
         dest.parent.mkdir(parents=True, exist_ok=True)
@@ -183,8 +203,8 @@ def apply(home, commit, ref, skills, actions, keep_retired=False):
     manifest = {
         "ref": ref, "commit": commit, "synced_at": time.strftime("%Y-%m-%dT%H:%M:%S%z"),
         "skills": {n: tree_hash(canon / n) for n in skills},
-        "links": [str(d / n) for d in runtime_dirs(home) for n in skills
-                  if (d / n).is_symlink() and Path(os.readlink(d / n)) == canon / n],
+        "links": [str(link_path(d, n)) for d in runtime_dirs(home) for n in skills
+                  if link_path(d, n).is_symlink() and Path(os.readlink(link_path(d, n))) == canon / n],
         "conflicts": [str(dest) for kind, _, _, dest in actions if kind in ("conflict", "unlink")],
         "retired": [] if keep_retired else sorted(retired),
     }
@@ -371,6 +391,8 @@ def main(argv=None):
     ap.add_argument("--core-only", default="", help="comma-separated Hermes profiles that get the core block without the overlay")
     ap.add_argument("--keep-retired", action="store_true",
                     help="leave retired skill names in place (a host whose tooling still pins them)")
+    ap.add_argument("--replace-conflicts", action="store_true",
+                    help="back up and remove a same-named skill elsewhere in a runtime (siblings stay), then link the core skill")
     ap.add_argument("--home", type=Path, default=Path.home(), help=argparse.SUPPRESS)
     args = ap.parse_args(argv)
     home = args.home.resolve()
@@ -378,12 +400,13 @@ def main(argv=None):
         return check(home, args.ref)
     with tempfile.TemporaryDirectory() as tmp:
         commit, skills = export_ref(args.ref, tmp)
-        actions = plan(home, skills, args.keep_retired)
+        actions = plan(home, skills, args.keep_retired, args.replace_conflicts)
         changes = sum(a[0] != "conflict" for a in actions)
         print(f"core skills at {args.ref} = {commit[:10]}: {len(skills)} skills, {changes} changes, "
               f"{len(actions) - changes} conflicts kept as-is")
         for kind, name, src, dest in actions:
-            print(f"  {kind:<11} {dest}" + (f" -> {src}" if kind not in ("install", "update", "retire") else ""))
+            print(f"  {kind:<11} {dest}" + (f" -> {src}" if kind not in ("install", "update", "retire", "displace") else "")
+              + (" (backed up, then removed)" if kind == "displace" else ""))
         if args.blocks:
             core_dir = export_core(commit, tmp)
             overlay = args.overlay.read_text() if args.overlay else ""
