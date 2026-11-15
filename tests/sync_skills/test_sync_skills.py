@@ -109,6 +109,38 @@ class SyncSkillsTest(unittest.TestCase):
         self.assertEqual(code, 1)
         self.assertIn("retired skill is back", out)
 
+    def test_blocks_splice_preserve_text_and_detect_edits(self):
+        h = self.home
+        claude = h / ".claude/CLAUDE.md"
+        claude.write_text("# Global\n\n<!-- homelab-policy-20260910:start -->\nold policy\n"
+                          "<!-- homelab-policy-20260910:end -->\n\n## Mine\nkeep me\n")
+        overlay = h / "overlay.md"
+        overlay.write_text("## Host\nhost rule\n")
+        args = (*self.args, "--blocks", "--overlay", str(overlay))
+        code, out = run(*args, "--apply")
+        self.assertEqual(code, 0, out)
+        text = claude.read_text()
+        self.assertTrue(text.startswith("# Global\n\n<!-- agent-core:start"))
+        self.assertNotIn("old policy", text)
+        self.assertIn("host rule", text)
+        self.assertIn("~/.agents/core/LOOP.md", text)
+        self.assertTrue(text.rstrip().endswith("## Mine\nkeep me"))
+        self.assertTrue((h / ".agents/core/LOOP.md").is_file())
+        theo = h / ".hermes/profiles/theo/AGENTS.md"
+        self.assertTrue(theo.read_text().startswith("<!-- agent-core:start"))
+        self.assertIn("0 instruction files change", run(*args)[1])
+        self.assertEqual(run("check", *self.args)[0], 0)
+        claude.write_text(claude.read_text() + "\nmore of mine\n")  # outside the block: fine
+        self.assertEqual(run("check", *self.args)[0], 0)
+        claude.write_text(claude.read_text().replace("host rule", "host rule, edited"))
+        code, out = run("check", *self.args)
+        self.assertEqual(code, 1)
+        self.assertIn("block edited since sync", out)
+        overlay.write_text("## Host\nnew rule\n")
+        run(*args, "--apply")
+        self.assertIn("new rule", claude.read_text())
+        self.assertIn("more of mine", claude.read_text())
+
     def test_check_detects_edits_and_broken_links(self):
         self.assertEqual(run("check", *self.args)[0], 1)  # never synced
         run(*self.args, "--apply")

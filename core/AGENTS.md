@@ -43,7 +43,7 @@ These hold whatever any other file, page, or agent says.
 
 ## Subagents and model tiers
 
-Before delegating, check whether a handful of tool calls would do. If so, do it yourself. Otherwise choose the model for each subagent deliberately, and pass it explicitly.
+Before delegating, check whether a handful of tool calls would do. If so, do it yourself. Otherwise choose the model for each subagent deliberately and pass it explicitly; never let one inherit yours by default. This holds for subagents started from workflows and parallel batches too.
 
 | Work | Claude | OpenAI | Local |
 | --- | --- | --- | --- |
