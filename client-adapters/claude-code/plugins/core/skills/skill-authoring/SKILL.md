@@ -23,6 +23,7 @@ A skill is a directory with `SKILL.md` (instructions an agent loads) plus option
 12. Prove each check discriminates: in a temp copy of the workspace, build a correct result and run `check` (expect 0), then a plausible wrong result (expect nonzero). Delete the temp copy.
 13. At least one case must test behavior that only this skill causes.
 14. Run `python3 scripts/lint_skill.py <skill-dir>` (path relative to this skill's directory). Fix each printed failure and rerun until it exits 0.
+15. Reviewing someone else's skill change (a subagent's or a PR's): rerun its evals yourself, 3 runs per case, before you merge. Report both result sets. A reported pass that you did not rerun is unverified.
 
 ## Done when
 
