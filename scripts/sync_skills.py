@@ -147,8 +147,18 @@ def is_single_skill(path):
     return not any(p.name in ("SKILL.md", "DESCRIPTION.md") and p.parent != path for p in path.rglob("*"))
 
 
+def new_backup_dir(home, label):
+    """A backup dir no earlier run used: two applies in one second must not merge (and overwrite) backups."""
+    base = home / "backups" / f"{time.strftime('%Y%m%d-%H%M%S')}-{label}"
+    path, n = base, 1
+    while path.exists():
+        n += 1
+        path = base.with_name(f"{base.name}-{n}")
+    return path
+
+
 def apply(home, commit, ref, skills, actions):
-    backup = home / "backups" / f"{time.strftime('%Y%m%d-%H%M%S')}-core-skill-sync"
+    backup = new_backup_dir(home, "core-skill-sync")
     def stash(path):
         if path.is_symlink() or path.exists():
             rel = path.relative_to(home)
@@ -308,7 +318,7 @@ def plan_blocks(home, blocks, core_only):
 
 
 def apply_blocks(home, commit, core_dir, blocks, core_only, overlay_path, changes):
-    backup = home / "backups" / f"{time.strftime('%Y%m%d-%H%M%S')}-core-blocks"
+    backup = new_backup_dir(home, "core-blocks")
     dest = home / ".agents/core"
     if dest.exists():
         (backup / ".agents").mkdir(parents=True, exist_ok=True)

@@ -150,6 +150,19 @@ class SyncSkillsTest(unittest.TestCase):
         self.assertIn("new rule", claude.read_text())
         self.assertIn("more of mine", claude.read_text())
 
+    def test_two_applies_in_the_same_second_do_not_collide(self):
+        from unittest import mock
+        (self.home / ".hermes/profiles/theo/SOUL.md").write_text("I am Theo.\n")
+        args = (*self.args, "--blocks")
+        with mock.patch.object(sync_skills.time, "strftime", return_value="20990101-000000"):
+            self.assertEqual(run(*args, "--apply")[0], 0)
+            (self.home / ".hermes/profiles/theo/SOUL.md").write_text("I am Theo, edited.\n")
+            (self.home / ".agents/skills/grill/SKILL.md").write_text("edited\n")
+            self.assertEqual(run(*args, "--apply")[0], 0)
+        souls = sorted(p.read_text() for p in (self.home / "backups").rglob("SOUL.md"))
+        self.assertIn("I am Theo.\n", souls, "the first backup of SOUL.md must survive the second apply")
+        self.assertTrue(any("edited" in t for t in souls))
+
     def test_check_detects_edits_and_broken_links(self):
         self.assertEqual(run("check", *self.args)[0], 1)  # never synced
         run(*self.args, "--apply")
