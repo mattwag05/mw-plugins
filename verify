@@ -1,0 +1,39 @@
+#!/bin/sh
+# verify: the one command an agent runs to check this repo (template: core/templates/verify).
+# Exits 0 all passed, 1 any failed, 2 none failed but a check was skipped (missing tool = open gate).
+cd "$(dirname "$0")" || exit 1
+fails=0; skips=0; log=$(mktemp); trap 'rm -f "$log"' EXIT
+
+check() {
+  name=$1; shift
+  if "$@" >"$log" 2>&1; then echo "PASS $name"
+  else echo "FAIL $name"; tail -15 "$log" | sed 's/^/     /'; fails=$((fails + 1)); fi
+}
+need() {
+  command -v "$1" >/dev/null 2>&1 && return 0
+  echo "SKIP $2 ($1 not installed)"; skips=$((skips + 1)); return 1
+}
+lint_core_skills() {
+  rc=0
+  for s in plugins/core/skills/*/; do
+    python3 plugins/core/skills/skill-authoring/scripts/lint_skill.py "$s" || rc=1
+  done
+  return $rc
+}
+no_em_dashes() {
+  # Core docs and skills are authored prose; eval fixtures may hold dashes on purpose.
+  ! grep -rn --exclude-dir=evals "$(printf '\342\200\224')" core plugins/core
+}
+
+check "adapters current" python3 scripts/build_claude_adapters.py --check
+need claude "marketplace valid" && check "marketplace valid" claude plugin validate .
+check "doc-harvest tests" python3 -m unittest discover -s plugins/doc-harvest/tests
+check "eval runner tests" python3 -m unittest discover -s tests/eval_skill
+check "core skill lint" lint_core_skills
+check "no em dashes in core" no_em_dashes
+need gitleaks "secret scan" && check "secret scan" gitleaks dir --no-banner --redact .
+
+echo "verify: $fails failed, $skips skipped"
+[ "$fails" -gt 0 ] && exit 1
+[ "$skips" -gt 0 ] && exit 2
+exit 0

@@ -5,7 +5,7 @@ Use these five steps for every task: code, homelab changes, research, writing. A
 ## 1. Frame
 
 1. State the goal in one sentence.
-2. State the done-check: the observable result that proves the task is finished. Examples: a command's output, a passing test, a rendered page, a file at a path.
+2. State the done-check: the observable result that proves the task is finished. Examples: a command's output, a passing test, a file at a path.
 3. If you cannot write the done-check, the intent is unclear. Use `grill` before doing anything else.
 4. Pick one playbook and read only that skill:
    - new behavior: `tdd`
@@ -33,7 +33,7 @@ Use these five steps for every task: code, homelab changes, research, writing. A
 
 ## 4. Verify
 
-1. Run the project's `verify` command, or the playbook's done-check, and paste the output. The output is evidence. Your summary is not.
+1. Run `./verify` at the repo root (see `references/verify.md`), or the playbook's done-check, and paste the output. The output is evidence. Your summary is not.
 2. "Inconclusive" is not a pass. A missing or failing check is an open gate: say so plainly.
 3. Expected values in tests come from outside your own reasoning: a spec, real data, or the reproduction.
 4. For a consequential change, use `review`. The reviewer starts fresh and gets the original goal and the diff.
