@@ -5,4 +5,9 @@
 - t3dotgg/tstack @ 11e37a7, skills/babysit-pr/SKILL.md, MIT: idea that a script watches CI and the model never writes its own sleep loop (the script itself is not copied; forge polling is out of scope).
 - mattpocock/skills @ 5863806, skills/engineering/pr/SKILL.md, MIT: PR body sections for evidence and a one-way or two-way door note.
 
+- mw-plugins archive/plugins/phased-shipping/skills/phased-shipping/SKILL.md (2026-11-15 fold): find the CI workflow that really runs the tests, name the PR a stacked PR builds on, and the stacked-PR mechanics (branch per slice, review host from the push URL, CI-only-on-main retarget, retarget-before-merge, merge commits keep hashes), condensed into `references/stacked-prs.md`. Its auto-push, ScheduleWakeup polling, fixer subagents that push, `/simplify` gate, and GitHub `gh-stack` path were dropped.
+- mw-plugins archive/plugins/session-closeout and project-housekeeping (2026-11-15 fold): list the whole outgoing commit range, including older commits, and name the canonical remote in the ask.
+
 Adapted for small models: dropped GitHub, bot names, cross-model review and autonomous merge; the agent never pushes or merges. Mechanical checks moved into `scripts/ready_check.sh`; the verdict has a fixed first-line format; steps are numbered with an observable Done-when list.
+
+Eval `all-good` now has two outgoing commits and checks that `SHIP.md` lists both hashes.

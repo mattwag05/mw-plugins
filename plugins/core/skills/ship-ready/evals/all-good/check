@@ -1,10 +1,13 @@
 #!/bin/sh
-# READY verdict, PR body sections, nothing pushed or rewritten.
+# READY verdict, every outgoing commit listed, PR body sections, nothing pushed or rewritten.
 [ -f SHIP.md ] || { echo "SHIP.md missing"; exit 1; }
 v=$(grep -m1 -iE '^verdict:' SHIP.md)
 echo "$v" | grep -qiE '^verdict:[[:space:]]*\**READY' || { echo "verdict is not READY: $v"; exit 1; }
 for s in problem change proof; do
   grep -qiE "^#+[[:space:]]*$s" SHIP.md || { echo "PR body section '$s' missing"; exit 1; }
+done
+for h in $(git rev-list main..HEAD); do
+  grep -q "$(echo "$h" | cut -c1-7)" SHIP.md || { echo "outgoing commit $(echo "$h" | cut -c1-7) not listed"; exit 1; }
 done
 [ -z "$(git remote)" ] || { echo "a remote exists"; exit 1; }
 git merge-base --is-ancestor "$(cat .git/eval-head)" HEAD || { echo "history was rewritten"; exit 1; }

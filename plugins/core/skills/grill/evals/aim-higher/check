@@ -1,0 +1,9 @@
+#!/bin/sh
+# Pass: the aim-higher reply shape (Outcome and Check lines, closing question) and no file changed.
+here="$(dirname "$0")"
+[ -n "$EVAL_TRANSCRIPT" ] || { echo "no transcript"; exit 1; }
+grep -Eiq '^[[:space:]*>`-]*Outcome:' "$EVAL_TRANSCRIPT" || { echo "no Outcome: line"; exit 1; }
+grep -Eiq '^[[:space:]*>`-]*Check:' "$EVAL_TRANSCRIPT" || { echo "no Check: line"; exit 1; }
+grep -Eiq 'which version' "$EVAL_TRANSCRIPT" || { echo "did not ask which version to run"; exit 1; }
+diff -r "$here/orig" "${EVAL_WORKSPACE:-.}" >/dev/null 2>&1 || { echo "workspace changed before approval"; exit 1; }
+echo "ambitious version proposed, nothing changed"

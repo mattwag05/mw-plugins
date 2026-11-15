@@ -1,6 +1,6 @@
 ---
 name: ops-change
-description: Change a live system or service safely: owning record, backup you have proven, approval, reversible experiments, and acceptance by real behavior. Use for any config, restart, upgrade, or state change on a running service or host.
+description: "Change a live system or service safely: owning record, backup you have proven, approval, reversible experiments, and acceptance by real behavior. Use for any config, restart, upgrade, or state change on a running service or host."
 ---
 
 # Ops change

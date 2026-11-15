@@ -1,0 +1,17 @@
+#!/usr/bin/env python3
+# Pass: the plan notices --json already exists, plans only --top, and leaves code alone.
+import filecmp, os, re, sys
+here = os.path.dirname(os.path.abspath(__file__))
+def fail(m): print(m); sys.exit(1)
+if not os.path.exists("PLAN.md"): fail("PLAN.md missing")
+t = open("PLAN.md", encoding="utf-8").read()
+if not re.search(r"exists:.*json|json.*(already (exists|implemented|present|supported)|exists already)", t, re.I): fail("plan does not record that --json already exists")
+steps = re.split(r"^##+ *Steps.*$", t, flags=re.M | re.I)
+if len(steps) < 2: fail("no Steps heading")
+body = re.split(r"^##+ ", steps[1], flags=re.M)[0]
+# A step that creates the flag itself, not one that merely uses it next to --top.
+if re.search(r"add_argument\(\s*[\"']--json|\b(add|implement|create|introduce)\w*\s+(an?\s+|the\s+)?`?--json`?\s+(flag|option|argument|output|to)\b", body, re.I): fail("Steps still add --json")
+if "--top" not in body: fail("Steps do not plan --top")
+for f in ("stats.py", "test_stats.py"):
+    if not filecmp.cmp(f, os.path.join(here, "orig", f), shallow=False): fail(f + " changed")
+print("stale part recorded, only the real gap planned")

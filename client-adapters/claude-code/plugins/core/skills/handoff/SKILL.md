@@ -1,6 +1,6 @@
 ---
 name: handoff
-description: Write HANDOFF.md so a fresh session can continue the work from files alone, and decide whether to hand off at all. Use when context is getting long, a phase ends, work pauses, or the human asks to hand off or continue later.
+description: "Write HANDOFF.md so a fresh session can continue the work from files alone, and decide whether to hand off at all. Use when context is getting long, a phase ends, work pauses, or the human asks to hand off or continue later."
 ---
 
 # Handoff

@@ -1,6 +1,6 @@
 ---
 name: tdd
-description: Build new behavior test-first, or refactor safely, one behavior at a time: write a failing test, see it fail, then make it pass. Use when adding a feature, fixing via tests, refactoring, or the user says tdd or red-green.
+description: "Build new behavior test-first, or refactor safely, one behavior at a time: write a failing test, see it fail, then make it pass. Use when adding a feature, fixing via tests, refactoring, or the user says tdd or red-green."
 ---
 
 # TDD (test first)

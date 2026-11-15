@@ -1,6 +1,6 @@
 ---
 name: unslop
-description: Make prose read like a careful human wrote it by removing AI tells. Use when writing or editing any prose a person will read: replies, docs, commit messages, emails, READMEs.
+description: "Make prose read like a careful human wrote it by removing AI tells, and shape replies so the reader can act. Use when writing or editing any prose a person will read: replies, docs, commit messages, emails, READMEs. Covers the retired unslop and i-have-adhd skills."
 ---
 
 # Unslop
@@ -22,12 +22,28 @@ Prose here means sentences meant for a person. Code, commands, file paths, numbe
 5. Fix every line it prints, then rerun. Repeat until it prints nothing and exits 0.
 6. Reread once and ask: what still sounds machine-made? Fix it, then rerun the scanner one last time.
 
+## Replies
+
+A reply is text a person reads to decide what to do next (a chat answer, a status update, a reply draft in a file). Shape it this way:
+
+- The first line is the answer or the next action, such as a command or a file to open. Context comes after.
+- Number multi-step work: one action per step, five items at most. Split a longer list into "now" and "later".
+- Say where things stand: "Step 3 of 5 done: schema updated."
+- Show what now works and how to try it, not a list of edits.
+- State an error as cause and fix, without "Uh oh" or "There seems to be".
+- Finish the first issue. Offer a second one as a separate question at the end, not as a "by the way" sidebar.
+- If anything is still open, end with one next action the reader can do now.
+- Give time estimates in concrete units ("about 15 minutes").
+
+Test: a reader who sees only the first and last lines knows what happened and what to do next.
+
 ## Done when
 
 - `python3 scripts/slop_scan.py <file>` exits 0 with no output.
 - The file contains zero em dash characters.
 - Every number, name, command, and code block from the original is still present and unchanged.
 - No sentence opens with a stock phrase from `patterns.md`.
+- For a reply, the first line is the answer or the next action.
 - You did not add facts the original lacked.
 
 ## Notes

@@ -7,4 +7,6 @@ t = open(fs[0], encoding="utf-8").read()
 if not re.search(r"not found|could not find|couldn't find|no source|not stated|not specified|unknown", t, re.I): fail("does not say the value was not found")
 if re.search(r"\b(1|2|4|8|10|16|32|64|100|128|256)\s*(MB|MiB|KB|KiB|GB)\b", t, re.I): fail("invented a size value")
 if not re.search(r"open questions", t, re.I): fail("no Open questions section")
-print("reports not found, no invented size")
+oq = re.split(r"^#+\s*open questions.*$", t, flags=re.I | re.M)[-1]
+if not re.search(r"\b(grep|rg|ls|cat|curl)\b|\bfind [./~]", oq): fail("Open questions does not list the searches or commands run")
+print("reports not found, no invented size, searches listed")

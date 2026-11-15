@@ -35,3 +35,14 @@ Read this when editing existing prose. Each line gives the tell, then the fix.
 - Passive voice that hides the actor: name the actor.
 - Frame last, point first ("Mail was the hard part"): put the frame first, the specific thing last ("The hardest part was Mail.").
 - Labels: use the term readers already know. Name items in a set the same way (all goals, or all categories).
+
+## Additions from the retired unslop and i-have-adhd skills
+- Name-dropping a list of outlets or people with no context: pick one and say what it said.
+- False ranges ("from X to Y" where X and Y are not on one scale): list the items.
+- Knowledge-cutoff disclaimers ("While specific details are limited..."): find a source or cut it.
+- En dashes or spaced hyphens used as an em dash: same fix as the em dash.
+- More AI vocabulary: additionally, enhance, enduring, interplay. More abstract nouns: wedge, locus, vantage, primitive (noun), surface ("API surface"), bedrock, modality, gold-plating.
+- Idioms ("circle back", "get the ball rolling", "on the same page"): write the literal action.
+- A first sentence that announces what comes next ("Let me...", "I'll..."): delete it and start with the answer.
+- Empty hedges ("perhaps", "could possibly"): delete. Keep a hedge that carries real uncertainty.
+- Voice: use "I" where it fits, and say so when a reaction is mixed ("fast, but the setup is fiddly").

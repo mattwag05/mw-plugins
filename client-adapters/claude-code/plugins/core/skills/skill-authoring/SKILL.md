@@ -1,6 +1,6 @@
 ---
 name: skill-authoring
-description: Write or edit an agent skill so a small model can follow it, with evals. Use when creating a new SKILL.md, fixing a skill that misbehaves, or reviewing a skill before it ships.
+description: "Write or edit an agent skill so a small model can follow it, with evals. Use when creating a new SKILL.md, fixing a skill that misbehaves, or reviewing a skill before it ships."
 ---
 
 # Skill authoring
@@ -10,7 +10,7 @@ A skill is a directory with `SKILL.md` (instructions an agent loads) plus option
 ## Steps
 
 1. Name the one job. A skill does one thing. If the job needs two, write two skills.
-2. Write frontmatter: `name:` (kebab-case, equals the directory name) and `description:` (under 300 characters: what it does, then "Use when ..." triggers). Put the trigger words first. The description sits in the agent's context every turn, so cut every word the body already says.
+2. Write frontmatter: `name:` (kebab-case, equals the directory name) and `description:` (under 300 characters: what it does, then "Use when ..." triggers). Put the trigger words first. The description sits in the agent's context every turn, so cut every word the body already says. Wrap the description in double quotes (escape inner ones as `\"`): strict YAML parsers, such as the one Pi uses, drop a skill whose unquoted value contains `: `.
 3. Write the body under 600 words, in this order: short definition of any jargon, numbered steps, `## Done when`. Each step is one action ending in something observable.
 4. Write steps as commands, not advice. If a step is mechanical (counting, sorting, reversing, diffing), name the command to run. Small models botch hand-done mechanical work.
 5. Say what to do, not what to avoid. A banned behavior drags attention to it. Keep a prohibition only for a hard limit (never push, never deploy) and pair it with the action to take instead.

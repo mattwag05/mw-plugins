@@ -1,6 +1,6 @@
 ---
 name: grill
-description: Settle unclear intent before doing any work, by asking the human numbered questions with recommended answers. Use when the goal or done-check is unclear, the request is ambiguous, or the user says "grill me" or "stress-test this plan".
+description: "Settle unclear intent before doing any work, by asking the human numbered questions with recommended answers. Use when the goal or done-check is unclear, the request is ambiguous, or the user says \"grill me\", \"stress-test this plan\", or \"aim higher\" (covers the retired ambition skill)."
 ---
 
 # Grill
@@ -33,9 +33,29 @@ A **decision** is a choice only the human can make (scope, priority, taste). A *
 - Do not pad. Five sharp questions beat fifteen vague ones.
 - If an answer is "you decide", take your recommendation and mark it `assumed` in the decisions file.
 
+## Aim higher (only when asked)
+
+Use this when the human asks for the ambitious version of a task ("aim higher", "be more ambitious", "how would an expert do this").
+
+1. If you cannot tell what the task is for, ask that one question and stop.
+2. Read `references/ambitious-version.md` in this skill's directory.
+3. Reply in exactly this shape, one line each:
+
+   ```
+   Outcome: <what should be true after this is done>
+   Altitude: <upgrade, or "skipped: <reason>">
+   Depth: <upgrade, or "skipped: <reason>">
+   Range: <upgrade, or "skipped: <reason>">
+   Needs: <tools, data, access; mark what you already have>
+   Check: <a check that depends on neither you nor the human>
+   Which version should I run?
+   ```
+4. Stop and change no files. A bigger goal never widens approval: the new scope, and any access, deploy, message, or spending it needs, waits for the human's yes.
+
 ## Done when
 
 - The transcript shows at least one round of numbered questions, each with a `Recommended:` line.
 - No question asks the human for something the workspace already states.
 - No source or project file was changed before the human confirmed.
 - After confirmation, the decisions file exists with the goal and done-check on top.
+- For an aim-higher request: the reply has the `Outcome:` and `Check:` lines, ends with the question, and no file changed.

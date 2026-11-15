@@ -4,4 +4,6 @@
 - mattpocock/skills @ 5863806, skills/engineering/retro/SKILL.md, MIT: mechanical mistakes become checks, judgment lessons become skill or doc edits; proposals are presented, not applied.
 - poteto/plugins pstack @ 74dd229, skills/reflect/SKILL.md, MIT: idea of routing session learnings into concrete edits to existing skills, and of encoding lessons as structure. No text copied; its three-subagent fan-out was dropped.
 
+- mw-plugins archive/plugins/session-closeout and archive/plugins/project-housekeeping (2026-11-15 fold): read-only and plan mode stop at proposals, no empty commits, private details kept out of public repos, and the cleanup, records, memory, and unfinished-Git rules, condensed into `references/housekeeping.md`. Push steps moved to `../ship-ready/SKILL.md`; host-specific homelab steps were dropped.
+
 Adapted for small models: homelab, memory-system and multi-repo branches removed; a single repo flow with exact commands; fixed handoff file `CLOSEOUT.md` with five exact headings; retro writes proposals only, into `## Proposed checks`.

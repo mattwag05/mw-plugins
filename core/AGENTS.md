@@ -84,6 +84,19 @@ Before your first edit, pick the matching skill below and read `~/.agents/skills
 | `handoff` | Context is running short, or work moves to another session |
 | `skill-authoring` | Writing or editing a skill, including its small-model evals |
 
+## Retired skill names
+
+These skills were folded into the core. If told to use one, use its replacement.
+
+| Retired | Use instead |
+| --- | --- |
+| `autonomous-execution` | The Behavior rules above and `LOOP.md` Verify |
+| `ambition` | `grill`, section "Aim higher" |
+| `i-have-adhd` | `unslop`, section "Replies", and Writing below |
+| `phased-shipping` | `plan` (one PR per slice) and `ship-ready` |
+| `session-closeout`, `project-housekeeping` | `closeout` |
+| old `unslop` | core `unslop` |
+
 ## Writing
 
-Apply `unslop` to docs, comments, PR bodies, and final replies. Keep exact commands and quoted evidence unchanged.
+Apply `unslop` to docs, comments, PR bodies, and final replies. Keep exact commands and quoted evidence unchanged. In a reply, lead with the answer or the next action, number multi-step work, say where things stand, and show what now works.
