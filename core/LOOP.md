@@ -38,6 +38,7 @@ Use these five steps for every task. Never skip a step silently; write `skip: <r
 2. "Inconclusive" is not a pass. A missing or failing check is an open gate: say so plainly. Show each new check failing once before you trust it.
 3. Judge success by a check that does not depend on you: a spec, real data, the reproduction, or another system's output. Expected values in tests come from there.
 4. For a consequential change, use `review`. The reviewer starts fresh and gets the original goal and the diff.
+5. Check what the human would check, yourself: fetch the page, call the endpoint, read the logs. Report what it showed. Never hand back homework such as "please check" or "let me know if it works".
 
 ## 5. Close
 

@@ -50,6 +50,7 @@ need claude "marketplace valid" && check "marketplace valid" claude plugin valid
 check "doc-harvest tests" python3 -m unittest discover -s plugins/doc-harvest/tests
 check "eval runner tests" python3 -m unittest discover -s tests/eval_skill
 check "skill sync tests" python3 -m unittest discover -s tests/sync_skills
+check "skill lint tests" python3 -m unittest discover -s tests/lint_skill
 check "core skill lint" lint_core_skills
 check "lint_skill copies in sync" lint_skill_copies
 check "eval change.diff applies" eval_diffs_apply

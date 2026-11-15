@@ -8,6 +8,8 @@ mv .stash/README.md . 2>/dev/null || true
 echo "# calc" > README.md
 git add README.md; git commit -qm "base"
 git checkout -q -b feature
+echo "Usage: import calc; calc.add(1, 2)" >> README.md
+git commit -qam "docs: usage note"
 mv .stash/* .; rmdir .stash
 git add -A; git commit -qm "add calc"
 git rev-parse HEAD > .git/eval-head

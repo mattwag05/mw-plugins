@@ -1,6 +1,6 @@
 ---
 name: review
-description: Review a change from a fresh start against its original intent and write a findings ledger in REVIEW.md. Use when a consequential change is done, before asking to push or merge, or when the user says review.
+description: "Review a change from a fresh start against its original intent and write a findings ledger in REVIEW.md. Use when a consequential change is done, before asking to push or merge, or when the user says review."
 ---
 
 # Review

@@ -1,6 +1,6 @@
 ---
 name: plan
-description: Turn a goal into a plan sized to the work: a short PLAN.md for one session, or a SPEC.md plus ordered, independently checkable issues for multi-session work. Use when starting work bigger than a small fix, or when asked to plan, spec, or break down a task.
+description: "Turn a goal into a plan sized to the work: a short PLAN.md for one session, or a SPEC.md plus ordered, independently checkable issues for multi-session work. Use when starting work bigger than a small fix, or when asked to plan, spec, or break down a task. Covers the retired phased-shipping."
 ---
 
 # Plan
@@ -11,13 +11,13 @@ A **slice** is one piece of work that ends in something you can check by running
 
 ## Steps
 
-1. Read the request and the files it touches (`ls`, `cat`, `grep`). State the goal in one sentence and the done-check for the whole task. Only if you cannot state the goal itself, read `../grill/SKILL.md` and follow it first. Open choices (stack, schema, naming) do not block the plan: write each as `assumed: <choice>` in the plan, then list them when you ask for approval.
+1. Read the request and the files it touches (`ls`, `cat`, `grep`). State the goal in one sentence and the done-check for the whole task. Only if you cannot state the goal itself, read `../grill/SKILL.md` and follow it first. Open choices (stack, schema, naming) do not block the plan: write each as `assumed: <choice>` in the plan, then list them when you ask for approval. Check the request's premise against the code: if part of it already exists, plan only the real gap and write `exists: <what, where>` in the plan.
 2. Size the work. One session means a single sitting with fewer than about 6 steps. Anything larger is multi-session.
 3. One session: write `PLAN.md` with these headings, in order:
    - `## Goal`
    - `## Files to touch`
    - `## Done-check` (an exact command and its expected result)
-   - `## Steps` (numbered, each small and ordered)
+   - `## Steps` (numbered and ordered; each names the exact file and the command that checks it)
    Create no other planning files. Go to step 7.
 4. Multi-session: write `SPEC.md` with these headings:
    - `## Problem`
@@ -29,6 +29,7 @@ A **slice** is one piece of work that ends in something you can check by running
    - Each slice has its own done-check. If you cannot say how to check it, merge it into a neighbor or split it differently.
    - Put preparation (refactoring that makes later slices easy) first.
    - Order slices so each lists the slices it is blocked by. No cycles.
+   - If the work ships as several PRs, each slice is one PR. Note the branch it stacks on. When a slice starts, recheck its premise against the code.
 6. Record each slice as an issue:
    - If a `.beads/` directory exists, run `bd create "<title>" -d "<goal>. Done-check: <check>"` and note blockers with `bd dep add <blocked-id> <blocker-id>`.
    - Otherwise write `issues/NN-<slug>.md` (NN = 01, 02, ...) containing:

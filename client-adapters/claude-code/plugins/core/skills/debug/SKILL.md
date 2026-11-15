@@ -1,6 +1,6 @@
 ---
 name: debug
-description: Fix a bug or regression by first reproducing it with a check that can fail, then fixing the root cause. Use when something is broken, throwing, failing, wrong, or slow, or the user says debug.
+description: "Fix a bug or regression by first reproducing it with a check that can fail, then fixing the root cause. Use when something is broken, throwing, failing, wrong, or slow, or the user says debug."
 ---
 
 # Debug

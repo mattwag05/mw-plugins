@@ -6,6 +6,25 @@ import re
 import sys
 
 
+def yaml_unsafe(fm):
+    """Flag frontmatter that strict YAML parsers (Pi uses npm `yaml`) reject, which makes them drop the skill."""
+    errs = []
+    for line in fm.splitlines():
+        m = re.match(r"([A-Za-z_][\w-]*):[ \t]+(\S.*)$", line)
+        if not m:
+            continue
+        key, val = m.group(1), m.group(2).rstrip()
+        if val[0] == '"':
+            if len(val) < 2 or not val.endswith('"') or re.search(r'(?<!\\)"', val[1:-1]):
+                errs.append(f"frontmatter: {key} has unbalanced or unescaped double quotes")
+        elif val[0] == "'":
+            if len(val) < 2 or not val.endswith("'") or re.search(r"(?<!')'(?!')", val[1:-1]):
+                errs.append(f"frontmatter: {key} has unbalanced single quotes")
+        elif val[0] not in "|>[{" and (": " in val or val.endswith(":") or " #" in val):
+            errs.append(f"frontmatter: {key} is unquoted but contains ': ', ' #', or a trailing ':' (double-quote it)")
+    return errs
+
+
 def lint(d):
     errs = []
     sk = os.path.join(d, "SKILL.md")
@@ -16,6 +35,7 @@ def lint(d):
     if not m:
         return ["frontmatter missing"]
     fm, body = m.groups()
+    errs += yaml_unsafe(fm)
     name = re.search(r"^name:\s*(\S.*)$", fm, re.M)
     desc = re.search(r"^description:\s*(\S.*)$", fm, re.M)
     if not name:

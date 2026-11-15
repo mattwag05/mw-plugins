@@ -1,0 +1,17 @@
+#!/usr/bin/env python3
+# Pass: reply leads with the first action, numbers the steps in order, keeps commands, drops chat filler.
+import os, re, sys
+def fail(m): print(m); sys.exit(1)
+out = open("reply.md", encoding="utf-8").read() if os.path.exists("reply.md") else ""
+if not out.strip(): fail("reply.md missing or empty")
+for s in ["./backup.sh prod", "./migrate.sh 0042", "./healthcheck.sh", "14:05"]:
+    if s not in out: fail("lost: " + s)
+first = next(l for l in out.splitlines() if l.strip())
+if "backup.sh" not in first: fail("first line is not the next action: " + first.strip()[:80])
+steps = [l for l in out.splitlines() if re.match(r"\s*\d+[.)]\s", l)]
+if len(steps) < 3: fail("fewer than 3 numbered steps")
+pos = [next((i for i, l in enumerate(steps) if c in l), -1) for c in ["backup.sh", "migrate.sh", "healthcheck.sh"]]
+if -1 in pos or pos != sorted(pos): fail("commands not in numbered steps in order")
+bad = [p for p in ["great question", "hope this helps", "let me know", "by the way", "testament", "worth noting"] if p in out.lower()]
+if bad: fail("filler remains: " + ", ".join(bad))
+print("action first, numbered steps, commands kept")
