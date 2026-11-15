@@ -251,7 +251,7 @@ def instruction_files(home):
 
 def export_core(commit, dest):
     with tarfile.open(fileobj=io.BytesIO(git("archive", commit, "core")), mode="r:") as tar:
-        tar.extractall(dest)
+        tar.extractall(dest, filter="data") if sys.version_info >= (3, 12) else tar.extractall(dest)
     return Path(dest) / "core"
 
 
