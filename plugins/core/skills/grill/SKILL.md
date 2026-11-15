@@ -11,7 +11,7 @@ A **decision** is a choice only the human can make (scope, priority, taste). A *
 
 ## Steps
 
-1. Read the request. Look in the workspace (README, docs, existing files) for every fact you need. Use `ls`, `cat`, `grep`. Never ask the human a question a file can answer; cite the file instead ("README says X").
+1. Read the request. Look in the workspace (README, docs, existing files) for every fact you need. Use `ls`, `cat`, `grep`. Never ask the human a question a file can answer; cite the file instead ("README says X"). Before you offer an option that deletes or replaces something, look at that thing with a tool (`ls`, `cat`) and describe what it holds.
 2. List the decisions still open. Keep only those whose earlier decisions are already settled. A question that depends on another open question waits for a later round.
 3. Ask one **round**: every question from step 2, numbered, in this format:
 
