@@ -72,6 +72,7 @@ def run_case(case, skill_dir, args, out_dir, run_no):
             task = f"Read and follow the skill at {skill_dir}/SKILL.md.\n\n{task}"
         cmd = pi_command(skill_dir, task, args.model, guard=not args.no_guard, routing=args.routing)
     transcript = Path(out_dir) / f"{case.name}-run{run_no}.log"
+    before = {p for p in Path(skill_dir).rglob("*")}
     with transcript.open("w") as log:
         try:
             agent = subprocess.run(cmd, cwd=work, stdout=log, stderr=subprocess.STDOUT,
@@ -80,6 +81,10 @@ def run_case(case, skill_dir, args, out_dir, run_no):
             return False, f"agent timed out after {args.timeout}s", transcript
         except FileNotFoundError as e:
             return False, f"agent not runnable: {e}", transcript
+    # A model sometimes writes into the skill's own source tree instead of its temp workspace.
+    stray = sorted(str(p.relative_to(skill_dir)) for p in set(Path(skill_dir).rglob("*")) - before)
+    if stray:
+        return False, f"agent wrote outside the workspace: {stray[0]}", transcript
     if agent.returncode != 0:
         return False, f"agent exited {agent.returncode}", transcript
     env = dict(os.environ, EVAL_TRANSCRIPT=str(transcript), EVAL_WORKSPACE=str(work))
