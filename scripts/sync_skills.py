@@ -42,7 +42,11 @@ def git(*args):
 def export_ref(ref, dest):
     """Extract plugins/core/skills at ref into dest; return (commit, {name: path})."""
     commit = git("rev-parse", "--verify", f"{ref}^{{commit}}").decode().strip()
-    with tarfile.open(fileobj=io.BytesIO(git("archive", commit, SRC)), mode="r:") as tar:
+    try:
+        data = git("archive", commit, SRC)
+    except subprocess.CalledProcessError:
+        sys.exit(f"error: {ref} ({commit[:10]}) has no {SRC}; pick a ref that contains the core skills")
+    with tarfile.open(fileobj=io.BytesIO(data), mode="r:") as tar:
         tar.extractall(dest, filter="data") if sys.version_info >= (3, 12) else tar.extractall(dest)
     root = Path(dest) / SRC
     skills = {p.name: p for p in sorted(root.iterdir()) if (p / "SKILL.md").is_file()}
