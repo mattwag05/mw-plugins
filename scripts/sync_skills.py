@@ -217,7 +217,8 @@ def check(home, ref):
 # --- instruction blocks ------------------------------------------------------------------
 BLOCK_START = "<!-- agent-core:start (managed by mw-plugins scripts/sync_skills.py; edit the source, not this block) -->"
 BLOCK_END = "<!-- agent-core:end -->"
-LEGACY = [("<!-- homelab-policy-20260910:start -->", "<!-- homelab-policy-20260910:end -->")]
+LEGACY = [("<!-- homelab-policy-20260910:start -->", "<!-- homelab-policy-20260910:end -->"),
+          ("<!-- agentic-workflow-20260913:start -->", "<!-- agentic-workflow-20260913:end -->")]
 BLOCKS_MANIFEST = ".core-blocks.json"
 
 
