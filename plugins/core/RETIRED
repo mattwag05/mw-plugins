@@ -1,0 +1,10 @@
+# Skill names the core replaced. sync_skills.py moves any copy or link with these names
+# out of every runtime (to backups) and the drift check flags one that comes back.
+code-review
+diagnosing-bugs
+grill-with-docs
+setup-matt-pocock-skills
+session-closeout
+to-spec
+to-tickets
+triage

@@ -30,6 +30,7 @@ REPO = Path(__file__).resolve().parents[1]
 SRC = "plugins/core/skills"
 MANIFEST = ".core-sync.json"
 EXCLUDE = {"evals", "__pycache__", ".DS_Store"}
+retired = set()  # filled by export_ref from plugins/core/RETIRED at the ref
 
 
 def git(*args):
@@ -43,6 +44,12 @@ def export_ref(ref, dest):
         tar.extractall(dest, filter="data") if sys.version_info >= (3, 12) else tar.extractall(dest)
     root = Path(dest) / SRC
     skills = {p.name: p for p in sorted(root.iterdir()) if (p / "SKILL.md").is_file()}
+    try:
+        text = git("show", f"{commit}:plugins/core/RETIRED").decode()
+    except subprocess.CalledProcessError:
+        text = ""
+    retired.clear()
+    retired.update(l.strip() for l in text.splitlines() if l.strip() and not l.startswith("#"))
     for p in skills.values():
         for junk in [q for q in p.rglob("*") if q.name in EXCLUDE]:
             if not junk.exists():
@@ -79,6 +86,13 @@ def plan(home, skills):
             actions.append(("conflict", name, src, dest))
         elif tree_hash(dest) != tree_hash(src):
             actions.append(("update", name, src, dest))
+    for rdir in [canon] + runtime_dirs(home):
+        for name in sorted(retired - set(skills)):
+            old = rdir / name
+            if old.is_symlink() or (old.exists() and is_single_skill(old)):
+                actions.append(("retire", name, None, old))
+            elif old.exists():
+                actions.append(("conflict", name, None, old))
     for rdir in runtime_dirs(home):
         taken = names_in(rdir)
         for name in skills:
@@ -140,6 +154,9 @@ def apply(home, commit, ref, skills, actions):
         if kind == "unlink":
             dest.unlink()  # our own symlink; nothing to back up
             continue
+        if kind == "retire":
+            stash(dest)
+            continue
         dest.parent.mkdir(parents=True, exist_ok=True)
         stash(dest)
         if kind in ("install", "update"):
@@ -153,6 +170,7 @@ def apply(home, commit, ref, skills, actions):
         "links": [str(d / n) for d in runtime_dirs(home) for n in skills
                   if (d / n).is_symlink() and Path(os.readlink(d / n)) == canon / n],
         "conflicts": [str(dest) for kind, _, _, dest in actions if kind in ("conflict", "unlink")],
+        "retired": sorted(retired),
     }
     (canon / MANIFEST).write_text(json.dumps(manifest, indent=2) + "\n")
     return backup if backup.exists() else None
@@ -179,6 +197,11 @@ def check(home, ref):
     with tempfile.TemporaryDirectory() as tmp:
         commit, skills = export_ref(ref, tmp)
         stale = sorted(n for n, p in skills.items() if manifest["skills"].get(n) != tree_hash(p))
+    for rdir in [canon] + runtime_dirs(home):
+        for name in manifest.get("retired", []):
+            old = rdir / name
+            if (old.is_symlink() or old.exists()) and str(old) not in manifest.get("conflicts", []):
+                problems.append(f"{old}: retired skill is back; rerun sync --apply")
     for c in manifest.get("conflicts", []):
         print(f"NOTE {c}: an existing skill with this name or a category is kept; core skill not linked there")
     if stale:
@@ -207,7 +230,7 @@ def main(argv=None):
         print(f"core skills at {args.ref} = {commit[:10]}: {len(skills)} skills, {changes} changes, "
               f"{len(actions) - changes} conflicts kept as-is")
         for kind, name, src, dest in actions:
-            print(f"  {kind:<11} {dest}" + (f" -> {src}" if kind not in ("install", "update") else ""))
+            print(f"  {kind:<11} {dest}" + (f" -> {src}" if kind not in ("install", "update", "retire") else ""))
         if not args.apply:
             print("dry run; rerun with --apply to make these changes")
             return 0

@@ -89,6 +89,26 @@ class SyncSkillsTest(unittest.TestCase):
         self.assertEqual(run("check", *self.args)[0], 0)
         self.assertIn(" 0 changes", run(*self.args)[1])
 
+    def test_retired_names_are_moved_out_and_stay_out(self):
+        h = self.home
+        (h / ".agents/skills/triage").mkdir()
+        (h / ".agents/skills/triage/SKILL.md").write_text("old triage\n")
+        (h / ".pi/agent/skills/triage").symlink_to(h / ".agents/skills/triage")
+        (h / ".hermes/profiles/theo/skills/triage").mkdir()
+        (h / ".hermes/profiles/theo/skills/triage/SKILL.md").write_text("theo triage\n")
+        code, out = run(*self.args, "--apply")
+        self.assertEqual(code, 0, out)
+        for p in (".agents/skills/triage", ".pi/agent/skills/triage", ".hermes/profiles/theo/skills/triage"):
+            self.assertFalse((h / p).exists() or (h / p).is_symlink(), p)
+        backup = next((h / "backups").iterdir())
+        self.assertEqual((backup / ".hermes/profiles/theo/skills/triage/SKILL.md").read_text(), "theo triage\n")
+        self.assertEqual(run("check", *self.args)[0], 0)
+        (h / ".hermes/skills/triage").mkdir()
+        (h / ".hermes/skills/triage/SKILL.md").write_text("back again\n")
+        code, out = run("check", *self.args)
+        self.assertEqual(code, 1)
+        self.assertIn("retired skill is back", out)
+
     def test_check_detects_edits_and_broken_links(self):
         self.assertEqual(run("check", *self.args)[0], 1)  # never synced
         run(*self.args, "--apply")
