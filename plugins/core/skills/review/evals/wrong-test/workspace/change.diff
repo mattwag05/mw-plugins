@@ -8,7 +8,7 @@
 +    return re.sub(r"[^a-z0-9]", "-", text.lower()).strip("-")
 --- /dev/null
 +++ b/test_slug.py
-@@ -0,0 +1,15 @@
+@@ -0,0 +1,17 @@
 +import unittest
 +from slug import slugify
 +

@@ -31,6 +31,15 @@ lint_skill_copies() {
   done
   return $rc
 }
+eval_diffs_apply() {
+  # Workspaces hold the post-change files, so each change.diff must reverse-apply cleanly.
+  rc=0
+  for d in plugins/core/skills/*/evals/*/workspace/change.diff; do
+    [ -e "$d" ] || continue
+    (cd "$(dirname "$d")" && git apply --check -R change.diff) || { echo "bad diff: $d"; rc=1; }
+  done
+  return $rc
+}
 no_em_dashes() {
   # Core docs and skills are authored prose; eval fixtures may hold dashes on purpose.
   ! grep -rn --exclude-dir=evals "$(printf '\342\200\224')" core plugins/core
@@ -43,6 +52,7 @@ check "eval runner tests" python3 -m unittest discover -s tests/eval_skill
 check "skill sync tests" python3 -m unittest discover -s tests/sync_skills
 check "core skill lint" lint_core_skills
 check "lint_skill copies in sync" lint_skill_copies
+check "eval change.diff applies" eval_diffs_apply
 check "no em dashes in core" no_em_dashes
 need gitleaks "secret scan" && check "secret scan" gitleaks dir --no-banner --redact .
 
