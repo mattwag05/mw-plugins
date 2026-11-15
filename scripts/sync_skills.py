@@ -8,6 +8,8 @@ Canonical install: <home>/.agents/skills/<name> (Codex and Pi read this layout).
 Runtime links, for each runtime directory that exists on this host:
   <home>/.claude/skills, <home>/.pi/agent/skills, <home>/.hermes/skills,
   <home>/.hermes/profiles/<p>/skills (except "default", which Hermes never reads).
+With --blocks, the agent-core block goes into CLAUDE.md, Pi and Codex AGENTS.md, and the end of
+each Hermes profile's existing SOUL.md.
 Content comes from `git archive <ref>`, so uncommitted edits are never installed.
 Anything replaced is moved to <home>/backups/<timestamp>-core-skill-sync/. A directory
 holding nested skills (a category), or a runtime that already has a skill with the same
@@ -223,12 +225,14 @@ BLOCKS_MANIFEST = ".core-blocks.json"
 
 
 def instruction_files(home):
-    files = [home / ".claude/CLAUDE.md", home / ".pi/agent/AGENTS.md", home / ".codex/AGENTS.md",
-             home / ".hermes/AGENTS.md"]
+    files = [f for f in (home / ".claude/CLAUDE.md", home / ".pi/agent/AGENTS.md", home / ".codex/AGENTS.md")
+             if f.parent.is_dir()]
+    # Hermes always loads only SOUL.md from a profile home (AGENTS.md is cwd project context). Never create a
+    # SOUL.md: Hermes reseeds a missing one with its stock persona.
     profiles = home / ".hermes/profiles"
-    if profiles.is_dir():
-        files += [p / "AGENTS.md" for p in sorted(profiles.iterdir()) if p.is_dir() and p.name != "default"]
-    return [f for f in files if f.parent.is_dir()]
+    souls = [home / ".hermes/SOUL.md"] + ([p / "SOUL.md" for p in sorted(profiles.iterdir())
+                                         if p.is_dir() and p.name != "default"] if profiles.is_dir() else [])
+    return files + [f for f in souls if f.is_file()]
 
 
 def export_core(commit, dest):
@@ -256,7 +260,7 @@ def cut(text, start, end):
     return text[:i] + text[j:], True
 
 
-def splice(text, block):
+def splice(text, block, at_end=False):
     for start, end in LEGACY:
         text, _ = cut(text, start, end)
     start = BLOCK_START.split(" (")[0]
@@ -265,6 +269,8 @@ def splice(text, block):
     if i >= 0 and j >= 0:
         after = text[j + len(BLOCK_END):].lstrip("\n")
         return text[:i] + block + ("\n" + after if after else "")
+    if at_end:
+        return text.rstrip("\n") + "\n\n" + block
     if text.startswith("# "):
         head, _, rest = text.partition("\n")
         return head + "\n\n" + block + ("\n" + rest.lstrip("\n") if rest.strip() else "")
@@ -291,7 +297,7 @@ def plan_blocks(home, blocks, core_only):
     out = []
     for f in instruction_files(home):
         old = f.read_text() if f.exists() else ""
-        new = splice(old, blocks[variant_for(home, f, core_only)])
+        new = splice(old, blocks[variant_for(home, f, core_only)], at_end=f.name == "SOUL.md")
         if new != old:
             out.append((f, old, new))
     return out

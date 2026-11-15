@@ -114,6 +114,8 @@ class SyncSkillsTest(unittest.TestCase):
         claude = h / ".claude/CLAUDE.md"
         claude.write_text("# Global\n\n<!-- homelab-policy-20260910:start -->\nold policy\n"
                           "<!-- homelab-policy-20260910:end -->\n\n## Mine\nkeep me\n")
+        soul = h / ".hermes/profiles/theo/SOUL.md"
+        soul.write_text("I am Theo.\n")
         overlay = h / "overlay.md"
         overlay.write_text("## Host\nhost rule\n")
         args = (*self.args, "--blocks", "--overlay", str(overlay))
@@ -126,8 +128,10 @@ class SyncSkillsTest(unittest.TestCase):
         self.assertIn("~/.agents/core/LOOP.md", text)
         self.assertTrue(text.rstrip().endswith("## Mine\nkeep me"))
         self.assertTrue((h / ".agents/core/LOOP.md").is_file())
-        theo = h / ".hermes/profiles/theo/AGENTS.md"
-        self.assertTrue(theo.read_text().startswith("<!-- agent-core:start"))
+        theo = soul
+        self.assertTrue(theo.read_text().startswith("I am Theo.\n\n<!-- agent-core:start"))
+        self.assertFalse((h / ".hermes/profiles/sage/SOUL.md").exists())
+        self.assertFalse((h / ".hermes/profiles/theo/AGENTS.md").exists())
         run(*args, "--core-only", "theo", "--apply")
         self.assertNotIn("host rule", theo.read_text())
         self.assertIn("host rule", claude.read_text())
