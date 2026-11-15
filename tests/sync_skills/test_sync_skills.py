@@ -163,6 +163,14 @@ class SyncSkillsTest(unittest.TestCase):
         self.assertIn("I am Theo.\n", souls, "the first backup of SOUL.md must survive the second apply")
         self.assertTrue(any("edited" in t for t in souls))
 
+    def test_keep_retired_leaves_pinned_skills_alone(self):
+        (self.home / ".agents/skills/triage").mkdir()
+        (self.home / ".agents/skills/triage/SKILL.md").write_text("pinned triage\n")
+        code, out = run(*self.args, "--keep-retired", "--apply")
+        self.assertEqual(code, 0, out)
+        self.assertEqual((self.home / ".agents/skills/triage/SKILL.md").read_text(), "pinned triage\n")
+        self.assertEqual(run("check", *self.args)[0], 0)
+
     def test_check_detects_edits_and_broken_links(self):
         self.assertEqual(run("check", *self.args)[0], 1)  # never synced
         run(*self.args, "--apply")

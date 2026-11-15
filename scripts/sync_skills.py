@@ -81,7 +81,7 @@ def runtime_dirs(home):
     return [d for d in dirs if d.parent.is_dir()]
 
 
-def plan(home, skills):
+def plan(home, skills, keep_retired=False):
     canon = home / ".agents/skills"
     actions = []
     for name, src in skills.items():
@@ -92,7 +92,7 @@ def plan(home, skills):
             actions.append(("conflict", name, src, dest))
         elif tree_hash(dest) != tree_hash(src):
             actions.append(("update", name, src, dest))
-    for rdir in [canon] + runtime_dirs(home):
+    for rdir in ([] if keep_retired else [canon] + runtime_dirs(home)):
         for name in sorted(retired - set(skills)):
             old = rdir / name
             if old.is_symlink() or (old.exists() and is_single_skill(old)):
@@ -157,7 +157,7 @@ def new_backup_dir(home, label):
     return path
 
 
-def apply(home, commit, ref, skills, actions):
+def apply(home, commit, ref, skills, actions, keep_retired=False):
     backup = new_backup_dir(home, "core-skill-sync")
     def stash(path):
         if path.is_symlink() or path.exists():
@@ -186,7 +186,7 @@ def apply(home, commit, ref, skills, actions):
         "links": [str(d / n) for d in runtime_dirs(home) for n in skills
                   if (d / n).is_symlink() and Path(os.readlink(d / n)) == canon / n],
         "conflicts": [str(dest) for kind, _, _, dest in actions if kind in ("conflict", "unlink")],
-        "retired": sorted(retired),
+        "retired": [] if keep_retired else sorted(retired),
     }
     (canon / MANIFEST).write_text(json.dumps(manifest, indent=2) + "\n")
     return backup if backup.exists() else None
@@ -369,6 +369,8 @@ def main(argv=None):
     ap.add_argument("--blocks", action="store_true", help="also write the agent-core block into each runtime's instruction file")
     ap.add_argument("--overlay", type=Path, help="host overlay appended inside the block (private, per host)")
     ap.add_argument("--core-only", default="", help="comma-separated Hermes profiles that get the core block without the overlay")
+    ap.add_argument("--keep-retired", action="store_true",
+                    help="leave retired skill names in place (a host whose tooling still pins them)")
     ap.add_argument("--home", type=Path, default=Path.home(), help=argparse.SUPPRESS)
     args = ap.parse_args(argv)
     home = args.home.resolve()
@@ -376,7 +378,7 @@ def main(argv=None):
         return check(home, args.ref)
     with tempfile.TemporaryDirectory() as tmp:
         commit, skills = export_ref(args.ref, tmp)
-        actions = plan(home, skills)
+        actions = plan(home, skills, args.keep_retired)
         changes = sum(a[0] != "conflict" for a in actions)
         print(f"core skills at {args.ref} = {commit[:10]}: {len(skills)} skills, {changes} changes, "
               f"{len(actions) - changes} conflicts kept as-is")
@@ -392,7 +394,7 @@ def main(argv=None):
                   f"{len(bchanges)} instruction files change")
             for f, old, _ in bchanges:
                 print(f"  {'block' if old else 'create':<11} {f}")
-        backup = apply(home, commit, args.ref, skills, actions) if args.apply else None
+        backup = apply(home, commit, args.ref, skills, actions, args.keep_retired) if args.apply else None
         if args.apply and args.blocks:
             bb = apply_blocks(home, commit, core_dir, blocks, core_only,
                               args.overlay.resolve() if args.overlay else None, bchanges)
