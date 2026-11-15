@@ -25,12 +25,16 @@ from pathlib import Path
 GUARD = Path(__file__).resolve().parents[1] / "plugins/anti-loop/skills/anti-loop/assets/pi/no-progress-guard.ts"
 
 
-def pi_command(skill_dir, task_text, model, guard=True):
-    cmd = [
-        "pi", "-p", "--no-session", "--no-skills", "--skill", str(skill_dir),
-        "--no-context-files", "--no-extensions", "--no-mcp", "--no-prompt-templates",
-        "--offline",
-    ]
+def pi_command(skill_dir, task_text, model, guard=True, routing=False):
+    if routing:
+        # Real routing: the global instructions and every installed skill, no hint about which to read.
+        cmd = ["pi", "-p", "--no-session", "--no-extensions", "--no-mcp", "--no-prompt-templates", "--offline"]
+    else:
+        cmd = [
+            "pi", "-p", "--no-session", "--no-skills", "--skill", str(skill_dir),
+            "--no-context-files", "--no-extensions", "--no-mcp", "--no-prompt-templates",
+            "--offline",
+        ]
     if guard:
         # Production Pi runs this guard; without it a 27B model can repeat one tool call until timeout.
         cmd += ["-e", str(GUARD)]
@@ -63,10 +67,10 @@ def run_case(case, skill_dir, args, out_dir, run_no):
         cmd = shlex.split(args.agent_cmd) + [str(skill_dir), str(task_file)]
     else:
         task = task_file.read_text()
-        if not args.no_hint:
+        if not (args.no_hint or args.routing):
             # A 27B model often skips a skill it was not told to read; evals test content, not routing.
             task = f"Read and follow the skill at {skill_dir}/SKILL.md.\n\n{task}"
-        cmd = pi_command(skill_dir, task, args.model, guard=not args.no_guard)
+        cmd = pi_command(skill_dir, task, args.model, guard=not args.no_guard, routing=args.routing)
     transcript = Path(out_dir) / f"{case.name}-run{run_no}.log"
     with transcript.open("w") as log:
         try:
@@ -96,6 +100,8 @@ def main(argv=None):
     ap.add_argument("--case", action="append", help="run only this case name (repeatable)")
     ap.add_argument("--no-hint", action="store_true", help="do not tell pi which skill to read (tests routing)")
     ap.add_argument("--no-guard", action="store_true", help="run pi without the anti-loop no-progress guard")
+    ap.add_argument("--routing", action="store_true",
+                    help="test routing: no hint, the host's global instructions and all installed skills")
     args = ap.parse_args(argv)
 
     skill_dir = args.skill_dir.resolve()
