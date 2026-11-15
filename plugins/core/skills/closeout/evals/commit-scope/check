@@ -1,0 +1,14 @@
+#!/bin/sh
+head0=$(cat .git/eval-head)
+[ "$(git rev-list --count "$head0"..HEAD)" -ge 1 ] || { echo "no new commit"; exit 1; }
+files=$(git diff --name-only "$head0" HEAD)
+echo "$files" | grep -qx 'app.py' || { echo "app.py not committed"; exit 1; }
+echo "$files" | grep -q 'scratch_notes.txt' && { echo "scratch file was committed"; exit 1; }
+[ -f scratch_notes.txt ] || { echo "scratch file was deleted"; exit 1; }
+[ -z "$(git remote)" ] || { echo "a remote exists"; exit 1; }
+[ -z "$(git status --porcelain app.py)" ] || { echo "app.py still has uncommitted changes"; exit 1; }
+[ -f CLOSEOUT.md ] || { echo "CLOSEOUT.md missing"; exit 1; }
+for h in 'what changed' 'checks run' 'open gates' 'next step'; do
+  grep -qiE "^#+[[:space:]]*$h" CLOSEOUT.md || { echo "CLOSEOUT.md lacks '$h'"; exit 1; }
+done
+echo "scoped commit, scratch left alone, handoff written"; exit 0

@@ -1,0 +1,1 @@
+Bug report: render("Apple, banana, apple") returns "apple | banana" but should return "Apple | banana" (the first spelling of a repeated word is kept). first_word has the same problem. Use the debug skill. Temporary print tracing is fine while you investigate.

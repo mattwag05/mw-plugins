@@ -42,6 +42,21 @@ class EvalSkillTest(unittest.TestCase):
         self.assertEqual(code, 1)
         self.assertIn("agent exited 1", out.getvalue())
 
+    def test_setup_runs_before_agent(self):
+        with tempfile.TemporaryDirectory() as d:
+            skill = Path(d) / "s"
+            case = skill / "evals" / "prep"
+            case.mkdir(parents=True)
+            (skill / "SKILL.md").write_text("---\nname: s\ndescription: x\n---\n")
+            (case / "task.md").write_text("noop\n")
+            for name, body in (("setup", "touch prepared"), ("check", "test -f prepared && test -f agent_saw_it")):
+                (case / name).write_text(f"#!/bin/sh\n{body}\n")
+                (case / name).chmod(0o755)
+            agent = "sh -c 'test -f prepared && touch agent_saw_it' agent"
+            with contextlib.redirect_stdout(io.StringIO()) as out:
+                code = eval_skill.main([str(skill), "--agent-cmd", agent, "--out", str(Path(d) / "out")])
+            self.assertEqual(code, 0, out.getvalue())
+
     def test_missing_skill_is_usage_error(self):
         with contextlib.redirect_stderr(io.StringIO()):
             self.assertEqual(eval_skill.main([str(HERE)]), 2)

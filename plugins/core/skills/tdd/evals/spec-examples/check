@@ -1,0 +1,33 @@
+#!/usr/bin/env python3
+import os, re, subprocess, sys, shutil, tempfile
+here = os.path.dirname(os.path.abspath(sys.argv[0]))
+ws = os.environ.get("EVAL_WORKSPACE", os.getcwd())
+pris = os.path.join(here, "pristine")
+env = dict(os.environ, PYTHONDONTWRITEBYTECODE="1")
+
+def run(cmd, cwd):
+    try:
+        return subprocess.run(cmd, cwd=cwd, env=dict(env, PYTHONPATH=cwd), capture_output=True, timeout=60).returncode
+    except subprocess.TimeoutExpired:
+        return 99
+def fail(m): print(m); sys.exit(1)
+
+if run([sys.executable, os.path.join(here, "hidden_test.py")], ws) != 0:
+    fail("hidden acceptance tests fail")
+new = [f for f in os.listdir(ws) if f.endswith(".py") and f not in os.listdir(pris)]
+if not new: fail("no new test file added")
+for f in new:
+    txt = open(os.path.join(ws, f)).read()
+    if not re.search(r"SC-0042-4|SC-1234-8|SC-0000-0", txt):
+        continue  # expected values must come from the spec's worked examples
+    tmp = tempfile.mkdtemp()
+    try:
+        for g in os.listdir(pris): shutil.copy(os.path.join(pris, g), tmp)
+        shutil.copy(os.path.join(ws, f), tmp)
+        red = run([sys.executable, f], tmp) != 0 or run([sys.executable, "-m", "unittest", f[:-3]], tmp) == 1
+    finally:
+        shutil.rmtree(tmp, ignore_errors=True)
+    green = run([sys.executable, f], ws) == 0 and run([sys.executable, "-m", "unittest", f[:-3]], ws) != 1
+    if red and green:
+        print("test " + f + " uses spec examples, fails on the stub, passes on the implementation"); sys.exit(0)
+fail("no added test file uses a spec example, fails on the stub, and passes on the implementation")

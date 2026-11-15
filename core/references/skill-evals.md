@@ -1,6 +1,6 @@
 # Skill evals
 
-A core skill joins the core only when its evals pass on the floor model: Qwen3.8-27B for judgment skills, Qwen3.6 for mechanical ones. Rerun the evals after you edit a skill or change models.
+A core skill joins the core only when its evals pass on Qwen3.8-27B, the floor model for every skill. Rerun the evals after you edit a skill or change models.
 
 ## Layout
 
@@ -8,6 +8,7 @@ A core skill joins the core only when its evals pass on the floor model: Qwen3.8
 <skill>/evals/<case>/
   task.md      the prompt, written the way a user would ask
   workspace/   optional starting files, copied fresh for each run
+  setup        optional executable; prepares state (such as git history) in the workspace before the agent
   check        executable; runs in the workspace after the agent; exit 0 = pass
 ```
 
@@ -19,7 +20,7 @@ The `check` script gets two environment variables: `EVAL_TRANSCRIPT` (the agent'
 python3 scripts/eval_skill.py <skill-dir> --runs 3
 ```
 
-By default the runner calls `pi -p` and loads only the skill under test, with no context files, extensions, or MCP. `--model` picks the model, `--case` picks a single case, and `--agent-cmd` swaps in another agent. A case passes only when every run passes. Small models vary from run to run, so use `--runs 3` before a skill joins the core.
+By default the runner calls `pi -p` and loads only the skill under test, with no context files, extensions, or MCP. It also tells the model which `SKILL.md` to read, because the 27B model often skips a skill that only its description advertises. That is why `LOOP.md` names the skill to read. `--no-hint` drops that line, to test routing on its own. The runner also loads the anti-loop no-progress guard, as production Pi does. Without it, the 27B model once repeated a single tool call more than 150 times until the run timed out. `--no-guard` turns it off. `--model` picks the model, `--case` picks a single case, and `--agent-cmd` swaps in another agent. A case passes only when every run passes. Small models vary from run to run, so use `--runs 3` before a skill joins the core.
 
 ## Writing good cases
 

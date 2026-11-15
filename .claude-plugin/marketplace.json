@@ -40,6 +40,12 @@
       "version": "1.1.0"
     },
     {
+      "name": "core",
+      "source": "./client-adapters/claude-code/plugins/core",
+      "description": "Minimal core skills for the shared agent loop, sized to work on small local models.",
+      "version": "0.1.0"
+    },
+    {
       "name": "doc-harvest",
       "source": "./client-adapters/claude-code/plugins/doc-harvest",
       "description": "Harvest documentation websites into structured local references and navigate existing documentation sets.",

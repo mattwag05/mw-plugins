@@ -1,8 +1,9 @@
 #!/usr/bin/env python3
 """Run a skill's fixture evals headless and print PASS/FAIL per case.
 
-Layout: <skill-dir>/evals/<case>/task.md, optional workspace/, and an executable
-`check` run in the workspace copy after the agent finishes (exit 0 = pass).
+Layout: <skill-dir>/evals/<case>/task.md, optional workspace/, optional executable
+`setup` run in the workspace copy before the agent, and an executable `check` run
+there after the agent finishes (exit 0 = pass).
 
   python3 scripts/eval_skill.py plugins/core/skills/debug [--runs 3] [--model ID]
 
@@ -21,12 +22,18 @@ import time
 from pathlib import Path
 
 
-def pi_command(skill_dir, task_text, model):
+GUARD = Path(__file__).resolve().parents[1] / "plugins/anti-loop/skills/anti-loop/assets/pi/no-progress-guard.ts"
+
+
+def pi_command(skill_dir, task_text, model, guard=True):
     cmd = [
         "pi", "-p", "--no-session", "--no-skills", "--skill", str(skill_dir),
         "--no-context-files", "--no-extensions", "--no-mcp", "--no-prompt-templates",
         "--offline",
     ]
+    if guard:
+        # Production Pi runs this guard; without it a 27B model can repeat one tool call until timeout.
+        cmd += ["-e", str(GUARD)]
     if model:
         cmd += ["--model", model]
     return cmd + ["--", task_text]
@@ -46,11 +53,20 @@ def run_case(case, skill_dir, args, out_dir, run_no):
     work = Path(tempfile.mkdtemp(prefix=f"eval-{case.name}-", dir=out_dir))
     if (case / "workspace").is_dir():
         shutil.copytree(case / "workspace", work, dirs_exist_ok=True)
+    setup = case / "setup"
+    if setup.is_file():
+        prep = subprocess.run([str(setup.resolve())], cwd=work, capture_output=True, text=True, timeout=120)
+        if prep.returncode != 0:
+            return False, f"setup exited {prep.returncode}: {prep.stderr.strip()[-200:]}", None
     task_file = case / "task.md"
     if args.agent_cmd:
         cmd = shlex.split(args.agent_cmd) + [str(skill_dir), str(task_file)]
     else:
-        cmd = pi_command(skill_dir, task_file.read_text(), args.model)
+        task = task_file.read_text()
+        if not args.no_hint:
+            # A 27B model often skips a skill it was not told to read; evals test content, not routing.
+            task = f"Read and follow the skill at {skill_dir}/SKILL.md.\n\n{task}"
+        cmd = pi_command(skill_dir, task, args.model, guard=not args.no_guard)
     transcript = Path(out_dir) / f"{case.name}-run{run_no}.log"
     with transcript.open("w") as log:
         try:
@@ -78,6 +94,8 @@ def main(argv=None):
     ap.add_argument("--timeout", type=int, default=900, help="seconds per agent run")
     ap.add_argument("--out", type=Path, help="directory for workspaces and transcripts (default: a new temp dir)")
     ap.add_argument("--case", action="append", help="run only this case name (repeatable)")
+    ap.add_argument("--no-hint", action="store_true", help="do not tell pi which skill to read (tests routing)")
+    ap.add_argument("--no-guard", action="store_true", help="run pi without the anti-loop no-progress guard")
     args = ap.parse_args(argv)
 
     skill_dir = args.skill_dir.resolve()

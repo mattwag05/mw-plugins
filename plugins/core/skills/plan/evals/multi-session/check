@@ -1,0 +1,15 @@
+#!/bin/sh
+# Multi-session scaling: SPEC.md with headings, >=2 issue files each with a done-check and blocked-by line.
+[ -f SPEC.md ] || { echo "SPEC.md missing"; exit 1; }
+for h in Problem Decisions "Out of scope" "Acceptance checks"; do
+  grep -Eiq "^##+ +$h" SPEC.md || { echo "SPEC.md missing heading: $h"; exit 1; }
+done
+n=0
+for f in issues/*.md; do
+  [ -f "$f" ] || continue
+  grep -Eiq 'done-?check' "$f" || { echo "$f has no done-check"; exit 1; }
+  grep -Eiq 'blocked-?by' "$f" || { echo "$f has no blocked-by"; exit 1; }
+  n=$((n+1))
+done
+[ "$n" -ge 2 ] || { echo "need at least 2 issue files, found $n"; exit 1; }
+echo "SPEC.md and $n issues, each with done-check and blocked-by"

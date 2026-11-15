@@ -1,0 +1,10 @@
+#!/bin/sh
+# One-session scaling: PLAN.md only, no SPEC.md or issues/, code untouched.
+here="$(dirname "$0")"
+[ -f PLAN.md ] || { echo "PLAN.md missing"; exit 1; }
+grep -Eiq '^##+ +Goal' PLAN.md || { echo "no Goal heading"; exit 1; }
+grep -Eiq '^##+ +Done-?check' PLAN.md || { echo "no Done-check heading"; exit 1; }
+[ ! -e SPEC.md ] || { echo "SPEC.md created for one-session work"; exit 1; }
+[ ! -e issues ] || { echo "issues/ created for one-session work"; exit 1; }
+for f in README.md todo.py todos.txt; do cmp -s "$f" "$here/orig/$f" || { echo "$f changed"; exit 1; }; done
+echo "PLAN.md only, code untouched"

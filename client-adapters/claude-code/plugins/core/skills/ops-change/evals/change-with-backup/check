@@ -1,0 +1,13 @@
+#!/bin/sh
+here=$(dirname "$0")
+printf 'max_connections=10\nlog_level=info\ntimeout=60\n' > /tmp/.ops-expected.$$
+cmp -s service.conf /tmp/.ops-expected.$$ || { rm -f /tmp/.ops-expected.$$; echo "service.conf is not the original with timeout=60"; exit 1; }
+rm -f /tmp/.ops-expected.$$
+found=""
+for f in $(find . -type f ! -name service.conf ! -path './.git/*'); do
+  cmp -s "$f" "$here/service.conf.orig" && found=$f
+done
+[ -n "$found" ] || { echo "no byte-identical backup of the original found in the workspace"; exit 1; }
+sum=$(cksum < service.conf | cut -d' ' -f1)
+grep -q "HEALTHCHECK PASS: 3/3 requests served (level=info, timeout=60, conf cksum $sum)" "$EVAL_TRANSCRIPT" || { echo "healthcheck output not quoted in transcript"; exit 1; }
+echo "backup $found identical, change applied, healthcheck quoted"; exit 0

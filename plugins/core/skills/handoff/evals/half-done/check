@@ -1,0 +1,17 @@
+#!/bin/sh
+# HANDOFF.md has all headings and its Read-first paths exist.
+[ -f HANDOFF.md ] || { echo "HANDOFF.md missing"; exit 1; }
+for h in Goal Done-check "Done so far" Next "Open gates" "Read first"; do
+  grep -Eiq "^##+ +$h" HANDOFF.md || { echo "missing heading: $h"; exit 1; }
+done
+sec=$(awk 'BEGIN{IGNORECASE=1} /^##+ +Read first/{f=1;next} /^##+ /{f=0} f' HANDOFF.md)
+found=0
+for p in NOTES.md docs/spec.md slugify.py test_slugify.py; do
+  printf '%s' "$sec" | grep -Fq "$p" && found=$((found+1))
+done
+[ "$found" -ge 2 ] || { echo "Read first lists fewer than 2 real workspace files"; exit 1; }
+# every path-looking token in Read first must exist
+for tok in $(printf '%s' "$sec" | grep -Eo '[A-Za-z0-9_./-]+\.(md|py|txt)' | sort -u); do
+  [ -e "$tok" ] || { echo "Read first names a missing file: $tok"; exit 1; }
+done
+echo "headings present, $found real paths, all exist"

@@ -1,0 +1,1 @@
+This notes tool needs to become a multi-user web service: user accounts, a REST API, a web UI, and a migration of the existing notes.json data into a database. It will take several working sessions. Write the plan for it. Do not build anything.

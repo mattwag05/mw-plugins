@@ -1,0 +1,9 @@
+#!/bin/sh
+# HANDOFF.md exists, under 400 words, and does not paste manifest.log content.
+[ -f HANDOFF.md ] || { echo "HANDOFF.md missing"; exit 1; }
+w=$(wc -w < HANDOFF.md)
+[ "$w" -lt 400 ] || { echo "too long: $w words"; exit 1; }
+n=$(grep -Fxc -f manifest.log HANDOFF.md)
+[ "$n" -lt 3 ] || { echo "pasted $n lines of manifest.log"; exit 1; }
+grep -Eq 'manifest\.log|TODO\.md' HANDOFF.md || { echo "no pointer to workspace files"; exit 1; }
+echo "short ($w words), pointers not pasted"

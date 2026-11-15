@@ -1,0 +1,11 @@
+#!/bin/sh
+# Pass if the agent used the README fact (Python 3.9 / stdlib) instead of asking about it, and changed nothing.
+here="$(dirname "$0")"
+[ -n "$EVAL_TRANSCRIPT" ] || { echo "no transcript"; exit 1; }
+if grep -Ei '\?' "$EVAL_TRANSCRIPT" | grep -Eiq '(which|what).*(language|python version|runtime)|(language|runtime|python version).*(use|using|target)|standard library|third.party|dependenc'; then
+  echo "asked the human for a fact the README states"; exit 1
+fi
+grep -Eq '3\.9|standard library|stdlib' "$EVAL_TRANSCRIPT" || { echo "did not use or cite the README fact"; exit 1; }
+grep -Eic 'recommend' "$EVAL_TRANSCRIPT" | grep -Eqv '^0$' || { echo "no recommendations"; exit 1; }
+diff -r "$here/orig" "${EVAL_WORKSPACE:-.}" >/dev/null 2>&1 || { echo "workspace changed"; exit 1; }
+echo "used README fact, did not ask for it"

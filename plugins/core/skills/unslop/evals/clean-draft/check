@@ -1,0 +1,16 @@
+#!/usr/bin/env python3
+# Pass: no em dash, no stock phrases, fenced block and inline command byte-identical.
+import re, sys, os
+here = os.path.dirname(os.path.abspath(__file__))
+out = open("draft.md", encoding="utf-8").read() if os.path.exists("draft.md") else ""
+orig = open(os.path.join(here, "draft.orig"), encoding="utf-8").read()
+def fail(m): print(m); sys.exit(1)
+if not out.strip(): fail("draft.md missing or empty")
+fenced = re.search(r"```sh\n.*?\n```", orig, re.S).group(0)
+if fenced not in out: fail("fenced code block changed")
+if "`orbit cache stats --json`" not in out: fail("inline command changed")
+prose = out.replace(fenced, "")
+if "—" in prose: fail("em dash remains in prose")
+bad = [p for p in ["delve", "worth noting", "fast-paced", "leverag", "seamless", "robust", "pivotal", "great question", "i hope this helps", "testament", "unlock the power", "crucial", "in conclusion"] if p in prose.lower()]
+if bad: fail("stock phrases remain: " + ", ".join(bad))
+print("clean and code intact")

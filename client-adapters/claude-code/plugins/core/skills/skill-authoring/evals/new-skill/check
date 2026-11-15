@@ -1,0 +1,6 @@
+#!/bin/sh
+d="$(dirname "$0")"
+[ -f skills/shout/SKILL.md ] || { echo "skills/shout/SKILL.md missing"; exit 1; }
+out=$(python3 "$d/lint_skill.py" skills/shout 2>&1) || { echo "$out" | head -3 | tr '\n' ' '; exit 1; }
+grep -q 'tr a-z A-Z' skills/shout/SKILL.md || { echo "command tr a-z A-Z not named in skill"; exit 1; }
+echo "lint passes and command named"

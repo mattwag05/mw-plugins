@@ -1,0 +1,6 @@
+#!/bin/sh
+d="$(dirname "$0")"
+out=$(python3 "$d/lint_skill.py" skills/greeter 2>&1) || { echo "$out" | head -3 | tr '\n' ' '; exit 1; }
+grep -qi 'greet' skills/greeter/SKILL.md || { echo "greeting intent lost"; exit 1; }
+grep -q 'name: greeter' skills/greeter/SKILL.md || { echo "name changed"; exit 1; }
+echo "lint passes, intent kept"
