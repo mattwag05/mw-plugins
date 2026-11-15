@@ -29,6 +29,7 @@ check "adapters current" python3 scripts/build_claude_adapters.py --check
 need claude "marketplace valid" && check "marketplace valid" claude plugin validate .
 check "doc-harvest tests" python3 -m unittest discover -s plugins/doc-harvest/tests
 check "eval runner tests" python3 -m unittest discover -s tests/eval_skill
+check "skill sync tests" python3 -m unittest discover -s tests/sync_skills
 check "core skill lint" lint_core_skills
 check "no em dashes in core" no_em_dashes
 need gitleaks "secret scan" && check "secret scan" gitleaks dir --no-banner --redact .
