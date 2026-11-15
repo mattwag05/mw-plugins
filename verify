@@ -20,6 +20,17 @@ lint_core_skills() {
   done
   return $rc
 }
+lint_skill_copies() {
+  # Eval cases keep copies of lint_skill.py; fail if any drifts from the canonical one.
+  canonical=plugins/core/skills/skill-authoring/scripts/lint_skill.py
+  rc=0
+  for c in $(find plugins/core/skills/skill-authoring/evals -name lint_skill.py); do
+    if ! diff -q "$canonical" "$c" >/dev/null; then
+      echo "drift: $c differs from $canonical"; rc=1
+    fi
+  done
+  return $rc
+}
 no_em_dashes() {
   # Core docs and skills are authored prose; eval fixtures may hold dashes on purpose.
   ! grep -rn --exclude-dir=evals "$(printf '\342\200\224')" core plugins/core
@@ -31,6 +42,7 @@ check "doc-harvest tests" python3 -m unittest discover -s plugins/doc-harvest/te
 check "eval runner tests" python3 -m unittest discover -s tests/eval_skill
 check "skill sync tests" python3 -m unittest discover -s tests/sync_skills
 check "core skill lint" lint_core_skills
+check "lint_skill copies in sync" lint_skill_copies
 check "no em dashes in core" no_em_dashes
 need gitleaks "secret scan" && check "secret scan" gitleaks dir --no-banner --redact .
 
