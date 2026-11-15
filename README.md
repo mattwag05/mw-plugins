@@ -50,7 +50,7 @@ python3 scripts/build_claude_adapters.py --check
 | `testflight-triage` | Review TestFlight data and track actionable work. |
 | `xcode-mcp` | Build, test, fix, and manage Xcode projects through MCP. |
 
-Retired plugins (ambition, autonomous-execution, i-have-adhd, internet-skill-finder, phased-shipping, project-housekeeping, session-closeout, unslop) live in `archive/plugins/`; see `archive/README.md`.
+Retired plugins (ambition, autonomous-execution, i-have-adhd, internet-skill-finder, phased-shipping, project-housekeeping, session-closeout, unslop) live in `archive/plugins/` for history only. Their rules are folded into the 12 core skills; `archive/README.md` and the "Retired skill names" table in `core/AGENTS.md` say where each went.
 
 Versions and adapter source paths are recorded in `.claude-plugin/marketplace.json`.
 
