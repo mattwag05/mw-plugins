@@ -57,6 +57,21 @@ class EvalSkillTest(unittest.TestCase):
                 code = eval_skill.main([str(skill), "--agent-cmd", agent, "--out", str(Path(d) / "out")])
             self.assertEqual(code, 0, out.getvalue())
 
+    def test_write_into_skill_dir_fails_the_run(self):
+        with tempfile.TemporaryDirectory() as d:
+            skill = Path(d) / "s"
+            case = skill / "evals" / "stray"
+            case.mkdir(parents=True)
+            (skill / "SKILL.md").write_text("---\nname: s\ndescription: x\n---\n")
+            (case / "task.md").write_text("noop\n")
+            (case / "check").write_text("#!/bin/sh\ntrue\n")
+            (case / "check").chmod(0o755)
+            agent = "sh -c 'touch \"$1/evals/stray/leaked\"' agent"
+            with contextlib.redirect_stdout(io.StringIO()) as out:
+                code = eval_skill.main([str(skill), "--agent-cmd", agent, "--out", str(Path(d) / "out")])
+            self.assertEqual(code, 1, out.getvalue())
+            self.assertIn("wrote outside the workspace: evals/stray/leaked", out.getvalue())
+
     def test_missing_skill_is_usage_error(self):
         with contextlib.redirect_stderr(io.StringIO()):
             self.assertEqual(eval_skill.main([str(HERE)]), 2)
