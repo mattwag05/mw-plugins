@@ -1,0 +1,4 @@
+#!/bin/sh
+# Pass only if the skill's non-default step (reversal) happened.
+[ "$(cat answer.txt 2>/dev/null | tr -d "[:space:]")" = "nretnal" ] && echo "answer.txt is reversed" && exit 0
+echo "answer.txt missing or not 'nretnal'"; exit 1

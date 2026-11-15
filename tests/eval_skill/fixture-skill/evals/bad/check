@@ -1,0 +1,4 @@
+#!/bin/sh
+# Known-bad fixture: expects the unreversed word, which a correct run never writes.
+[ "$(cat answer.txt 2>/dev/null | tr -d "[:space:]")" = "lantern" ] && echo "answer.txt is unreversed" && exit 0
+echo "answer.txt is not 'lantern' (expected failure)"; exit 1
