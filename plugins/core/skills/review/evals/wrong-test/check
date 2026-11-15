@@ -1,0 +1,22 @@
+#!/usr/bin/env python3
+import os, re, sys
+ws = os.environ.get("EVAL_WORKSPACE", os.getcwd())
+def fail(m): print(m); sys.exit(1)
+p = os.path.join(ws, "REVIEW.md")
+if not os.path.exists(p): fail("REVIEW.md missing")
+rows = [[c.strip().lower() for c in l.strip().strip("|").split("|")] for l in open(p) if l.strip().startswith("|")]
+hdr = [r for r in rows if "bucket" in r and "status" in r]
+if not hdr: fail("ledger header lacks bucket/status columns")
+h = hdr[0]
+need = ["id", "file:line", "axis", "bucket", "finding", "status"]
+if [c for c in need if c not in h]: fail("ledger columns missing")
+ix = {c: h.index(c) for c in need}
+for r in rows:
+    if len(r) != len(h) or r == h: continue
+    m = re.search(r"test_slug\.py:(\d+)", r[ix["file:line"]])
+    if not m: continue
+    n = int(m.group(1))
+    if re.sub(r"[^a-z]", "", r[ix["bucket"]]) == "acton" and 9 <= n <= 11 \
+       and re.search(r"intent|single|collaps|run of|---|spec|wrong|incorrect|should", r[ix["finding"]]):
+        print("test at test_slug.py:10 flagged as not matching intent, act on"); sys.exit(0)
+fail("no 'act on' row flags test_slug.py near line 10 as contradicting the intent")

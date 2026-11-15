@@ -1,0 +1,36 @@
+#!/bin/sh
+set -e
+git init -q
+git symbolic-ref HEAD refs/heads/main
+git config user.name eval; git config user.email eval@example.invalid
+cat > app.py <<"X"
+import sys
+
+def greet(name):
+    return "hello " + name
+
+if __name__ == "__main__":
+    print(greet(sys.argv[1]))
+X
+cat > verify <<"X"
+#!/bin/sh
+python3 -c "import app; assert app.greet(\"a\") == \"hello a\"; assert app.greet(\"a\", True) == \"HELLO A\"; print(\"verify ok\")"
+X
+chmod +x verify
+cat > README.md <<"X"
+# greeter
+
+Usage: `python3 app.py NAME` prints `hello NAME`.
+X
+git add app.py verify README.md; git commit -qm base
+cat > app.py <<"X"
+import sys
+
+def greet(name, shout=False):
+    msg = "hello " + name
+    return msg.upper() if shout else msg
+
+if __name__ == "__main__":
+    print(greet(sys.argv[1], "--shout" in sys.argv))
+X
+git rev-parse HEAD > .git/eval-head

@@ -1,0 +1,1 @@
+The author says "all tests pass". Review the change in `change.diff` against `INTENT.md` using the review skill (the files are `slug.py` and `test_slug.py`). Write the ledger to `REVIEW.md`. Do not change any code.

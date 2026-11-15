@@ -1,0 +1,13 @@
+#!/bin/sh
+set -e
+git init -q
+git symbolic-ref HEAD refs/heads/main
+git config user.name eval; git config user.email eval@example.invalid
+mkdir .stash; mv * .stash/ 2>/dev/null || true
+mv .stash/README.md . 2>/dev/null || true
+echo "# calc" > README.md
+git add README.md; git commit -qm "base"
+git checkout -q -b feature
+mv .stash/* .; rmdir .stash
+git add -A; git commit -qm "add calc"
+git rev-parse HEAD > .git/eval-head

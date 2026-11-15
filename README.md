@@ -39,30 +39,21 @@ python3 scripts/build_claude_adapters.py --check
 
 | Plugin | Purpose |
 | --- | --- |
-| `ambition` | Rework a task or prompt into a more ambitious version by raising its altitude, depth, or range. |
+| `core` | The 12 core skills for the shared agent loop (`core/LOOP.md`), sized and evaluated for small local models. |
 | `anti-loop` | Stop agents from rerunning or rewording tool calls whose output they already have; includes an enforcing Pi extension. |
 | `apple-container` | Run Linux containers with Apple's `container` CLI and migrate Docker workflows. |
-| `autonomous-execution` | Finish verifiable work with available tools before asking the user to intervene. |
 | `calendar-organizer` | Extract schedules and produce structured events and ICS files. |
 | `doc-harvest` | Harvest documentation sites and navigate indexed local references. |
-| `i-have-adhd` | Shape responses for an ADHD reader with direct, bounded next actions. |
-| `internet-skill-finder` | Search verified GitHub repositories for Agent Skills. |
 | `macos-automation` | Automate Mail, Calendar, Notes, and Reminders on macOS. |
-| `phased-shipping` | Ship multi-phase engineering work as stacked pull requests. |
 | `pippin` | Use Pippin through MCP or its command-line interface. |
-| `project-housekeeping` | Clean up redundant project material and reconcile unfinished Git work. Requires `unslop`. |
-| `session-closeout` | Update records from session learnings and prepare verified commits and approved pushes. Requires `unslop`. |
 | `swift-concurrency` | Write, review, and migrate Swift concurrency code. |
 | `testflight-triage` | Review TestFlight data and track actionable work. |
-| `unslop` | Remove common AI writing patterns and restore a natural voice. |
 | `xcode-mcp` | Build, test, fix, and manage Xcode projects through MCP. |
+
+Retired plugins (ambition, autonomous-execution, i-have-adhd, internet-skill-finder, phased-shipping, project-housekeeping, session-closeout, unslop) live in `archive/plugins/`; see `archive/README.md`.
 
 Versions and adapter source paths are recorded in `.claude-plugin/marketplace.json`.
 
 ## Attribution
 
-`unslop` is copied from Lauren Tan's [poteto/plugins](https://github.com/poteto/plugins/blob/main/pstack/skills/unslop/SKILL.md) repository under the MIT License. Its [bundled license](plugins/unslop/LICENSE) retains the upstream copyright notice. This copy adds local rules to the upstream `SKILL.md`.
-
-`ambition` paraphrases techniques from Felix Rieseberg's post [How to be more ambitious: A tutorial for humans with models](https://felixrieseberg.com/how-to-be-more-ambitious-a-tutorial-for-humans-with-models/).
-
-`i-have-adhd` is adapted from Ayoub Ghriss's [i-have-adhd](https://github.com/ayghri/i-have-adhd) repository under the MIT License. Its [bundled license](plugins/i-have-adhd/LICENSE) retains the upstream copyright notice.
+`core` adapts material from mattpocock/skills, poteto/plugins (pstack) and t3dotgg/tstack under the MIT License; notices are in [plugins/core/THIRD_PARTY_NOTICES.md](plugins/core/THIRD_PARTY_NOTICES.md), and each skill's `PROVENANCE.md` names its sources. Archived plugins keep their own license files under `archive/plugins/`.

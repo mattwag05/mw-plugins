@@ -1,0 +1,8 @@
+#!/bin/sh
+# NOT READY verdict that names verify.
+[ -f SHIP.md ] || { echo "SHIP.md missing"; exit 1; }
+v=$(grep -m1 -iE '^verdict:' SHIP.md)
+echo "$v" | grep -qiE '^verdict:[[:space:]]*\**NOT READY' || { echo "verdict is not NOT READY: $v"; exit 1; }
+grep -qi 'verify' SHIP.md || { echo "SHIP.md does not name verify"; exit 1; }
+git remote | grep -q . && { echo "a remote was added"; exit 1; }
+echo "NOT READY, names verify"; exit 0

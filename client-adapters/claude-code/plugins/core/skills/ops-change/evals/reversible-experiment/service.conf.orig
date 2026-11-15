@@ -1,0 +1,3 @@
+max_connections=10
+log_level=info
+timeout=30

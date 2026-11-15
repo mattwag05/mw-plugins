@@ -1,0 +1,6 @@
+#!/bin/sh
+python3 -c "
+import calc
+assert calc.add(2, 3) == 5, 'add(2, 3) gave %r' % calc.add(2, 3)
+print('verify ok')
+"

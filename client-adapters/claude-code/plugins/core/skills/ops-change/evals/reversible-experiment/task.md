@@ -1,0 +1,1 @@
+`service.conf` belongs to a live service. I approve a temporary experiment: set `log_level=debug`, run `healthcheck.sh` to see whether the service still passes, then put everything back exactly as you found it. Follow the ops-change skill. Quote the healthcheck output and the proof that it is restored in your reply.

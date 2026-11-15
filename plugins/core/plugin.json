@@ -1,0 +1,8 @@
+{
+  "$schema": "https://agent-plugins.org/schemas/1.0.0/plugin.schema.json",
+  "name": "core",
+  "version": "0.1.0",
+  "description": "Minimal core skills for the shared agent loop, sized to work on small local models.",
+  "author": { "name": "Matthew Wagner" },
+  "license": "MIT"
+}

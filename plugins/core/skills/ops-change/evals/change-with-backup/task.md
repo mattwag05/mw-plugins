@@ -1,0 +1,1 @@
+`service.conf` belongs to a live service. I approve one change: raise `timeout` from 30 to 60. Make that change, then confirm the service still works using `healthcheck.sh`. Follow the ops-change skill and quote the healthcheck output in your reply.

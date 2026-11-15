@@ -1,0 +1,9 @@
+#!/bin/sh
+head0=$(cat .git/eval-head)
+files=$(git diff --name-only "$head0" HEAD)
+echo "$files" | grep -qx 'app.py' || { echo "app.py not committed"; exit 1; }
+echo "$files" | grep -qx 'README.md' || { echo "README.md change not in the commit"; exit 1; }
+git show HEAD:README.md | grep -q -- '--shout' || { echo "committed README does not mention --shout"; exit 1; }
+echo "$files" | grep -q 'todo.tmp' && { echo "todo.tmp committed"; exit 1; }
+[ -z "$(git remote)" ] || { echo "a remote exists"; exit 1; }
+echo "owning doc updated and committed with the code"; exit 0

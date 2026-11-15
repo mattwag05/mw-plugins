@@ -1,0 +1,10 @@
+[session log]
+$ python3 app.py bob
+hello bob
+$ python3 app.py bob --shout
+Traceback (most recent call last):
+  File "app.py", line 8, in <module>
+    print(greet(sys.argv[1], "--shout" in sys.argv))
+NameError: name 'sys' is not defined
+(I had deleted the `import sys` line while editing, then restored it.)
+Note: `verify` only imports `app` and calls greet(), so it never runs the command-line entry point and would not have caught this.

@@ -1,0 +1,2 @@
+- mattpocock/skills @ 5863806, skills/engineering/research/SKILL.md, MIT: the primary-sources-first rule and the write-findings-to-a-Markdown-file-with-cited-claims job.
+Adapted for small models: dropped the background-agent step (no subagents on the floor model); added a fixed file path and template (question, answer, evidence, inference, conflicts, open questions); added rules to separate source text from inference, to record gaps, and to work from local files when no web tool exists; defined "primary source" inline; added a Done when list.

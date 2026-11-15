@@ -1,0 +1,55 @@
+#!/usr/bin/env python3
+import os, re, subprocess, sys, shutil, tempfile
+here = os.path.dirname(os.path.abspath(sys.argv[0]))
+ws = os.environ.get("EVAL_WORKSPACE", os.getcwd())
+pris = os.path.join(here, "pristine")
+env = dict(os.environ, PYTHONDONTWRITEBYTECODE="1")
+
+def run(cmd, cwd, pp=None):
+    e = dict(env)
+    if pp: e["PYTHONPATH"] = pp
+    try:
+        return subprocess.run(cmd, cwd=cwd, env=e, capture_output=True, timeout=60).returncode
+    except subprocess.TimeoutExpired:
+        return 99
+
+def fail(msg): print(msg); sys.exit(1)
+
+# 1. hidden acceptance test
+if run([sys.executable, os.path.join(here, "hidden_test.py")], ws, ws) != 0:
+    fail("hidden acceptance test fails")
+
+# 2. no leftover debug tags or new print() lines in original files
+for root, _, files in os.walk(ws):
+    if "__pycache__" in root: continue
+    for f in files:
+        p = os.path.join(root, f)
+        try: txt = open(p, errors="ignore").read()
+        except OSError: continue
+        if re.search(r"\[DEBUG-", txt): fail("leftover [DEBUG- tag in " + f)
+for f in os.listdir(pris):
+    if f.endswith(".py") and "print(" in open(os.path.join(ws, f), errors="ignore").read() and "print(" not in open(os.path.join(pris, f)).read():
+        fail("stray print debugging left in " + f)
+
+# 3. a repro the agent added must fail on pristine source and pass on the fix
+def changed_test(f):
+    return f.startswith("test") and open(os.path.join(ws, f)).read() != open(os.path.join(pris, f)).read()
+new = [f for f in os.listdir(ws) if f.endswith(".py") and (f not in os.listdir(pris) or changed_test(f))]
+if not new: fail("no repro added (no new .py file and no edited test file)")
+def red(d, f):
+    if run([sys.executable, f], d, d) != 0: return True
+    return run([sys.executable, "-m", "unittest", f[:-3]], d, d) == 1
+def green(d, f):
+    return run([sys.executable, f], d, d) == 0 and run([sys.executable, "-m", "unittest", f[:-3]], d, d) != 1
+for f in new:
+    tmp = tempfile.mkdtemp()
+    try:
+        for g in os.listdir(pris):
+            shutil.copy(os.path.join(pris, g), tmp)
+        shutil.copy(os.path.join(ws, f), tmp)
+        r = red(tmp, f)
+    finally:
+        shutil.rmtree(tmp, ignore_errors=True)
+    if r and green(ws, f):
+        print("repro " + f + " fails on pristine and passes on the fix"); sys.exit(0)
+fail("no added or edited repro fails on pristine source and passes on the fix")

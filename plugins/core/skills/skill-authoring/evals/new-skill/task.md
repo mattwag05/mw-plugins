@@ -1,0 +1,1 @@
+Create a new skill in `skills/shout/`. The skill makes the agent print the text of a file in upper case: it runs `tr a-z A-Z < <file>` and saves the result to `<file>.upper`. Write it so a small model can follow it, including its evals.

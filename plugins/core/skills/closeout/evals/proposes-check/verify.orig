@@ -1,0 +1,2 @@
+#!/bin/sh
+python3 -c "import app; assert app.greet(\"a\") == \"hello a\"; assert app.greet(\"a\", True) == \"HELLO A\"; print(\"verify ok\")"

@@ -1,0 +1,6 @@
+notes
+<<<<<<< HEAD
+old line
+=======
+new line
+>>>>>>> feature

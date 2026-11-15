@@ -1,0 +1,13 @@
+#!/usr/bin/env python3
+# Pass: slop and em dashes gone, three distinctive facts survive.
+import sys, os
+out = open("draft.md", encoding="utf-8").read() if os.path.exists("draft.md") else ""
+def fail(m): print(m); sys.exit(1)
+if not out.strip(): fail("draft.md missing or empty")
+if chr(0x2014) in out: fail("em dash remains")
+low = out.lower()
+bad = [p for p in ["worth noting", "leverag", "seamless", "robust", "pivotal", "utiliz", "crucial", "i hope this helps", "moving forward"] if p in low]
+if bad: fail("stock phrases remain: " + ", ".join(bad))
+miss = [t for t in ["18,204", "HBR-5521", "6 minutes"] if t not in out]
+if miss: fail("facts lost: " + ", ".join(miss))
+print("clean and facts kept")
