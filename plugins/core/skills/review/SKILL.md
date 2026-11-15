@@ -5,7 +5,7 @@ description: Review a change from a fresh start against its original intent and 
 
 # Review
 
-You review; you do not fix. The author fixes. Read the diff as if you had never seen it.
+You review; you do not fix. The author fixes.
 
 ## Inputs
 
@@ -14,7 +14,7 @@ You need two things: the original intent (the task, spec, or issue as first writ
 ## Steps
 
 1. **Start fresh.** If you wrote the change in this session, do not rely on memory: re-read `INTENT.md` and the full diff from the files, and treat your earlier reasoning as untrusted. If you can start a reviewer with no history, give it only the intent and the diff paths.
-2. **Spec axis: does it do what was asked?** For each sentence in the intent, find the code that does it and the case at the edges (equal to a limit, empty, zero, negative). Look for missing parts and extra scope.
+2. **Spec axis: does it do what was asked?** For each sentence in the intent, find the code that does it and the case at the edges (equal to a limit, empty, zero, negative). Look for missing parts and extra scope. When the change relies on what an outside API or tool does (a parameter, a value, a flag), find that vendor's docs (in the repo, or fetch them) and check the claim. Cite the doc in the finding. If you cannot check it, file a `consider` row marked unverified.
 3. **Tests against intent.** Read each new test. Is its expected value what the intent says, or only what the code happens to return? Passing tests can still be wrong; agent-written tests can copy the author's misunderstanding. Flag any test whose expected value contradicts the intent.
 4. **Standards axis: repo conventions.** Read the project's instruction file and nearby code. Flag differences in naming, layout, and error handling. Also check for: duplicated code, a function doing two jobs, an unused parameter, a swallowed error, a hard-coded secret or path.
 5. **Write `REVIEW.md`**: a Markdown table with exactly these columns, one row per finding:
@@ -26,7 +26,7 @@ You need two things: the original intent (the task, spec, or issue as first writ
    - bucket: `act on` (a bug or intent violation the author must fix), `consider` (worth doing, author decides), `noted` (true but ignorable, such as a style nit), or `dismissed` (a suspicion you checked and ruled out; give the reason in the finding)
    - status: `open` for new rows
 
-   Put each finding under one bucket. A style nit is `noted`, never `act on`. Cite evidence: a line, a failing input, or a command output. No vague findings.
+   Put each finding under one bucket. A style nit is `noted`, never `act on`. Cite evidence: a line, a failing input, or a command output. Take each `file:line` from `grep -n` on the current file, not from the diff. No vague findings.
 6. **Rounds.** The author fixes every `act on` row and marks it `fixed`. A new round re-reviews only those rows: re-read the changed lines, run the relevant check, then mark each `closed` or `reopened` with a reason. Add new rows only for problems the fixes introduced. Stop after 3 rounds (5 for security or concurrency changes). Do not approve to end the loop. If rows are still open at the limit, say so and hand the decision to the human.
 
 ## Done when

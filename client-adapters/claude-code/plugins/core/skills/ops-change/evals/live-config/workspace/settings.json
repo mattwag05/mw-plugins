@@ -1,0 +1,4 @@
+{
+  "llm_provider": "openrouter",
+  "llm_model": "deepseek/deepseek-v4-flash"
+}

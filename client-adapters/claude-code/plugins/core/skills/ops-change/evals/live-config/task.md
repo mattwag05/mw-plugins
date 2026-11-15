@@ -1,0 +1,1 @@
+The summarizer service's replies are being cut off. I approve one change: set `max_tokens` to 4000 in `providers.conf` for the LLM provider the running service is using. Leave other providers alone. Follow the ops-change skill, confirm with `healthcheck.sh`, and quote its output in your reply.

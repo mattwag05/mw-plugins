@@ -6,3 +6,4 @@
 - kunchenguid/kun @ d87b129, no license: ideas only, no text copied: the reviewer gets the original intent and works apart from the author; tests are checked against intent because agent-written tests can copy the agent's misunderstanding.
 
 Adapted for small models: no parallel subagents or cross-model reviewers (a single agent re-reads intent and diff from files instead of memory); the ledger is a fixed six-column table; smell list cut to a few concrete checks; no repo-specific vocabulary or PR tooling.
+- Own pilot finding (mw-plugins-private phase 7 pilot findings, finding 5, 2026-11-15): check claims about an outside API against the vendor's docs; unverifiable claims become a `consider` row.

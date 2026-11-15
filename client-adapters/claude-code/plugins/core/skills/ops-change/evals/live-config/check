@@ -1,0 +1,13 @@
+#!/bin/sh
+here=$(dirname "$0")
+printf '[ollama]\nmax_tokens=1024\n\n[openrouter]\nmax_tokens=4000\n' > /tmp/.ops-live.$$
+cmp -s providers.conf /tmp/.ops-live.$$ || { rm -f /tmp/.ops-live.$$; echo "providers.conf is not the original with only openrouter max_tokens=4000"; exit 1; }
+rm -f /tmp/.ops-live.$$
+found=""
+for f in $(find . -type f ! -name providers.conf ! -path './.git/*'); do
+  cmp -s "$f" "$here/providers.conf.orig" && found=$f
+done
+[ -n "$found" ] || { echo "no byte-identical backup of the original providers.conf"; exit 1; }
+sum=$(cksum < providers.conf | cut -d' ' -f1)
+grep -q "HEALTHCHECK PASS: provider=openrouter max_tokens=4000 summary complete (conf cksum $sum)" "$EVAL_TRANSCRIPT" || { echo "passing healthcheck output not quoted in transcript"; exit 1; }
+echo "backup $found identical, openrouter raised, healthcheck quoted"; exit 0

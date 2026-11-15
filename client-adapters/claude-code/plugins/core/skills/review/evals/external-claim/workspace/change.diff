@@ -1,0 +1,10 @@
+--- a/client.py
++++ b/client.py
+@@ -8,5 +8,7 @@ def build_request(prompt):
+         "model": "nimbus-flash",
+         "messages": [{"role": "user", "content": prompt}],
+         "max_tokens": MAX_TOKENS,
++        # Nimbus's documented switch to turn reasoning off.
++        "reasoning": {"hide": True},
+     }
+     return json.dumps(body)
