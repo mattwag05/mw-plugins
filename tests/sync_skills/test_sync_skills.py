@@ -128,6 +128,11 @@ class SyncSkillsTest(unittest.TestCase):
         self.assertTrue((h / ".agents/core/LOOP.md").is_file())
         theo = h / ".hermes/profiles/theo/AGENTS.md"
         self.assertTrue(theo.read_text().startswith("<!-- agent-core:start"))
+        run(*args, "--core-only", "theo", "--apply")
+        self.assertNotIn("host rule", theo.read_text())
+        self.assertIn("host rule", claude.read_text())
+        self.assertEqual(run("check", *self.args)[0], 0)
+        args = (*args, "--core-only", "theo")
         self.assertIn("0 instruction files change", run(*args)[1])
         self.assertEqual(run("check", *self.args)[0], 0)
         claude.write_text(claude.read_text() + "\nmore of mine\n")  # outside the block: fine

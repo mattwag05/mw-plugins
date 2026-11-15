@@ -281,17 +281,23 @@ def sha(text):
     return hashlib.sha256(text.encode()).hexdigest()
 
 
-def plan_blocks(home, block):
+def variant_for(home, f, core_only):
+    """'core' for a Hermes profile listed in --core-only (no host overlay), else 'full'."""
+    profiles = home / ".hermes/profiles"
+    return "core" if f.parent.parent == profiles and f.parent.name in core_only else "full"
+
+
+def plan_blocks(home, blocks, core_only):
     out = []
     for f in instruction_files(home):
         old = f.read_text() if f.exists() else ""
-        new = splice(old, block)
+        new = splice(old, blocks[variant_for(home, f, core_only)])
         if new != old:
             out.append((f, old, new))
     return out
 
 
-def apply_blocks(home, commit, core_dir, block, overlay_path, changes):
+def apply_blocks(home, commit, core_dir, blocks, core_only, overlay_path, changes):
     backup = home / "backups" / f"{time.strftime('%Y%m%d-%H%M%S')}-core-blocks"
     dest = home / ".agents/core"
     if dest.exists():
@@ -305,8 +311,9 @@ def apply_blocks(home, commit, core_dir, block, overlay_path, changes):
         tmp = f.with_name(f.name + ".core-tmp")
         tmp.write_text(new)
         os.replace(tmp, f)
-    manifest = {"commit": commit, "overlay": str(overlay_path) if overlay_path else None, "block": sha(block),
-                "files": [str(f) for f in instruction_files(home)]}
+    manifest = {"commit": commit, "overlay": str(overlay_path) if overlay_path else None,
+                "blocks": {v: sha(b) for v, b in blocks.items()},
+                "files": {str(f): variant_for(home, f, core_only) for f in instruction_files(home)}}
     (dest / BLOCKS_MANIFEST).write_text(json.dumps(manifest, indent=2) + "\n")
     return backup if backup.exists() else None
 
@@ -317,16 +324,19 @@ def check_blocks(home, ref):
     except (OSError, ValueError):
         return []  # blocks were never installed on this host
     problems = []
-    for f in map(Path, manifest["files"]):
+    for f, variant in manifest["files"].items():
+        f = Path(f)
         got = block_text(f.read_text()) if f.exists() else None
         if got is None:
             problems.append(f"{f}: agent-core block missing")
-        elif sha(got) != manifest["block"]:
+        elif sha(got) != manifest["blocks"][variant]:
             problems.append(f"{f}: agent-core block edited since sync")
     overlay = Path(manifest["overlay"]).read_text() if manifest.get("overlay") else ""
     with tempfile.TemporaryDirectory() as tmp:
         commit = git("rev-parse", "--verify", f"{ref}^{{commit}}").decode().strip()
-        if sha(render_block(export_core(commit, tmp), overlay)) != manifest["block"]:
+        core_dir = export_core(commit, tmp)
+        if sha(render_block(core_dir, overlay)) != manifest["blocks"]["full"] or \
+                sha(render_block(core_dir, "")) != manifest["blocks"]["core"]:
             problems.append(f"agent-core block is behind {ref} or the overlay changed; rerun sync --blocks --apply")
     return problems
 
@@ -338,6 +348,7 @@ def main(argv=None):
     ap.add_argument("--apply", action="store_true", help="make the changes (default: print the plan only)")
     ap.add_argument("--blocks", action="store_true", help="also write the agent-core block into each runtime's instruction file")
     ap.add_argument("--overlay", type=Path, help="host overlay appended inside the block (private, per host)")
+    ap.add_argument("--core-only", default="", help="comma-separated Hermes profiles that get the core block without the overlay")
     ap.add_argument("--home", type=Path, default=Path.home(), help=argparse.SUPPRESS)
     args = ap.parse_args(argv)
     home = args.home.resolve()
@@ -354,14 +365,17 @@ def main(argv=None):
         if args.blocks:
             core_dir = export_core(commit, tmp)
             overlay = args.overlay.read_text() if args.overlay else ""
-            block = render_block(core_dir, overlay)
-            bchanges = plan_blocks(home, block)
-            print(f"agent-core block ({len(block.split())} words): {len(bchanges)} instruction files change")
+            blocks = {"full": render_block(core_dir, overlay), "core": render_block(core_dir, "")}
+            core_only = {p.strip() for p in args.core_only.split(",") if p.strip()}
+            bchanges = plan_blocks(home, blocks, core_only)
+            print(f"agent-core block ({len(blocks['full'].split())} words; core-only {len(blocks['core'].split())}): "
+                  f"{len(bchanges)} instruction files change")
             for f, old, _ in bchanges:
                 print(f"  {'block' if old else 'create':<11} {f}")
         backup = apply(home, commit, args.ref, skills, actions) if args.apply else None
         if args.apply and args.blocks:
-            bb = apply_blocks(home, commit, core_dir, block, args.overlay.resolve() if args.overlay else None, bchanges)
+            bb = apply_blocks(home, commit, core_dir, blocks, core_only,
+                              args.overlay.resolve() if args.overlay else None, bchanges)
             print(f"blocks applied; backups in {bb}" if bb else "blocks applied")
         if args.apply:
             print(f"applied; backups in {backup}" if backup else "applied; nothing replaced")
