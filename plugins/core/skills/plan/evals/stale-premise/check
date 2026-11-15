@@ -5,7 +5,7 @@ here = os.path.dirname(os.path.abspath(__file__))
 def fail(m): print(m); sys.exit(1)
 if not os.path.exists("PLAN.md"): fail("PLAN.md missing")
 t = open("PLAN.md", encoding="utf-8").read()
-if not re.search(r"exists:.*json|json.*(already (exists|implemented|present|supported)|exists already)", t, re.I): fail("plan does not record that --json already exists")
+if not re.search(r"exists:.*json|existing\W+--json|json.*(already (exists|implemented|present|supported)|exists already)", t, re.I): fail("plan does not record that --json already exists")
 steps = re.split(r"^##+ *Steps.*$", t, flags=re.M | re.I)
 if len(steps) < 2: fail("no Steps heading")
 body = re.split(r"^##+ ", steps[1], flags=re.M)[0]

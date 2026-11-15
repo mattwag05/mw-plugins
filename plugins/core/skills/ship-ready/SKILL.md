@@ -22,7 +22,7 @@ You never push, open a PR, or merge. You decide whether the change is ready, wri
    - If NOT READY: `## Blocking` listing every FAIL, naming the failing check (for example "verify exited 1"), and the next fix. Stop there.
    - If READY: `## Outgoing commits` with the output of `git log --oneline <base>..HEAD` (every commit the push would carry, including ones older than this session), then `## PR body` with `### Problem`, `### Change`, `### Proof`.
 4. PR body rules: Problem is one or two plain sentences on what was wrong or missing, from the user's request, not an inventory of edits. Change says in a few lines what you did and why. Proof pastes the `verify` command and its final output lines. Add a `Door: one-way` or `two-way` line (can it be undone after merge?). Use a title that says why the change matters. In a stack of PRs, name the PR this one builds on and read `references/stacked-prs.md`.
-5. Reply with the verdict and the one action you want approved, naming the branch and the canonical remote (`git remote get-url --push origin`, never a mirror), for example "Approve: push branch X to remote Y, then open a PR". Wait. If an outgoing commit is not from this work, say so; the human decides.
+5. Reply with the verdict and the one action you want approved, naming the branch and the canonical remote (`git remote get-url --push origin`, never a mirror), for example "Approve: push branch X to remote Y, then open a PR". Wait. The remote is part of the ask, not a checklist row: if no remote is configured, say so in the ask and keep the verdict. If an outgoing commit is not from this work, say so; the human decides.
 
 ## Done when
 
