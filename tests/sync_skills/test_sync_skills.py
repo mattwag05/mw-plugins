@@ -76,6 +76,19 @@ class SyncSkillsTest(unittest.TestCase):
         self.assertIn("NOTE", out)
         self.assertIn(" 0 changes", run(*self.args)[1])
 
+    def test_same_name_elsewhere_is_a_conflict_and_our_link_is_removed(self):
+        theo = self.home / ".hermes/profiles/theo/skills"
+        (theo / "software-development/plan").mkdir(parents=True)
+        (theo / "software-development/plan/SKILL.md").write_text("---\nname: plan\ndescription: x\n---\n")
+        (theo / "plan").symlink_to(self.home / ".agents/skills/plan")  # left by an earlier sync
+        code, out = run(*self.args, "--apply")
+        self.assertEqual(code, 0, out)
+        self.assertFalse((theo / "plan").is_symlink(), "our same-named link must be removed")
+        self.assertTrue((theo / "tdd").is_symlink(), "a plain copy at the link path is still replaced")
+        self.assertTrue((self.home / ".pi/agent/skills/plan").is_symlink())
+        self.assertEqual(run("check", *self.args)[0], 0)
+        self.assertIn(" 0 changes", run(*self.args)[1])
+
     def test_check_detects_edits_and_broken_links(self):
         self.assertEqual(run("check", *self.args)[0], 1)  # never synced
         run(*self.args, "--apply")

@@ -10,7 +10,8 @@ Runtime links, for each runtime directory that exists on this host:
   <home>/.hermes/profiles/<p>/skills (except "default", which Hermes never reads).
 Content comes from `git archive <ref>`, so uncommitted edits are never installed.
 Anything replaced is moved to <home>/backups/<timestamp>-core-skill-sync/. A directory
-holding nested skills (a category) is never replaced: it is reported as a conflict.
+holding nested skills (a category), or a runtime that already has a skill with the same
+name, is never touched: it is reported as a conflict (two same-named skills hide each other).
 """
 import argparse
 import hashlib
@@ -79,9 +80,15 @@ def plan(home, skills):
         elif tree_hash(dest) != tree_hash(src):
             actions.append(("update", name, src, dest))
     for rdir in runtime_dirs(home):
+        taken = names_in(rdir)
         for name in skills:
             link, target = rdir / name, canon / name
-            if link.is_symlink() and Path(os.readlink(link)) == target:
+            ours = link.is_symlink() and Path(os.readlink(link)) == target
+            if any(d != link for d in taken.get(name, ())):
+                # Another skill here already uses this name; two same-named skills hide each other in Hermes.
+                actions.append(("unlink" if ours else "conflict", name, target, link))
+                continue
+            if ours:
                 continue
             if link.is_symlink():
                 kind = "relink"
@@ -93,6 +100,24 @@ def plan(home, skills):
                 kind = "conflict"  # a category or composite skill (for example Hermes research/): never replace
             actions.append((kind, name, target, link))
     return actions
+
+
+def names_in(rdir):
+    """{frontmatter name: [dirs]} for real skills under rdir, not following symlinks (core links are symlinks)."""
+    names = {}
+    if not rdir.is_dir():
+        return names
+    for root, dirs, files in os.walk(rdir):
+        if "SKILL.md" not in files or Path(root) == rdir:
+            continue
+        with open(Path(root) / "SKILL.md", errors="ignore") as f:
+            head = f.read(2000)
+        for line in head.splitlines()[1:]:
+            if line.strip() == "---":
+                break
+            if line.startswith("name:"):
+                names.setdefault(line.split(":", 1)[1].strip().strip("\"'"), []).append(Path(root))
+    return names
 
 
 def is_single_skill(path):
@@ -112,6 +137,9 @@ def apply(home, commit, ref, skills, actions):
     for kind, name, src, dest in actions:
         if kind == "conflict":
             continue
+        if kind == "unlink":
+            dest.unlink()  # our own symlink; nothing to back up
+            continue
         dest.parent.mkdir(parents=True, exist_ok=True)
         stash(dest)
         if kind in ("install", "update"):
@@ -124,7 +152,7 @@ def apply(home, commit, ref, skills, actions):
         "skills": {n: tree_hash(canon / n) for n in skills},
         "links": [str(d / n) for d in runtime_dirs(home) for n in skills
                   if (d / n).is_symlink() and Path(os.readlink(d / n)) == canon / n],
-        "conflicts": [str(dest) for kind, _, _, dest in actions if kind == "conflict"],
+        "conflicts": [str(dest) for kind, _, _, dest in actions if kind in ("conflict", "unlink")],
     }
     (canon / MANIFEST).write_text(json.dumps(manifest, indent=2) + "\n")
     return backup if backup.exists() else None
@@ -152,7 +180,7 @@ def check(home, ref):
         commit, skills = export_ref(ref, tmp)
         stale = sorted(n for n, p in skills.items() if manifest["skills"].get(n) != tree_hash(p))
     for c in manifest.get("conflicts", []):
-        print(f"NOTE {c}: existing category or composite skill kept; core skill not linked there")
+        print(f"NOTE {c}: an existing skill with this name or a category is kept; core skill not linked there")
     if stale:
         problems.append(f"behind {ref} ({commit[:10]}): {', '.join(stale)} differ; run sync --ref {ref} --apply")
     for p in problems:
