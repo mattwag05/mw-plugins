@@ -10,7 +10,7 @@ A live system is one other people or services depend on right now. The host over
 ## Steps
 
 1. Find the owner. Read the record that owns this service (registry, runbook, or the repo's ops doc). It beats any copied list, old report, or memory. If two sources disagree, check the live system and say which you trusted.
-2. Baseline. Run the service's real acceptance check first (below) and keep its output. Capture the current value of what you will change, verbatim.
+2. Baseline. Read the live value of every setting the change depends on (provider, model, feature flags) from the running system or its settings store, not the defaults in code or env. Then run the service's real acceptance check first (below) and keep its output. Capture the current value of what you will change, verbatim.
 3. Approval. Each live write needs the human's own words naming it. If the task already names this change, that is approval for that change only. Anything extra you discover (another setting, a restart, a cleanup) needs a new ask.
 4. Backup before changing, in the way that fits the data:
    - Config file: `cp -p service.conf service.conf.bak.$(date +%Y%m%d%H%M%S)` next to the original, then `cmp service.conf service.conf.bak.*` to confirm it is byte-identical.

@@ -4,3 +4,4 @@
 - Authority and reversible-experiment rules also appear in core/AGENTS.md.
 
 Adapted for small models: the restore pattern is a runnable subshell snippet that prints a fixed `RESTORED: identical` line; backup is a named command with a `cmp` check; acceptance output must be quoted in the final reply.
+- Own pilot finding (mw-plugins-private phase 7 pilot findings, P6, 2026-11-15): the baseline reads live settings (provider, model, flags) from the running system or its settings store, not code or env defaults.
